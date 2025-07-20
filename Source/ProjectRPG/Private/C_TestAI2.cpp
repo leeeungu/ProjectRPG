@@ -11,6 +11,7 @@ C_TestAI2::C_TestAI2()
 		if (true)
 			a += i;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("C_TestAI2 created with a value of %d"), a);
 }
 
 C_TestAI2::~C_TestAI2()
