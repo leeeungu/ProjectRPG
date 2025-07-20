@@ -1,7 +1,6 @@
 name: Gemini AI Pull Request Review
 
 on:
-	commit:
 	pull_request:
 
 
