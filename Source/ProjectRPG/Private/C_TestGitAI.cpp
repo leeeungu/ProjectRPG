@@ -15,7 +15,7 @@ C_TestGitAI::C_TestGitAI()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("C_TestGitAI initialized with a positive sum: %d"), a);
 	}
-	2;
+	// This is a test comment to check if the code compiles correctly.
 }
 
 C_TestGitAI::~C_TestGitAI()
