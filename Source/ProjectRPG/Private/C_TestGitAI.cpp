@@ -7,6 +7,7 @@ C_TestGitAI::C_TestGitAI()
 {
 	int* pNode = new int(5);
 	pNode = new int(10);
+	pNode = new int(1);
 
 	delete pNode; // This will cause a memory leak if not handled properly
 	pNode = nullptr; // Reset pointer to avoid dangling pointer
