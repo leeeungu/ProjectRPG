@@ -6,9 +6,10 @@
 C_TestGitAI::C_TestGitAI()
 {
 	int a{};
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 100; i++)
 	{
-		a += i;
+		if (true)
+			a += i;
 	}
 	if (a > 0)
 	{
