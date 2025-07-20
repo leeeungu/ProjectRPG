@@ -1,6 +1,7 @@
 name: Gemini AI Pull Request Review
 
 on:
+	push:
 	pull_request:
 
 
