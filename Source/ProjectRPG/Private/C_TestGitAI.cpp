@@ -5,17 +5,6 @@
 
 C_TestGitAI::C_TestGitAI()
 {
-	int a{};
-	for (int i = 0; i < 1000; i++)
-	{
-		if (true)
-			a += i;
-	}
-	if (a > 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("C_TestGitAI initialized with a positive sum: %d"), a);
-	}
-	// This is a test comment to check if the code compiles correctly.
 }
 
 C_TestGitAI::~C_TestGitAI()
