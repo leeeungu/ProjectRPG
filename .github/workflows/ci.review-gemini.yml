@@ -1,9 +1,9 @@
 name: Gemini AI Pull Request Review
 
 on:
-  pull_request:
-	paths:
-		- 'Source/*'
+	pull_request:
+		paths:
+			- 'Source/*'
 
 
 permissions: write-all
