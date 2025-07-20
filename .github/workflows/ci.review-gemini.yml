@@ -3,7 +3,7 @@ name: Gemini AI Pull Request Review
 on:
   push_request:
 	 paths:
-          - 'Source/*'
+         	- 'Source/*'
 
 permissions: write-all
 
