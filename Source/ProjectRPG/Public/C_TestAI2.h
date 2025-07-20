@@ -7,9 +7,9 @@
 /**
  * 
  */
-class PROJECTRPG_API C_TestGitAI
+class PROJECTRPG_API C_TestAI2
 {
 public:
-	C_TestGitAI();
-	~C_TestGitAI();
+	C_TestAI2();
+	~C_TestAI2();
 };
