@@ -8,10 +8,12 @@ C_TestAI2::C_TestAI2()
 	int a{};
 	for (int i = 0; i < 100; i++)
 	{
+		
+		
 		if (true)
+		{
 			a += i;
-		if (false)
-			a += i;
+		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("C_TestAI2 created with a value of %d"), a);
 }
