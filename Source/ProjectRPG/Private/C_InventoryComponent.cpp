@@ -6,27 +6,37 @@ UC_InventoryComponent::UC_InventoryComponent()
 }
 
 
-int UC_InventoryComponent::getSlotData(int nY, int nX)
+int UC_InventoryComponent::getItemID(int nY, int nX) const
 {
-	return 120;
 	if (!isBound(nY, nX))
 		return 0;
 	return m_arrInventory[getArrayIndex(nY , nX)];
 }
 
+void UC_InventoryComponent::sortInventory()
+{
+}
+
 void UC_InventoryComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
+	m_arrInventory.Init(0, m_nInventorySize);
 }
 
-bool UC_InventoryComponent::isBound(int nY, int nX)
+void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	UActorComponent::PostEditChangeProperty(PropertyChangedEvent);
+	m_nInventorySize = m_nWidthSize* m_nHeightSize;
+}
+
+bool UC_InventoryComponent::isBound(int nY, int nX) const
 {
 	if (nY < 0 ||  nY >= m_nHeightSize || nX < 0 || nX >= m_nWidthSize)
 		return false;
 	return true;
 }
 
-void UC_InventoryComponent::setArrayData(int nY, int nX, int nVal)
+void UC_InventoryComponent::setItemID(int nY, int nX, int nVal)
 {
 	if (!isBound(nY, nX))
 		return;

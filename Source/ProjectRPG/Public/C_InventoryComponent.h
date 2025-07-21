@@ -12,24 +12,26 @@ class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UC_InventoryComponent")
-	int m_nWidthSize;
+	int m_nWidthSize = 1;
 	UPROPERTY(EditDefaultsOnly, Category = "UC_InventoryComponent")
-	int m_nHeightSize;
+	int m_nHeightSize = 1;
 
 private:
+	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
+	int m_nInventorySize = 1;
+	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
 	TArray<int> m_arrInventory;
 
 public:	
 	UC_InventoryComponent();
 
-
 	/**
-	 * GetInventoryData
-	 * @param nY - slot Height/Row Index
-	 * @param nX - slot Width/Col Index
+	 * getItemID atIndex ((nY  * Inventory MaxWidth) + nX)
+	 * @param nY - Inventory Height/Row Index
+	 * @param nX - Inventory Width/Col Index
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
-	int getSlotData(int nY, int nX);
+	int getItemID(int nY, int nX) const;
 	/**
 	 * @return - Inventory MaxWidth
 	 */
@@ -40,12 +42,29 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
 	int getHeight() const { return m_nHeightSize; }
+	/**
+	 * SortInventoryData By ID
+	 */
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	void sortInventory();
+
 protected:
 	virtual void BeginPlay() override;
 
 
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 private:
-	bool isBound(int nY, int nX);
-	int getArrayIndex(int nY, int nX) { return nY * m_nHeightSize + nX; }
-	void setArrayData(int nY, int nX, int nVal);
+	/**
+	* Check Array Bound
+	*/
+	bool isBound(int nY, int nX) const;
+	/**
+	* Calculate Array index
+	 * @param nY - Inventory Height/Row Index
+	 * @param nX - Inventory Width/Col Index
+	 * @return - Array Index
+	 */
+	int getArrayIndex(int nY, int nX) const { return nY * m_nHeightSize + nX; }
+	void setItemID(int nY, int nX, int nVal);
 };
+	
