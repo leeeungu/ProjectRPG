@@ -13,7 +13,7 @@ jobs:
       - name: Run Gemini AI Review
         uses: ablil/gemini-code-review@v0.5.12
         with:
-          extra_prompt: "Your review must be written in Korean."
+          extra_prompt: "Your review must be written in Korean. 헝가리안 표기법, Doxygen 주석 규칙 이 지켜졌는 지 확인해줘"
           exclude_filenames: "**/*.md, Content/**/*"
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
