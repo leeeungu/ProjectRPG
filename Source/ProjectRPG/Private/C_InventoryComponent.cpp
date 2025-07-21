@@ -8,6 +8,7 @@ UC_InventoryComponent::UC_InventoryComponent()
 
 int UC_InventoryComponent::getItemID(int nY, int nX) const
 {
+	return 100;
 	if (!isBound(nY, nX))
 		return 0;
 	return m_arrInventory[getArrayIndex(nY , nX)];
