@@ -65,6 +65,14 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
 	void setItemID(int nY, int nX, int nVal);
+	/**
+	* Blueprint getInventorySlotData 
+	* @param nY - Inventory Height/Row Index
+	* @param nX - Inventory Width/Col Index
+	* @param sData - ItemData Structure to fill
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
+	void getInventorySlotData(int nY, int nX, FS_InventorySlotData& sData) ;
 protected:
 	virtual void BeginPlay() override;
 
@@ -73,14 +81,21 @@ protected:
 private:
 	/**
 	* Check Array Bound
+	* UnUsed
+	* @use getInventorySlotData(int nY, int nX)
 	*/
 	bool isBound(int nY, int nX) const;
+
+	/**
+	* getInventorySlotData
+	*/
+	FS_InventorySlotData* getInventorySlotData(int nY, int nX) ;
 	/**
 	* Calculate Array index
 	 * @param nY - Inventory Height/Row Index
 	 * @param nX - Inventory Width/Col Index
 	 * @return - Array Index
 	 */
-	int getArrayIndex(int nY, int nX);
+	int getArrayIndex(int nY, int nX) const;
 
 };
