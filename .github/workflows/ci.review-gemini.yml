@@ -2,9 +2,6 @@ name: Gemini AI Pull Request Review
 
 on:
   pull_request:
-    types: [opened]
-
-
 
 permissions: write-all
 
