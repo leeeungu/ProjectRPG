@@ -9,9 +9,9 @@ struct FS_InventorySlotData
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemID;
+	int nItemID = -1;
 	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemCount;
+	int nItemCount = 0;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -30,7 +30,7 @@ private:
 	int m_nInventorySize;
 	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
 	TArray<FS_InventorySlotData> m_arrInventory;
-
+	FS_InventorySlotData m_sDummyItemData;
 public:	
 	UC_InventoryComponent();
 
@@ -46,12 +46,17 @@ public:
 	 * @return - Inventory MaxWidth
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
-	int getWidth()  { return m_nInventoryWidth; }
+	int getInventoryWidth()  { return m_nInventoryWidth; }
+	/**
+	 * @return - Inventory Inventory Size
+	 */
+	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
+	int getInventorySize() { return m_nInventorySize; }
 	/**
 	 * @return - Inventory MaxHeight
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
-	int getHeight()  { return m_nInventoryHeight; }
+	int getInventoryHeight()  { return m_nInventoryHeight; }
 	/**
 	 * SortInventoryData By ID
 	 */
@@ -76,8 +81,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnRegister() override;
-	//virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 private:
 	/**
 	* Check Array Bound
