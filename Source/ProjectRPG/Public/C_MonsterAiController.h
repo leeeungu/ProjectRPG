@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "C_MonsterBaseCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
+#include "UObject/ConstructorHelpers.h"
 #include "C_MonsterAiController.generated.h"
+
+
 
 
 /**
@@ -28,6 +32,13 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	UBehaviorTree* m_pBtAsset;
+
+	UPROPERTY()
+	UBlackboardData* m_pBbAsset;
+
 
 private:
 	UBehaviorTreeComponent* m_pBT;
