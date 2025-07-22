@@ -78,6 +78,8 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	void getInventorySlotData(int nY, int nX, FS_InventorySlotData& sData) ;
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
+	void swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX);
 protected:
 	virtual void BeginPlay() override;
 

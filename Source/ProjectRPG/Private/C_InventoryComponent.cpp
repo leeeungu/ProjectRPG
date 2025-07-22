@@ -1,4 +1,5 @@
 #include "C_InventoryComponent.h"
+#include <map>
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
@@ -14,6 +15,36 @@ int UC_InventoryComponent::getItemID(int nY, int nX)
 
 void UC_InventoryComponent::sortInventoryByItemID()
 {
+	std::map<int,int> ItemMap{};
+	std::map<int, int>::iterator InsertResult{};
+	for (int i = 0; i < m_nInventorySize; i++)
+	{
+		if (m_arrInventory[i].nItemID >= 0)
+		{
+			InsertResult = ItemMap.lower_bound(m_arrInventory[i].nItemID);
+				// 이미 존재하는 아이템 ID인 경우, 개수를 합산
+			if (InsertResult == ItemMap.end())
+				ItemMap.insert(InsertResult, { m_arrInventory[i].nItemID , 1 });
+			else
+				InsertResult->second += 1;
+			m_arrInventory[i].nItemID = -1; // 아이템 ID를 -1로 설정하여 해당 슬롯을 비움
+			m_arrInventory[i].nItemCount = 0; // 아이템 개수도 0으로 설정
+		}
+	}
+
+	int nIndex = 0;
+	std::map<int, int >::iterator iter = ItemMap.begin();
+	while (iter != ItemMap.end() && nIndex < m_nInventorySize)
+	{
+		while (iter->second > 0 && nIndex < m_nInventorySize)
+		{
+			m_arrInventory[nIndex].nItemID = iter->first; // 아이템 ID 설정
+			m_arrInventory[nIndex].nItemCount = 1; // 아이템 개수 설정
+			iter->second--;
+			nIndex++;
+		}
+		iter++;
+	}
 }
 
 void UC_InventoryComponent::setItemID(int nY, int nX, int nVal)
@@ -30,6 +61,23 @@ void UC_InventoryComponent::getInventorySlotData(int nY, int nX, FS_InventorySlo
 	if (pSlotData == &m_sDummyItemData)
 		return;
 	sData = *pSlotData;
+}
+
+void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX)
+{
+	FS_InventorySlotData* pSrcSlotData = getInventorySlotData(nSrcY, nSrcX);
+	FS_InventorySlotData* pDstSlotData = getInventorySlotData(nDstY, nDstX);
+	if (pSrcSlotData == &m_sDummyItemData || pDstSlotData == &m_sDummyItemData)
+		return;
+	// Swap the data
+	int nData = pSrcSlotData->nItemID;
+	pSrcSlotData->nItemID = pDstSlotData->nItemID;
+	pDstSlotData->nItemID = nData;
+
+
+	nData = pSrcSlotData->nItemCount;
+	pSrcSlotData->nItemCount = pDstSlotData->nItemCount;
+	pDstSlotData->nItemCount = nData;
 }
 
 void UC_InventoryComponent::BeginPlay()
