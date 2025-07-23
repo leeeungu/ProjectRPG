@@ -32,3 +32,13 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
+void AC_BaseCharacter::setHp(int nHp)
+{
+	m_nHp = nHp;
+}
+
+int AC_BaseCharacter::getHp()
+{
+	return m_nHp;
+}
+
