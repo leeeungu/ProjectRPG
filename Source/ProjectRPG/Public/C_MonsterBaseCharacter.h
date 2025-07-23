@@ -9,14 +9,7 @@
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
-UENUM(BlueprintType)
-enum class E_MonsterState : uint8
-{
-	Idle	UMETA(DisplayName = "Idle"),
-	Patrol	UMETA(DisplayName = "Patrol"),
-	Chase	UMETA(DisplayName = "Chase"),
-	Attack	UMETA(DisplayName = "Attack")
-};
+
 
 /**
  * 

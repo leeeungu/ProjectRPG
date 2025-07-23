@@ -13,7 +13,14 @@
 #include "C_MonsterAiController.generated.h"
 
 
-
+UENUM(BlueprintType)
+enum class E_MonsterState : uint8
+{
+	Idle	UMETA(DisplayName = "Idle"),
+	Patrol	UMETA(DisplayName = "Patrol"),
+	Chase	UMETA(DisplayName = "Chase"),
+	Attack	UMETA(DisplayName = "Attack")
+};
 
 /**
  * 
@@ -26,13 +33,7 @@ class PROJECTRPG_API AC_MonsterAiController : public AAIController
 public:
 	AC_MonsterAiController();
 
-	virtual void OnPossess(APawn* pMonster) override;
-
-	virtual void OnUnPossess() override;
-
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY()
 	UBehaviorTree* m_pBtAsset;
 
@@ -43,5 +44,13 @@ protected:
 private:
 	UBehaviorTreeComponent* m_pBT;
 	UBlackboardComponent* m_pBB;
+
+public:
+	virtual void OnPossess(APawn* pMonster) override;
+
+	virtual void OnUnPossess() override;
+
+protected:
+	virtual void BeginPlay() override;
 	
 };

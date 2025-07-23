@@ -44,4 +44,5 @@ void AC_MonsterAiController::OnUnPossess()
 void AC_MonsterAiController::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
