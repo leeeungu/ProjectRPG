@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "C_InventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
+
 USTRUCT(BlueprintType)
 struct FS_InventorySlotData
 {
@@ -18,7 +20,9 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
+public:
+	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "UC_InventoryComponent")
+	FOnPushItem m_onPushItem;
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UC_InventoryComponent", meta = (ClampMin = 1))
 	int m_nInventoryWidth = 1;
@@ -78,8 +82,22 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	void getInventorySlotData(int nY, int nX, FS_InventorySlotData& sData) ;
+	/**
+	* @param nSrcY - Item1 Height/Row Index
+	* @param nSrcX - Item1 Width/Col Index
+	* @param nDstY - Item2 Height/Row Index
+	* @param nDstX - Item2 Width/Col Index
+	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	void swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX);
+	/**
+	* @param nSrcY - Item1 Height/Row Index
+	* @param nSrcX - Item1 Width/Col Index
+	* @param nDstY - Item2 Height/Row Index
+	* @param nDstX - Item2 Width/Col Index
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
+	bool pushItem(int nItemID, int nItemCount);
 protected:
 	virtual void BeginPlay() override;
 

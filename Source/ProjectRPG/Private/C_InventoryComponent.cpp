@@ -6,7 +6,6 @@ UC_InventoryComponent::UC_InventoryComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 int UC_InventoryComponent::getItemID(int nY, int nX) 
 {
 	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
@@ -78,6 +77,24 @@ void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, i
 	nData = pSrcSlotData->nItemCount;
 	pSrcSlotData->nItemCount = pDstSlotData->nItemCount;
 	pDstSlotData->nItemCount = nData;
+}
+
+bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
+{
+	FS_InventorySlotData* pSlotData = &m_sDummyItemData;
+	for (int i = 0; i < m_nInventorySize && pSlotData  == &m_sDummyItemData; i++)
+	{
+		if (m_arrInventory[i].nItemID < 0)
+			pSlotData = &m_arrInventory[i];
+	}
+	if (pSlotData != &m_sDummyItemData)
+	{
+		pSlotData->nItemID = nItemID;
+		pSlotData->nItemCount = nItemCount;
+		if (m_onPushItem.IsBound())
+			m_onPushItem.Broadcast(pSlotData->nItemID, pSlotData->nItemCount);
+	}
+	return  pSlotData != &m_sDummyItemData;
 }
 
 void UC_InventoryComponent::BeginPlay()
