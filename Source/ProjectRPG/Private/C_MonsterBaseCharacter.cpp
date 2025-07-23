@@ -1,0 +1,11 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "C_MonsterBaseCharacter.h"
+
+AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
+{
+	AIControllerClass = AC_MonsterAiController::StaticClass();
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+}

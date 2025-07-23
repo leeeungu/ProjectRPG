@@ -1,0 +1,56 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AIController.h"
+#include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardData.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackBoardComponent.h"
+#include "UObject/ConstructorHelpers.h"
+#include "C_MonsterAiController.generated.h"
+
+
+UENUM(BlueprintType)
+enum class E_MonsterState : uint8
+{
+	Idle	UMETA(DisplayName = "Idle"),
+	Patrol	UMETA(DisplayName = "Patrol"),
+	Chase	UMETA(DisplayName = "Chase"),
+	Attack	UMETA(DisplayName = "Attack")
+};
+
+/**
+ * 
+ */
+UCLASS()
+class PROJECTRPG_API AC_MonsterAiController : public AAIController
+{
+	GENERATED_BODY()
+
+public:
+	AC_MonsterAiController();
+
+protected:
+	UPROPERTY()
+	UBehaviorTree* m_pBtAsset;
+
+	UPROPERTY()
+	UBlackboardData* m_pBbAsset;
+
+
+private:
+	UBehaviorTreeComponent* m_pBT;
+	UBlackboardComponent* m_pBB;
+
+public:
+	virtual void OnPossess(APawn* pMonster) override;
+
+	virtual void OnUnPossess() override;
+
+protected:
+	virtual void BeginPlay() override;
+	
+};
