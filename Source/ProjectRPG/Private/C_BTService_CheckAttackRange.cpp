@@ -8,6 +8,8 @@ UC_BTService_CheckAttackRange::UC_BTService_CheckAttackRange()
 	NodeName = TEXT("Check Attack Range");
 	Interval = 0.3f;
 	RandomDeviation = 0.1f;
+
+	bNotifyTick = true;
 }
 
 void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -20,7 +22,7 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		return;
 
 	APawn* pAiPawn = pAiController->GetPawn();
-	AActor* pTarget = Cast<AActor>(pBb->GetValueAsObject("TargetActor"));
+	APawn* pTarget = Cast<APawn>(pBb->GetValueAsObject("TargetActor"));
 
 	if (!pAiPawn || !pTarget)
 		return;
@@ -29,5 +31,14 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 	bool bInRange = fDistance <= 300.0f;
 
 	pBb->SetValueAsBool("IsInAttackRange", bInRange);
+
+	if (bInRange)
+		pBb->SetValueAsEnum("State", static_cast<uint8>(E_MonsterState::Attack));
+	else
+		pBb->SetValueAsEnum("State", static_cast<uint8>(E_MonsterState::Chase));
+
+	
+	UE_LOG(LogTemp, Warning, TEXT("Distance: %f, InRange: %s"), fDistance, bInRange ? TEXT("true") : TEXT("false"));
+
 
 }

@@ -52,5 +52,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
+
+	void setState(const char* strKeyName, E_MonsterState eState);
 };

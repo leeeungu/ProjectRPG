@@ -9,3 +9,12 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
+
+void AC_MonsterBaseCharacter::playMontage()
+{
+	if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(m_pAttackMontage))
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(m_pAttackMontage);
+	}
+	
+}
