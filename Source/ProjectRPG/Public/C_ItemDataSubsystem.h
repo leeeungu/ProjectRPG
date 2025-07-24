@@ -29,12 +29,16 @@ protected:
 	FString m_strDataTablePath = TEXT("/Game/Item/DataTable/DT_ItemData.DT_ItemData");
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData;
-	FS_ItemData m_sDummyItemData;
 public:
 	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	UFUNCTION(BlueprintCallable, Category = "ItemData")
+	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool getItemDataByID(int ItemID, FS_ItemData& OutData) const;
+	UFUNCTION(BlueprintPure, Category = "ItemData")
+	bool isValidItemID(int ItemID) const;
+
+	UFUNCTION(BlueprintPure, Category = "ItemData")
+	int getUnValidItemID() { return -1; }
 };

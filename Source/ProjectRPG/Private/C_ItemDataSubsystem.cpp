@@ -14,7 +14,6 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
     if (!m_pItemDataTable)
         m_pItemDataTable = LoadObject<UDataTable>(NULL, *m_strDataTablePath, NULL, LOAD_None, NULL);
-    m_mapItemData.FindOrAdd(m_sDummyItemData.nItemID, &m_sDummyItemData);
     if (m_pItemDataTable)
     {
         for (auto& Pair : m_pItemDataTable->GetRowMap())
@@ -42,4 +41,9 @@ bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) con
         return true;
     }
     return false;
+}
+
+bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const
+{
+    return ItemID >= 0;
 }

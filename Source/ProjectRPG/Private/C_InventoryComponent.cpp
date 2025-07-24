@@ -3,7 +3,7 @@
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 int UC_InventoryComponent::getItemID(int nY, int nX) 
@@ -15,19 +15,16 @@ int UC_InventoryComponent::getItemID(int nY, int nX)
 void UC_InventoryComponent::sortInventoryByItemID()
 {
 	std::map<int,int> ItemMap{};
-	std::map<int, int>::iterator InsertResult{};
+	std::pair<std::map<int, int>::iterator,bool> InsertResult{};
 	for (int i = 0; i < m_nInventorySize; i++)
 	{
-		if (m_arrInventory[i].nItemID >= 0)
+		if (m_pItemDataSubsystem->isValidItemID(m_arrInventory[i].nItemID) && !m_arrInventory[i].bLockSort)
 		{
-			InsertResult = ItemMap.lower_bound(m_arrInventory[i].nItemID);
+			InsertResult = ItemMap.insert({ m_arrInventory[i].nItemID, 1 });
 				// 이미 존재하는 아이템 ID인 경우, 개수를 합산
-			if (InsertResult == ItemMap.end())
-				ItemMap.insert(InsertResult, { m_arrInventory[i].nItemID , 1 });
-			else
-				InsertResult->second += 1;
-			m_arrInventory[i].nItemID = -1; // 아이템 ID를 -1로 설정하여 해당 슬롯을 비움
-			m_arrInventory[i].nItemCount = 0; // 아이템 개수도 0으로 설정
+			if (!InsertResult.second)
+				InsertResult.first->second += 1;
+			resetItemSlot(&m_arrInventory[i]);
 		}
 	}
 
@@ -37,9 +34,12 @@ void UC_InventoryComponent::sortInventoryByItemID()
 	{
 		while (iter->second > 0 && nIndex < m_nInventorySize)
 		{
-			m_arrInventory[nIndex].nItemID = iter->first; // 아이템 ID 설정
-			m_arrInventory[nIndex].nItemCount = 1; // 아이템 개수 설정
-			iter->second--;
+			if (!m_pItemDataSubsystem->isValidItemID(m_arrInventory[nIndex].nItemID))
+			{
+				m_arrInventory[nIndex].nItemID = iter->first; // 아이템 ID 설정
+				m_arrInventory[nIndex].nItemCount = 1; // 아이템 개수 설정
+				iter->second--;
+			}
 			nIndex++;
 		}
 		iter++;
@@ -69,14 +69,17 @@ void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, i
 	if (pSrcSlotData == &m_sDummyItemData || pDstSlotData == &m_sDummyItemData)
 		return;
 	// Swap the data
-	int nData = pSrcSlotData->nItemID;
-	pSrcSlotData->nItemID = pDstSlotData->nItemID;
-	pDstSlotData->nItemID = nData;
+	Swap<FS_InventorySlotData>(*pSrcSlotData,*pDstSlotData);
 
-
-	nData = pSrcSlotData->nItemCount;
-	pSrcSlotData->nItemCount = pDstSlotData->nItemCount;
-	pDstSlotData->nItemCount = nData;
+	//int nData = pSrcSlotData->nItemID;
+	//pSrcSlotData->nItemID = pDstSlotData->nItemID;
+	//pDstSlotData->nItemID = nData;
+	//nData = pSrcSlotData->nItemCount;
+	//pSrcSlotData->nItemCount = pDstSlotData->nItemCount;
+	//pDstSlotData->nItemCount = nData;
+	//bool bData = pSrcSlotData->bLockSort;
+	//pSrcSlotData->bLockSort = pDstSlotData->bLockSort;
+	//pDstSlotData->bLockSort = bData;
 }
 
 bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
@@ -97,11 +100,33 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 	return  pSlotData != &m_sDummyItemData;
 }
 
+void UC_InventoryComponent::setItemSlotLock(int nY, int nX, bool bLock)
+{
+	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData)
+		return;
+	pSlotData->bLockSort  = bLock;
+}
+
+bool UC_InventoryComponent::getItemSlotlock(int nY, int nX)
+{
+	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData)
+		return false;
+	return pSlotData->bLockSort;
+}
+
 void UC_InventoryComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 	if (m_nInventorySize > 0)
 		m_arrInventory.Init(FS_InventorySlotData{}, m_nInventorySize);
+
+	if (!GetWorld())
+		return;
+	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+	if (GameInstance)
+		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
 }
 
 void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -132,7 +157,14 @@ FS_InventorySlotData* UC_InventoryComponent::getInventorySlotData(int nY, int nX
 
 int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 { 
-	return nY * m_nInventoryHeight + nX; 
+	return nY * m_nInventoryWidth + nX;
+}
+
+void UC_InventoryComponent::resetItemSlot(FS_InventorySlotData* pItemSlot)
+{
+	pItemSlot->nItemID = m_pItemDataSubsystem->getUnValidItemID(); // 아이템 ID를 -1로 설정하여 해당 슬롯을 비움
+	pItemSlot->nItemCount = 0; // 아이템 개수도 0으로 설정
+	pItemSlot->bLockSort = false;
 }
 
 
