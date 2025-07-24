@@ -23,6 +23,7 @@ protected:
 
 private:
 	int m_nHp;
+	int m_nMaxHp;
 	int m_nAtk;
 
 
