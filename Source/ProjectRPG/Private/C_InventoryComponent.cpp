@@ -1,9 +1,12 @@
 #include "C_InventoryComponent.h"
 #include <map>
+#include <Tasks/AITask_MoveTo.h>
+//#include <Kismet/>
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	//UAITask_MoveTo::AIMoveTo
 }
 
 int UC_InventoryComponent::getItemID(int nY, int nX) 

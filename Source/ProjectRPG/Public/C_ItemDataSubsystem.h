@@ -13,7 +13,7 @@ struct FS_ItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	int nItemID = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	FString strItemDescription = "아무런 효과 없음";
+	FString strItemDescription = TEXT("아무런 효과 없음");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	UTexture2D* pItemIcon;
 };
