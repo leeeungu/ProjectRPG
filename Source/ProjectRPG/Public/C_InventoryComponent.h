@@ -109,6 +109,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
 	bool getItemSlotlock(int nY, int nX)  ;
+
+
+	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
+	int getItemCount(int nY, int nX);
 protected:
 	virtual void BeginPlay() override;
 
