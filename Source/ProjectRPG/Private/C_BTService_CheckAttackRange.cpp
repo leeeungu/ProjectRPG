@@ -25,19 +25,17 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 	APawn* pTarget = Cast<APawn>(pBb->GetValueAsObject("TargetActor"));
 
 	if (!pAiPawn || !pTarget)
+	{
+		pBb->SetValueAsBool("IsInAttackRange", false);
 		return;
+	}
+		
 
 	float fDistance = FVector::Dist(pAiPawn->GetActorLocation(), pTarget->GetActorLocation());
 	bool bInRange = fDistance <= 300.0f;
 
 	pBb->SetValueAsBool("IsInAttackRange", bInRange);
 
-	if (bInRange)
-		pBb->SetValueAsEnum("State", static_cast<uint8>(E_MonsterState::Attack));
-	else
-		pBb->SetValueAsEnum("State", static_cast<uint8>(E_MonsterState::Chase));
-
-	
 	UE_LOG(LogTemp, Warning, TEXT("Distance: %f, InRange: %s"), fDistance, bInRange ? TEXT("true") : TEXT("false"));
 
 

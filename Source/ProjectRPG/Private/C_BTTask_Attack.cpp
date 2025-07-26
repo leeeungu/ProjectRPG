@@ -3,6 +3,11 @@
 
 #include "C_BTTask_Attack.h"
 
+UC_BTTask_Attack::UC_BTTask_Attack()
+{
+	NodeName = TEXT("Attack");
+}
+
 EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	AAIController* pAiController = OwnerComp.GetAIOwner();

@@ -16,7 +16,7 @@ class PROJECTRPG_API UC_BTTask_Attack : public UBTTaskNode
 	GENERATED_BODY()
 
 public:
-	UC_BTTask_Attack() = default;
+	UC_BTTask_Attack();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	

@@ -27,13 +27,16 @@ AC_MonsterAiController::AC_MonsterAiController()
 void AC_MonsterAiController::OnPossess(APawn* pMonster)
 {
 	Super::OnPossess(pMonster);
+	
 
 	if (m_pBbAsset && m_pBtAsset)
 	{
+
 		if (UseBlackboard(m_pBbAsset, m_pBB))
 		{
-			RunBehaviorTree(m_pBtAsset);
 
+			RunBehaviorTree(m_pBtAsset);
+		
 		}
 	}
 }
@@ -46,12 +49,9 @@ void AC_MonsterAiController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APawn* pPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+	
 	m_pBB->SetValueAsObject("TargetActor", pPlayer);
 
-}
-
-void AC_MonsterAiController::setState(const char* strKeyName, E_MonsterState eState)
-{
-	m_pBB->SetValueAsEnum(strKeyName, static_cast<uint8>(eState));
 }
