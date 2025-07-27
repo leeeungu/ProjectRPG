@@ -33,7 +33,12 @@ bool UC_CurrencyComponent::pushCurrency(int nCurrencyID, int nCurrencyAmount)
 	int& rCurrency = m_mapInventory.FindOrAdd(nCurrencyID);
 	if (rCurrency > INT_MAX - nCurrencyAmount)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Currency overflow for ID: %d"), nCurrencyID);
+		if (m_pGameAlertSubsystem)
+		{
+			FS_GameAlertSubsystemConfig config{};
+			config.strDefaultAlertMessage = FText::Format(NSLOCTEXT("CurrencyComponent", "CurrencyOverflow", "Currency overflow for ID: {0}"), nCurrencyID);
+			m_pGameAlertSubsystem->pushAlertMessage(config);
+		}
 		return false; // Prevent overflow
 	}
 	rCurrency += nCurrencyAmount;
@@ -48,7 +53,15 @@ bool UC_CurrencyComponent::popCurrency(int nCurrencyID, int nCurrencyAmount)
 		return false;
 	int* pCurrency = m_mapInventory.Find(nCurrencyID);
 	if (!pCurrency || *pCurrency < INT_MIN + nCurrencyAmount)
+	{
+		if (m_pGameAlertSubsystem)
+		{
+			FS_GameAlertSubsystemConfig config{};
+			config.strDefaultAlertMessage = FText::Format(NSLOCTEXT("CurrencyComponent", "CurrencyOverflow", "Currency UnderFlow for ID: {0}"), nCurrencyID);
+			m_pGameAlertSubsystem->pushAlertMessage(config);
+		}
 		return false; // Prevent underflow or none
+	}
 	*pCurrency -= nCurrencyAmount;
 	return true;
 }
@@ -58,8 +71,12 @@ void UC_CurrencyComponent::BeginPlay()
 	UActorComponent::BeginPlay();
 	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
 	if (GameInstance)
+	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
+		m_pGameAlertSubsystem = GameInstance->GetSubsystem<UC_GameAlertSubsystem>();
+	}
 	if (m_pItemDataSubsystem)
 		pushCurrency(m_pItemDataSubsystem->getCurrencyGoldItemID(), 0); // Initialize with 0 gold
+	
 }
 

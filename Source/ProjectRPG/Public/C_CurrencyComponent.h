@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include <C_ItemDataSubsystem.h>
+#include <C_GameAlertSubsystem.h>
 #include "C_CurrencyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushCurrency, int, nItemID, int, nItemCount);
@@ -22,6 +23,7 @@ private:
 	TMap<int, int> m_mapInventory;
 
 	UC_ItemDataSubsystem* m_pItemDataSubsystem;
+	UC_GameAlertSubsystem* m_pGameAlertSubsystem;
 public:	
 	UC_CurrencyComponent();
 
