@@ -25,7 +25,12 @@ public:
 protected:
 
 private:
-	
+	UPROPERTY(EditAnywhere, Category = "Attack Montage")
+	UAnimMontage* m_pAttackMontage;
+
+public:
+	void playMontage();
+
 
 
 	

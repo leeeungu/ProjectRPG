@@ -22,7 +22,9 @@ protected:
 
 
 private:
-	
+	int m_nHp;
+	int m_nMaxHp;
+	int m_nAtk;
 
 
 protected:
@@ -35,5 +37,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void setHp(int nHp);
+	int getHp();
 
 };

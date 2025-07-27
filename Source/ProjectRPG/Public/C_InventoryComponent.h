@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include <C_ItemDataSubsystem.h>
 #include "C_InventoryComponent.generated.h"
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
 
@@ -14,6 +16,7 @@ struct FS_InventorySlotData
 	int nItemID = -1;
 	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
 	int nItemCount = 0;
+	bool bLockSort;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -35,6 +38,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
 	TArray<FS_InventorySlotData> m_arrInventory;
 	FS_InventorySlotData m_sDummyItemData;
+
+	UC_ItemDataSubsystem* m_pItemDataSubsystem;
 public:	
 	UC_InventoryComponent();
 
@@ -98,6 +103,16 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	bool pushItem(int nItemID, int nItemCount);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	void setItemSlotLock(int nY, int nX, bool bLock);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool getItemSlotlock(int nY, int nX)  ;
+
+
+	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
+	int getItemCount(int nY, int nX);
 protected:
 	virtual void BeginPlay() override;
 
@@ -121,5 +136,6 @@ private:
 	 * @return - Array Index
 	 */
 	int getArrayIndex(int nY, int nX) const;
+	void resetItemSlot(FS_InventorySlotData* pItemSlot);
 
 };

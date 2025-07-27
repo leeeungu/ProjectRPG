@@ -14,16 +14,21 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
     if (!m_pItemDataTable)
         m_pItemDataTable = LoadObject<UDataTable>(NULL, *m_strDataTablePath, NULL, LOAD_None, NULL);
-    m_mapItemData.FindOrAdd(m_sDummyItemData.nItemID, &m_sDummyItemData);
     if (m_pItemDataTable)
     {
-        for (auto& Pair : m_pItemDataTable->GetRowMap())
+        TArray< FS_ItemData*>  arRow{};
+        m_pItemDataTable->GetAllRows("", arRow);
+        for (FS_ItemData* Row : arRow)
         {
-            FName RowName = Pair.Key;
-            if (const FS_ItemData* Row = m_pItemDataTable->FindRow<FS_ItemData>(RowName, TEXT("Init ItemData")))
+            const FS_ItemData*& pData = m_mapItemData.FindOrAdd(Row->nItemID, nullptr);
+            if (!pData)
             {
-                m_mapItemData.FindOrAdd(Row->nItemID, Row);
+                pData = Row;
             }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Item ID %d already exists in the map!"), Row->nItemID);
+			}
         }
     }
 }
@@ -36,10 +41,32 @@ void UC_ItemDataSubsystem::Deinitialize()
 
 bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) const
 {
+    FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
+    if (pItemData)
+        OutData = *pItemData;
+    return pItemData != nullptr;
+}
+
+bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const
+{
+    return ItemID != getUnValidItemID();
+}
+
+FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
+{   
     if (const FS_ItemData* const* Found = m_mapItemData.Find(ItemID))
     {
-        OutData = **Found;
-        return true;
-    }
+        return const_cast<FS_ItemData*>(*Found);
+	}
+    return nullptr;
+}
+
+bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID,  int32 Bitmask) const
+{   
+    FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
+    if (pItemData)
+    {
+        return (pItemData->eltemState & Bitmask) != 0;
+	}
     return false;
 }
