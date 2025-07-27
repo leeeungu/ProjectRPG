@@ -1,13 +1,10 @@
 #include "C_InventoryComponent.h"
 #include <map>
-#include <Tasks/AITask_MoveTo.h>
 #include <queue>
-//#include <Kismet/>
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	//UAITask_MoveTo::AIMoveTo
 }
 
 int UC_InventoryComponent::getItemID(int nY, int nX) 
@@ -77,40 +74,6 @@ void UC_InventoryComponent::sortInventoryByItemID()
 	}
 }
 
-
-// v1
-//std::map<int,int> ItemMap{};
-//std::pair<std::map<int, int>::iterator,bool> InsertResult{};
-//for (int i = 0; i < m_nInventorySize; i++)
-//{
-//	if (m_pItemDataSubsystem->isValidItemID(m_arrInventory[i].nItemID) && !m_arrInventory[i].bLockSort)
-//	{
-//		InsertResult = ItemMap.insert({ m_arrInventory[i].nItemID, 1 });
-//			// 이미 존재하는 아이템 ID인 경우, 개수를 합산
-//		if (!InsertResult.second)
-//		{
-//			InsertResult.first->second += 1;
-//		}
-//		resetItemSlot(&m_arrInventory[i]);
-//	}
-//}
-//int nIndex = 0;
-//std::map<int, int >::iterator iter = ItemMap.begin();
-//while (iter != ItemMap.end() && nIndex < m_nInventorySize)
-//{
-//	while (iter->second > 0 && nIndex < m_nInventorySize)
-//	{
-//		if (!m_pItemDataSubsystem->isValidItemID(m_arrInventory[nIndex].nItemID))
-//		{
-//			m_arrInventory[nIndex].nItemID = iter->first; // 아이템 ID 설정
-//			m_arrInventory[nIndex].nItemCount = 1; // 아이템 개수 설정
-//			iter->second--;
-//		}
-//		nIndex++;
-//	}
-//	iter++;
-//}
-
 void UC_InventoryComponent::setItemID(int nY, int nX, int nVal)
 {
 	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
@@ -133,18 +96,7 @@ void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, i
 	FS_InventorySlotData* pDstSlotData = getInventorySlotData(nDstY, nDstX);
 	if (pSrcSlotData == &m_sDummyItemData || pDstSlotData == &m_sDummyItemData)
 		return;
-	// Swap the data
 	Swap<FS_InventorySlotData>(*pSrcSlotData,*pDstSlotData);
-
-	//int nData = pSrcSlotData->nItemID;
-	//pSrcSlotData->nItemID = pDstSlotData->nItemID;
-	//pDstSlotData->nItemID = nData;
-	//nData = pSrcSlotData->nItemCount;
-	//pSrcSlotData->nItemCount = pDstSlotData->nItemCount;
-	//pDstSlotData->nItemCount = nData;
-	//bool bData = pSrcSlotData->bLockSort;
-	//pSrcSlotData->bLockSort = pDstSlotData->bLockSort;
-	//pDstSlotData->bLockSort = bData;
 }
 
 bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)

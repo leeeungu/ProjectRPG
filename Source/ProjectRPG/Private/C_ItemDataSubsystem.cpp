@@ -20,7 +20,15 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         m_pItemDataTable->GetAllRows("", arRow);
         for (FS_ItemData* Row : arRow)
         {
-            m_mapItemData.FindOrAdd(Row->nItemID, Row);
+            const FS_ItemData*& pData = m_mapItemData.FindOrAdd(Row->nItemID, nullptr);
+            if (!pData)
+            {
+                pData = Row;
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Item ID %d already exists in the map!"), Row->nItemID);
+			}
         }
     }
 }

@@ -78,6 +78,9 @@ public:
 	int getUnValidItemID() const { return -1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
+	int getCurrencyGoldItemID() const { return 0; }
+
+	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask) const;
 
 private:
