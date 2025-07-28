@@ -52,6 +52,6 @@ void AC_MonsterAiController::BeginPlay()
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
 	
-	m_pBB->SetValueAsObject("TargetActor", pPlayer);
+	//m_pBB->SetValueAsObject("TargetActor", pPlayer);
 
 }
