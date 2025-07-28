@@ -1,4 +1,4 @@
-#include "C_CurrencyComponent.h"
+﻿#include "C_CurrencyComponent.h"
 
 UC_CurrencyComponent::UC_CurrencyComponent()
 {
@@ -33,12 +33,9 @@ bool UC_CurrencyComponent::pushCurrency(int nCurrencyID, int nCurrencyAmount)
 	int& rCurrency = m_mapInventory.FindOrAdd(nCurrencyID);
 	if (rCurrency > INT_MAX - nCurrencyAmount)
 	{
-		if (m_pGameAlertSubsystem)
-		{
-			FS_GameAlertSubsystemConfig config{};
-			config.strDefaultAlertMessage = FText::Format(NSLOCTEXT("CurrencyComponent", "CurrencyOverflow", "Currency overflow for ID: {0}"), nCurrencyID);
-			m_pGameAlertSubsystem->pushAlertMessage(config);
-		}
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("골드를 더이상 획득할 수 없습니다."));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 		return false; // Prevent overflow
 	}
 	rCurrency += nCurrencyAmount;
@@ -54,12 +51,9 @@ bool UC_CurrencyComponent::popCurrency(int nCurrencyID, int nCurrencyAmount)
 	int* pCurrency = m_mapInventory.Find(nCurrencyID);
 	if (!pCurrency || *pCurrency < INT_MIN + nCurrencyAmount)
 	{
-		if (m_pGameAlertSubsystem)
-		{
-			FS_GameAlertSubsystemConfig config{};
-			config.strDefaultAlertMessage = FText::Format(NSLOCTEXT("CurrencyComponent", "CurrencyOverflow", "Currency UnderFlow for ID: {0}"), nCurrencyID);
-			m_pGameAlertSubsystem->pushAlertMessage(config);
-		}
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("골드를 더이상 차감할 수 없습니다."));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 		return false; // Prevent underflow or none
 	}
 	*pCurrency -= nCurrencyAmount;
@@ -73,10 +67,8 @@ void UC_CurrencyComponent::BeginPlay()
 	if (GameInstance)
 	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-		m_pGameAlertSubsystem = GameInstance->GetSubsystem<UC_GameAlertSubsystem>();
 	}
 	if (m_pItemDataSubsystem)
 		pushCurrency(m_pItemDataSubsystem->getCurrencyGoldItemID(), 0); // Initialize with 0 gold
-	
 }
 

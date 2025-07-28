@@ -23,7 +23,6 @@ private:
 	TMap<int, int> m_mapInventory;
 
 	UC_ItemDataSubsystem* m_pItemDataSubsystem;
-	UC_GameAlertSubsystem* m_pGameAlertSubsystem;
 public:	
 	UC_CurrencyComponent();
 

@@ -28,12 +28,16 @@ class PROJECTRPG_API UC_GameAlertSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Game Alert")
-	FOnAlertMessage OnAlertScrrenMessage;
+	FOnAlertMessage m_onAlertScrrenMessage;
 	UPROPERTY(BlueprintAssignable, Category = "Game Alert")
-	FOnAlertMessage OnAlertDebugMessage;
+	FOnAlertMessage m_onAlertDebugMessage;
+	UPROPERTY(BlueprintAssignable, Category = "Game Alert")
+	FOnAlertMessage m_onAlertMessage;
 private:
 	std::queue<FS_GameAlertSubsystemConfig> m_queMessage;
 	FTimerHandle m_sTimerHandle;
+	int m_nQueSize = 5;
+	static UC_GameAlertSubsystem* m_pSingletonInstance;	
 public:
 	UC_GameAlertSubsystem();
 	
@@ -44,6 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game Alert")
 	void pushAlertMessage(const FS_GameAlertSubsystemConfig& sMesssage);
 
+	static void pushAlertMessage_Cpp(const FS_GameAlertSubsystemConfig& sMesssage);
 private:
 	void broadcastAlertMessage();
 };
