@@ -14,23 +14,22 @@ class PROJECTRPG_API UC_MainWidget : public UUserWidget
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UC_MainWidget")
 	UCanvasPanel* m_pMainCanvas;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UC_MainWidget")
-	UCanvasPanel* m_pInventoryCanvas;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UC_MainWidget")
-	UCanvasPanel* m_pAlertCanvas;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UC_MainWidget")
-	UCanvasPanel* m_pQuickSlot;
 
 private:
-	TArray<UCanvasPanel*> m_arCanvasPanel;
+	TArray<UC_GameWindowWidget*> m_arrGameWidget;
 
 public:
 	UC_MainWidget(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	bool addWidgetToMain(E_WindwoType eType, UC_GameWindowWidget* pWidget);
+	bool addWidgetToMain(E_WindwoType eType);
 	UFUNCTION(BlueprintCallable)
-	bool removeWidgetFromMain(UC_GameWindowWidget* pWidget);
+	bool removeWidgetFromMain(E_WindwoType eType);
+
+	UFUNCTION(BlueprintPure)
+	bool isWidgetOpened(E_WindwoType eType) const;
+
+	void registerWidget(UC_GameWindowWidget* pWidget);
 protected:
 	virtual void NativeOnInitialized() override;
 };

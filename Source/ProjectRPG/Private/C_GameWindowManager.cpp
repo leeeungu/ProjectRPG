@@ -9,19 +9,28 @@ UC_GameWindowManager::UC_GameWindowManager()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UC_GameWindowManager::toggleWindowWidget(E_WindwoType eType, UC_GameWindowWidget* pWidget)
+bool UC_GameWindowManager::toggleWidget(E_WindwoType eType)
 {
-	if (!pWidget)
-		return;
+	if (isWidgetOpened(eType))
+	{
+		return removeWidgetFromMain(eType);
+	}
+	return addWidgetToMain(eType);
+}
 
-	if (pWidget->getHasParent())
-	{
-		m_pMainWidget->removeWidgetFromMain(pWidget);
-	}
-	else
-	{
-		m_pMainWidget->addWidgetToMain(eType, pWidget);
-	}
+bool UC_GameWindowManager::removeWidgetFromMain(E_WindwoType eType)
+{
+	return m_pMainWidget->removeWidgetFromMain(eType);
+}
+
+bool UC_GameWindowManager::addWidgetToMain(E_WindwoType eType)
+{
+	return m_pMainWidget->addWidgetToMain(eType);
+}
+
+bool UC_GameWindowManager::isWidgetOpened(E_WindwoType eType) const
+{
+	return m_pMainWidget->isWidgetOpened(eType);
 }
 
 void UC_GameWindowManager::BeginPlay()

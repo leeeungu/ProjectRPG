@@ -20,15 +20,21 @@ UCLASS()
 class PROJECTRPG_API UC_GameWindowWidget : public UUserWidget
 {
 	GENERATED_BODY()
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	E_WindwoType m_eWindowType;
 private:
-	bool m_bHasParent;
+	bool m_bIsOpened = true;	
 public:
 	UC_GameWindowWidget(const FObjectInitializer& ObjectInitializer);
 	
-	void setHasParent(bool bVal);
+	UFUNCTION(BlueprintCallable)
+	void setIsOpened(bool bVal);
 
 	UFUNCTION(BlueprintPure)
-	bool getHasParent() const { return m_bHasParent; }
+	bool getIsOpened() const { return m_bIsOpened; }
+
+
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void removeWidgetFromMain();
 
@@ -37,4 +43,10 @@ public:
 	void addWidgetToMain();
 
 	virtual void addWidgetToMain_Implementation();
+
+	E_WindwoType getWindowType() const { return m_eWindowType; }	
+
+
+protected:
+	virtual void NativeOnInitialized() override;
 };

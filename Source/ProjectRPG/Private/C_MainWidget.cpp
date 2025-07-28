@@ -4,46 +4,60 @@
 UC_MainWidget::UC_MainWidget(const FObjectInitializer& ObjectInitializer)
 	:UUserWidget{ ObjectInitializer }
 {
+	m_arrGameWidget.Init(nullptr, (uint8)E_WindwoType::E_Max);
 }
 
 
-bool UC_MainWidget::addWidgetToMain(E_WindwoType eType, UC_GameWindowWidget* pWidget)
+bool UC_MainWidget::addWidgetToMain(E_WindwoType eType)
 {
 	uint8 index = (uint8)eType;
-	if (!m_arCanvasPanel.IsValidIndex(index) || !pWidget)
+	if (!m_arrGameWidget.IsValidIndex(index))
 		return false;
-
-	UCanvasPanel* pCanvas = m_arCanvasPanel[index];
-	if (pCanvas->HasChild(pWidget))
+	UC_GameWindowWidget* pWidget = m_arrGameWidget[index];
+	if (!pWidget || pWidget->getIsOpened())
 		return false;
-	UCanvasPanelSlot* pSlot = pCanvas->AddChildToCanvas(pWidget);
-	if (pSlot)
-	{
-		pSlot->SetAnchors(FAnchors(0, 0, 1, 1));
-	}
-	pWidget->addWidgetToMain();
-	pWidget->setHasParent(pWidget->GetParent()  == pCanvas);
-
+	pWidget->setIsOpened(true);
 	return true;
 }
 
-bool UC_MainWidget::removeWidgetFromMain(UC_GameWindowWidget* pWidget)
+bool UC_MainWidget::removeWidgetFromMain(E_WindwoType eType)
 {
+	uint8 index = (uint8)eType;
+	if (!m_arrGameWidget.IsValidIndex(index))
+		return false;
+	UC_GameWindowWidget* pWidget = m_arrGameWidget[index];
+	if (!pWidget || !pWidget->getIsOpened())
+		return false;
+	pWidget->setIsOpened(false);
+	return true;
+}
+
+bool UC_MainWidget::isWidgetOpened(E_WindwoType eType) const
+{
+	uint8 index = (uint8)eType;
+	if (!m_arrGameWidget.IsValidIndex(index))
+		return false;
+	UC_GameWindowWidget* pWidget = m_arrGameWidget[index];
 	if (!pWidget)
 		return false;
-	pWidget->removeWidgetFromMain();
-	pWidget->setHasParent(pWidget->GetParent()  != nullptr);
-	return true;
+	return pWidget->getIsOpened();
+}
+
+void UC_MainWidget::registerWidget(UC_GameWindowWidget* pWidget)
+{
+	E_WindwoType eType = pWidget->getWindowType();
+	uint8 index = (uint8)eType;	
+	if (!m_arrGameWidget.IsValidIndex(index))
+		return;
+	if (m_arrGameWidget[index])
+		return;
+	m_arrGameWidget[index] = pWidget;
 }
 
 void UC_MainWidget::NativeOnInitialized()
 {
 	UUserWidget::NativeOnInitialized();
-	m_arCanvasPanel.Init(nullptr, (uint8)E_WindwoType::E_Max);
-	m_arCanvasPanel[(uint8)E_WindwoType::E_Inventory] = m_pInventoryCanvas;
-	m_arCanvasPanel[(uint8)E_WindwoType::E_Alert] = m_pAlertCanvas;
-	m_arCanvasPanel[(uint8)E_WindwoType::E_QuickSlot] = m_pQuickSlot;
-}
+}	
 
 
 

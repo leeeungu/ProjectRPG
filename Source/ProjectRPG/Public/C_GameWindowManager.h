@@ -23,7 +23,16 @@ public:
 	UC_GameWindowManager();
 
 	UFUNCTION(BlueprintCallable)
-	void toggleWindowWidget(E_WindwoType eType, UC_GameWindowWidget* pWidget);
+	bool toggleWidget(E_WindwoType eType);
+
+	UFUNCTION(BlueprintCallable)
+	bool removeWidgetFromMain(E_WindwoType eType);
+
+	UFUNCTION(BlueprintCallable)
+	bool addWidgetToMain(E_WindwoType eType);
+
+	UFUNCTION(BlueprintPure)
+	bool isWidgetOpened(E_WindwoType eType) const;
 protected:
 	virtual void BeginPlay() override;
 		
