@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "C_BTTaskPatrol.h"
@@ -25,7 +25,6 @@ EBTNodeResult::Type UC_BTTaskPatrol::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		return EBTNodeResult::Failed;
 
 	pBBcomp->SetValueAsVector("PatrolLocation", navRandom.Location);
-
 
 	return EBTNodeResult::Succeeded;
 }
