@@ -74,7 +74,9 @@ public:
 	bool isValidItemID(int ItemID) const;
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	int getUnValidItemID() const { return -1; }
+	int getUnValidItemID() const { return getUnValidItemID_CPP(); }
+
+	static int getUnValidItemID_CPP() { return -1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	int getCurrencyGoldItemID() const { return 0; }

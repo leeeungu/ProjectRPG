@@ -167,6 +167,74 @@ bool UC_InventoryComponent::getItemCountByID(int nItemID, int& nCount)
 	return true;
 }
 
+bool UC_InventoryComponent::removeItem(int nItemID, int nCount)
+{
+	TArray<FS_InventorySlotData*> arrSlotData{};
+	arrSlotData.Reserve(m_nInventorySize);
+	int nSum = nCount;
+	for (int i = 0; i < m_nInventorySize && nSum > 0; i++)
+	{
+		if (m_arrInventory[i].nItemID == nItemID && nSum > 0)
+		{
+			arrSlotData.Push(&m_arrInventory[i]);
+			nSum -= m_arrInventory[i].nItemCount;
+		}
+	}
+
+	if (nSum > 0)
+	{
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("아이템이 충분하지 않습니다."));
+		if (nItemID == UC_ItemDataSubsystem::getUnValidItemID_CPP())
+			config.strDefaultAlertMessage = FText::FromString(TEXT(""));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+		return false; // 아이템이 충분하지 않음
+	}
+
+	int& sCount = m_mapItemCount.FindOrAdd(nItemID);
+	sCount -= nCount;
+	if (sCount <= 0)
+		m_mapItemCount.Remove(nItemID);
+
+	for (FS_InventorySlotData* pSlotData : arrSlotData)
+	{
+		if (pSlotData->nItemCount > nCount)
+		{
+			pSlotData->nItemCount -= nCount;
+			nCount = 0;
+		}
+		else
+		{
+			nCount -= pSlotData->nItemCount;
+			resetItemSlot(pSlotData);
+		}
+	}
+	return true;
+}
+
+bool UC_InventoryComponent::removeItemAtSlot(int nY, int nX, int nCount)
+{
+	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData || pSlotData->nItemID == m_pItemDataSubsystem->getUnValidItemID())
+		return false;
+	if (pSlotData->nItemCount >= nCount)
+	{
+		int& sCount = m_mapItemCount.FindOrAdd(pSlotData->nItemID);
+		sCount -= nCount;
+		pSlotData->nItemCount -= nCount;
+		if (pSlotData->nItemCount <= 0)
+		{
+			resetItemSlot(pSlotData);
+			m_mapItemCount.Remove(pSlotData->nItemID);
+		}
+		return true;
+	}
+	FS_GameAlertSubsystemConfig config{};
+	config.strDefaultAlertMessage = FText::FromString(TEXT("아이템이 충분하지 않습니다."));
+	UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+	return false;
+}
+
 void UC_InventoryComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();

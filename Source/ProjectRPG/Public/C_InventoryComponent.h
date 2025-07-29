@@ -117,6 +117,13 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
 	bool getItemCountByID(int nItemID, int & nCount);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool removeItem(int nItemID, int nCount);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool removeItemAtSlot(int nY, int nX, int nCount);
+
 protected:
 	virtual void BeginPlay() override;
 
