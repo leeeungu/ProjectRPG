@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "C_BTService_CheckAttackRange.h"
@@ -32,7 +32,7 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		
 
 	float fDistance = FVector::Dist(pAiPawn->GetActorLocation(), pTarget->GetActorLocation());
-	bool bInRange = fDistance <= 300.0f;
+	bool bInRange = fDistance <= 200.0f;
 
 	pBb->SetValueAsBool("IsInAttackRange", bInRange);
 
