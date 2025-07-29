@@ -1,4 +1,4 @@
-#include "C_ItemDataSubsystem.h"
+﻿#include "C_ItemDataSubsystem.h"
 #include "Kismet/DataTableFunctionLibrary.h" 
 
 UC_ItemDataSubsystem::UC_ItemDataSubsystem()  
@@ -42,6 +42,8 @@ void UC_ItemDataSubsystem::Deinitialize()
 bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) const
 {
     FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
+    if (pItemData && pItemData->nItemID == getUnValidItemID())
+        pItemData = nullptr;
     if (pItemData)
         OutData = *pItemData;
     return pItemData != nullptr;
@@ -66,7 +68,7 @@ bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID,  int32 Bitmask) const
     FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
     if (pItemData)
     {
-        return (pItemData->eltemState & Bitmask) != 0;
+        return (pItemData->eltemStateFlag & Bitmask) != 0;
 	}
     return false;
 }

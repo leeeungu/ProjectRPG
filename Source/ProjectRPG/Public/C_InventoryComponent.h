@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -39,6 +39,7 @@ private:
 	TArray<FS_InventorySlotData> m_arrInventory;
 	FS_InventorySlotData m_sDummyItemData;
 
+	TMap<int, int > m_mapItemCount;
 	UC_ItemDataSubsystem* m_pItemDataSubsystem;
 public:	
 	UC_InventoryComponent();
@@ -47,7 +48,7 @@ public:
 	 * getItemID atIndex ((nY  * Inventory MaxWidth) + nX)
 	 * @param nY - Inventory Height/Row Index
 	 * @param nX - Inventory Width/Col Index
-	 * @return ÁöÁ¤µÈ À§Ä¡ÀÇ ¾ÆÀÌÅÛ ID. ÇØ´ç À§Ä¡°¡ ÀÎº¥Åä¸® ¹üÀ§¸¦ ¹ş¾î³ª¸é -1À» ¹İÈ¯ÇÕ´Ï´Ù.
+	 * @return ì§€ì •ëœ ìœ„ì¹˜ì˜ ì•„ì´í…œ ID. í•´ë‹¹ ìœ„ì¹˜ê°€ ì¸ë²¤í† ë¦¬ ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ë©´ -1ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
 	int getItemID(int nY, int nX);
@@ -112,7 +113,10 @@ public:
 
 
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
-	int getItemCount(int nY, int nX);
+	bool getItemCountAtSlot(int nY, int nX, int& nCount);
+
+	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
+	bool getItemCountByID(int nItemID, int & nCount);
 protected:
 	virtual void BeginPlay() override;
 

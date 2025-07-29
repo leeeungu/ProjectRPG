@@ -117,7 +117,11 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 		pSlotData->nItemID = nItemID;
 		pSlotData->nItemCount += nItemCount;
 		if (m_onPushItem.IsBound())
+		{
+			int& sCount = m_mapItemCount.FindOrAdd(pSlotData->nItemID);
+			sCount += pSlotData->nItemCount;
 			m_onPushItem.Broadcast(pSlotData->nItemID, pSlotData->nItemCount);
+		}
 	}
 	else
 	{
@@ -145,12 +149,22 @@ bool UC_InventoryComponent::getItemSlotlock(int nY, int nX)
 	return pSlotData->bLockSort;
 }
 
-int UC_InventoryComponent::getItemCount(int nY, int nX) 
+bool UC_InventoryComponent::getItemCountAtSlot(int nY, int nX, int& nCount)
 {
 	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
-		return 0;
-	return pSlotData->nItemCount;
+		return false;
+	nCount = pSlotData->nItemCount;
+	return true;
+}
+
+bool UC_InventoryComponent::getItemCountByID(int nItemID, int& nCount)
+{
+	int* pCount = m_mapItemCount.Find(nItemID);
+	if (!pCount)
+		return false;
+	nCount = *pCount;
+	return true;
 }
 
 void UC_InventoryComponent::BeginPlay()
