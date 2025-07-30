@@ -6,7 +6,7 @@
 
 class UC_InventoryComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuickSlotUse, int, ItemID);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuickSlotNone);
 
 UENUM(BlueprintType)
 enum class E_QuickSlotType : uint8
@@ -24,6 +24,9 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTRPG_API UC_QuickSlotManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
+public:
+	UPROPERTY(BlueprintAssignable, BlueprintReadWrite)
+	FOnQuickSlotNone m_onQuickSlotNoneDelegate;
 
 private:
 	int m_arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX];

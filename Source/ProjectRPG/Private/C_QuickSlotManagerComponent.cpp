@@ -34,7 +34,14 @@ bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, i
 		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 		return false;
 	}
-	return m_pInventoryComponent->removeItem(ItemID, nCount);
+	bool bResult = m_pInventoryComponent->removeItem(ItemID, nCount);
+	int nRemainCount{};
+	if (bResult && m_onQuickSlotNoneDelegate .IsBound()  && (!m_pInventoryComponent->getItemCountByID(ItemID, nRemainCount) || nRemainCount <= 0))
+	{
+		m_onQuickSlotNoneDelegate.Broadcast();
+	}
+	return bResult;
+
 }
 
 void UC_QuickSlotManagerComponent::setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID)
