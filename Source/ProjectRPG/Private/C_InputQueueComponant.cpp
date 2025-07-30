@@ -16,13 +16,17 @@ UC_InputQueueComponant::UC_InputQueueComponant()
 void UC_InputQueueComponant::InputQueueList(int32 InputKeyData, bool InputIsPossible)
 {
 	const int32 MaxSize = 5;
+	if (InputQueue.Num() >= MaxSize)
+	{
+		InputQueue.RemoveAt(0);
+	}
 	if (InputIsPossible)
 	{
-		if (InputQueue.Num() >= MaxSize)
-		{
-			InputQueue.RemoveAt(0);
-		}
 		InputQueue.Add(InputKeyData);
+	}
+	else
+	{
+		InputQueue.Add(0);
 	}
 }
 
@@ -30,7 +34,7 @@ int32 UC_InputQueueComponant::OutputLastIndex() const
 {
 	if (InputQueue.Num() == 0)
 	{
-		return -1; 
+		return 0; 
 	}
 	return InputQueue.Last();
 }
