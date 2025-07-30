@@ -40,10 +40,6 @@ void AC_MonsterAiController::OnPossess(APawn* pMonster)
 		}
 	}
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-
-
-	m_pBB->SetValueAsObject("TargetActor", pPlayer);
 }
 
 void AC_MonsterAiController::OnUnPossess()
