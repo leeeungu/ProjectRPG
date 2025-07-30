@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "C_BaseCharacter.h"
@@ -38,8 +38,28 @@ void AC_BaseCharacter::setHp(int nHp)
 	m_nHp = nHp;
 }
 
-int AC_BaseCharacter::getHp()
+int AC_BaseCharacter::getHp() const
 {
 	return m_nHp;
+}
+
+void AC_BaseCharacter::setMaxHp(int nMaxHp)
+{
+	m_nMaxHp = nMaxHp;
+}
+
+int AC_BaseCharacter::getMaxHp() const
+{
+	return m_nMaxHp;
+}
+
+void AC_BaseCharacter::setAtck(int nAtck)
+{
+	m_nAtk = nAtck;
+}
+
+int AC_BaseCharacter::getAtck() const
+{
+	return m_nAtk;
 }
 
