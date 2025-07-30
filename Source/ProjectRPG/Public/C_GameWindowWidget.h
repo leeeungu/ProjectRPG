@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -11,9 +11,10 @@ enum class E_WindwoType :  uint8
 	E_Inventory 	UMETA(DisplayName = "Inventory"),
 	E_Alert			UMETA(DisplayName = "Alert"),
 	E_QuickSlot		UMETA(DisplayName = "QuickSlot"),
+	E_Store			UMETA(DisplayName = "Store"),
 	E_SkillBar		UMETA(DisplayName = "SkillBar"),
 	E_SkillWindow	UMETA(DisplayName = "SkillWindow"),
-	E_Max
+	E_Max UMETA(Hidden),
 };
 
 UCLASS()
