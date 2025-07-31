@@ -3,21 +3,13 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include <C_ItemDataSubsystem.h>
+#include "C_InventorySlotInterface.h"
 #include "C_InventoryComponent.generated.h"
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
 
-USTRUCT(BlueprintType)
-struct FS_InventorySlotData
-{
-	GENERATED_USTRUCT_BODY()
-	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemID = -1;
-	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemCount = 0;
-	bool bLockSort;
-};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_InventoryComponent : public UActorComponent

@@ -11,7 +11,8 @@ enum class E_EItemType : uint8
 	E_Equip			UMETA(DisplayName = "EquipmentItem"),
 	E_BattleItem	UMETA(DisplayName = "BattleItem"),
 	E_QuestItem		UMETA(DisplayName = "QuestItem"),
-	E_Materialitem	UMETA(DisplayName = "Materialitem"),
+	E_Materialitem	UMETA(DisplayName = "MaterialItem"),
+	E_Currency		UMETA(DisplayName = "CurrencyItem"),
 };
 
 UENUM(BlueprintType, meta = (Bitflags))

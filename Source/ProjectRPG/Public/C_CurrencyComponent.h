@@ -12,6 +12,14 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_CurrencyComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	enum E_AlertType
+	{
+		E_NON,
+		E_CantPush,
+		E_CantPop,
+		E_NotCurrency,
+		E_NotEnough
+	};
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "UC_CurrencyComponent")
 	FOnPushCurrency m_onPushItem;
@@ -41,18 +49,32 @@ public:
 	* 추가 후, m_onPushItem 이벤트를 발생시킵니다.
 	* m_mapInventory에 CurrencyID가 존재하지 않으면 새로 추가합니다.
 	* 추가 성공하면 true를 반환합니다.
+	* @return false : overflow.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_CurrencyComponent")
 	bool pushCurrency(int nCurrencyID, int nCurrencyAmount);
 
 	/**
-	* CurrencyID에 CurrencyAmount를	제거합니다.
+	* CurrencyID에 CurrencyAmount를	제거합니다. 
 	* 제거에 성공하면 true를 반환합니다.
+	* @return false : overflow.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_CurrencyComponent")
 	bool popCurrency(int nCurrencyID, int nCurrencyAmount);
 
+	/**
+	* CurrencyID에 CurrencyAmount를	제거합니다.
+	* @return false : CurrencyAmount 보다 적으면
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UC_CurrencyComponent")
+	bool useCurrency(int nCurrencyID, int nCurrencyAmount);
+
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	void pushAlertMessage(E_AlertType eType) const;
+	bool getCurrencyCount(int nCurrencyID, int& rData) const;
+	bool isValueCurrency(int nCurrencyID) const;
 
 };
