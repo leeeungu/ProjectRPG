@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,6 +18,10 @@ private:
 	TArray<AC_MonsterSpawner*> m_arrSpawner;
 	UPROPERTY()
 	int32 m_nCurrentIndex;
+
+public:
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> m_arrFoundSpawner;
 	
 public:	
 	// Sets default values for this actor's properties

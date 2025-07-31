@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "C_MonsterSpawnerManager.h"
@@ -16,11 +16,8 @@ void AC_MonsterSpawnerManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<AActor*> arrFoundSpawner;
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_MonsterSpawner::StaticClass(), arrFoundSpawner);
-
-	for (AActor* pActor : arrFoundSpawner)
+	for (AActor* pActor : m_arrFoundSpawner)
 	{
 		AC_MonsterSpawner* pSpawner = Cast<AC_MonsterSpawner>(pActor);
 		if (pSpawner)
