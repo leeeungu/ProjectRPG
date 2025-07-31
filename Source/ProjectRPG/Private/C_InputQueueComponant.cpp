@@ -30,13 +30,24 @@ void UC_InputQueueComponant::InputQueueList(int32 InputKeyData, bool InputIsPoss
 	}
 }
 
-int32 UC_InputQueueComponant::OutputLastIndex() const
+int32 UC_InputQueueComponant::OutputLastIndex(bool IsPull) const
 {
-	if (InputQueue.Num() == 0)
+	if (IsPull)
 	{
-		return 0; 
+		if (InputQueue.Num() == 0)
+		{
+			return 0;
+		}
+		return InputQueue.Last();
 	}
-	return InputQueue.Last();
+	else
+		return 0;
+	
+}
+
+void UC_InputQueueComponant::ClearList()
+{
+	InputQueue.Empty();
 }
 
 
