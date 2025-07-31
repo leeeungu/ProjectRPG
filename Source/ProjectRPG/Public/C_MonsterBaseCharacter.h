@@ -9,7 +9,13 @@
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
-
+UENUM(BlueprintType)
+enum class E_MonsterRank : uint8
+{
+	Normal	UMETA(DisplayName = "Normal"),
+	Named	UMETA(DisplayName = "Named"),
+	Boss	UMETA(DisplayName = "Boss")
+};
 
 /**
  * 
@@ -23,6 +29,8 @@ public:
 	AC_MonsterBaseCharacter();
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Attack Montage")
