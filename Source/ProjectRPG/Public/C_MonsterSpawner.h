@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,7 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void setSpawnerActive(bool bActive);
 
-	UPROPERTY(BlueprintAssignable, Category = "SpawnerDelegate")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "SpawnerDelegate")
 	FOnSpawnComplete m_onSpawnComplete;
 
 
@@ -37,11 +37,5 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION(BlueprintCallable)
-	void notifySpawnComplete()
-	{
-		m_onSpawnComplete.Broadcast();
-	}
 
 };

@@ -22,7 +22,9 @@ public:
 	void InputQueueList(int32 InputKeyData, bool InputIsPossible);
 
 	UFUNCTION(BlueprintCallable, Category = "InputQueue")
-	int32 OutputLastIndex() const;
+	int32 OutputLastIndex(bool IsPull) const;
+	UFUNCTION(BlueprintCallable, Category = "InputQueue")
+	void ClearList();
 
 protected:
 	// Called when the game starts
