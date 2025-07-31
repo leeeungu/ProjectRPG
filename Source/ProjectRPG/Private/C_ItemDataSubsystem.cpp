@@ -1,6 +1,8 @@
 ﻿#include "C_ItemDataSubsystem.h"
 #include "Kismet/DataTableFunctionLibrary.h" 
 
+UC_ItemDataSubsystem* UC_ItemDataSubsystem::m_pInstance = nullptr;
+
 UC_ItemDataSubsystem::UC_ItemDataSubsystem()  
 {
     //Script/Engine.DataTable'/Game/Item/DataTable/DT_ItemData.DT_ItemData'
@@ -31,10 +33,14 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			}
         }
     }
+    if (!m_pInstance)
+        m_pInstance = this;
 }
 
 void UC_ItemDataSubsystem::Deinitialize()
 {
+    if (m_pInstance)
+        m_pInstance = nullptr;
     m_mapItemData.Empty();
 	Super::Deinitialize();
 }
@@ -47,6 +53,11 @@ bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) con
     if (pItemData)
         OutData = *pItemData;
     return pItemData != nullptr;
+}
+
+bool UC_ItemDataSubsystem::getItemDataByID_CPP(int ItemID, FS_ItemData& OutData) 
+{
+    return m_pInstance->getItemDataByID(ItemID, OutData);
 }
 
 bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const

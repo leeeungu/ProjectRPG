@@ -64,6 +64,7 @@ protected:
 	FString m_strDataTablePath = TEXT("/Game/Item/DataTable/DT_ItemData.DT_ItemData");
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData;
+	static UC_ItemDataSubsystem* m_pInstance;
 public:
 	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -71,6 +72,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool getItemDataByID(int ItemID, FS_ItemData& OutData) const;
+	static bool getItemDataByID_CPP(int ItemID, FS_ItemData& OutData);
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool isValidItemID(int ItemID) const;
 

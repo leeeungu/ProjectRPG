@@ -14,6 +14,7 @@ struct FS_InventorySlotData
 	int nItemID = -1;
 	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
 	int nItemCount = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
 	bool bLockSort;
 
 	FS_InventorySlotData& operator=(const FS_InventorySlotData& sSrc) 

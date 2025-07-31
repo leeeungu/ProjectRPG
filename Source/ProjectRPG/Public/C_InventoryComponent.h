@@ -8,13 +8,20 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
-
-
+USTRUCT()
+struct FS_InventorySlot
+{
+	GENERATED_USTRUCT_BODY()
+	FS_InventorySlotData sData;
+	UPROPERTY()
+	TScriptInterface< IC_InventorySlotInterface> pSlotInterface;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "UC_InventoryComponent")
 	FOnPushItem m_onPushItem;
@@ -27,9 +34,10 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
 	int m_nInventorySize;
-	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
-	TArray<FS_InventorySlotData> m_arrInventory;
-	FS_InventorySlotData m_sDummyItemData;
+
+	UPROPERTY()
+	TArray<FS_InventorySlot> m_arrInventory;
+	FS_InventorySlot m_sDummyItemData;
 
 	TMap<int, int > m_mapItemCount;
 	UC_ItemDataSubsystem* m_pItemDataSubsystem;
@@ -116,6 +124,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
 	bool removeItemAtSlot(int nY, int nX, int nCount);
 
+	void setSlotInterface(int nY, int nX, UObject* pInterface);
 protected:
 	virtual void BeginPlay() override;
 
@@ -131,7 +140,7 @@ private:
 	/**
 	* getInventorySlotData
 	*/
-	FS_InventorySlotData* getInventorySlotData(int nY, int nX) ;
+	FS_InventorySlot* getInventorySlotData(int nY, int nX) ;
 	/**
 	* Calculate Array index
 	 * @param nY - Inventory Height/Row Index
@@ -139,6 +148,7 @@ private:
 	 * @return - Array Index
 	 */
 	int getArrayIndex(int nY, int nX) const;
-	void resetItemSlot(FS_InventorySlotData* pItemSlot);
+	void resetItemSlot(FS_InventorySlot* pItemSlot);
+	void runSlotChangeInterface(FS_InventorySlot* pItemSlot);
 
 };
