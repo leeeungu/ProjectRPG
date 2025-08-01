@@ -85,7 +85,7 @@ public:
 	int getCurrencyGoldItemID() const { return 0; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask) const;
+	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
 
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;

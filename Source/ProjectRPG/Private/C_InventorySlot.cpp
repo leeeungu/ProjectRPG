@@ -30,7 +30,6 @@ void UC_InventorySlot::setIndex(int nIndexY, int nIndexX)
 	{
 		m_pInventory->setSlotInterface(m_nIndexY, m_nIndexX, this);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%d %d"), m_nIndexY, m_nIndexX);
 }
 
 void UC_InventorySlot::NativeOnInitialized()
