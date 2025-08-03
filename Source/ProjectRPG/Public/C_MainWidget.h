@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -14,6 +14,7 @@ class PROJECTRPG_API UC_MainWidget : public UUserWidget
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UC_MainWidget")
 	UCanvasPanel* m_pMainCanvas;
+protected:
 
 private:
 	TArray<UC_GameWindowWidget*> m_arrGameWidget;
@@ -22,14 +23,15 @@ public:
 	UC_MainWidget(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	bool addWidgetToMain(E_WindwoType eType);
+	bool addWidgetToMain(E_WindowType eType);
 	UFUNCTION(BlueprintCallable)
-	bool removeWidgetFromMain(E_WindwoType eType);
+	bool removeWidgetFromMain(E_WindowType eType);
 
 	UFUNCTION(BlueprintPure)
-	bool isWidgetOpened(E_WindwoType eType) const;
+	bool isWidgetOpened(E_WindowType eType) const;
 
 	void registerWidget(UC_GameWindowWidget* pWidget);
+	UC_GameWindowWidget* getGameWindowWidget(E_WindowType eType);
 protected:
 	virtual void NativeOnInitialized() override;
 };

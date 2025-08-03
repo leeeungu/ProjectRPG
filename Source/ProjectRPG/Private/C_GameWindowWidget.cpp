@@ -1,4 +1,4 @@
-#include "C_GameWindowWidget.h"
+﻿#include "C_GameWindowWidget.h"
 #include "C_MainWidget.h"
 
 UC_GameWindowWidget::UC_GameWindowWidget(const FObjectInitializer& ObjectInitializer) : 
@@ -27,7 +27,7 @@ void UC_GameWindowWidget::addWidgetToMain_Implementation()
 void UC_GameWindowWidget::NativeOnInitialized()
 {
 	UUserWidget::NativeOnInitialized();
-	if (m_eWindowType == E_WindwoType::E_NONE)
+	if (m_eWindowType == E_WindowType::E_NONE)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UC_GameWindowWidget::NativeOnInitialized() - m_eWindowType is E_NONE"));
 	}

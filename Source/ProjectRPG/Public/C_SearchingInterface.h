@@ -19,4 +19,11 @@ public:
 	bool beginSearchingEvent(AActor* pOther);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool endSearchingEvent(AActor* pOther);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool runEvent(AActor* pOther);
+
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool endEvent();
 };

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -17,22 +17,24 @@ protected:
 	TSubclassOf<UC_MainWidget> m_cMainWidget;
 private:
 	UC_MainWidget* m_pMainWidget;
-	TArray<UC_GameWindowWidget*> m_arWidget;
 	APlayerController* m_pPlayer;
 public:	
 	UC_GameWindowManager();
 
 	UFUNCTION(BlueprintCallable)
-	bool toggleWidget(E_WindwoType eType);
+	bool toggleWidget(E_WindowType eType);
 
 	UFUNCTION(BlueprintCallable)
-	bool removeWidgetFromMain(E_WindwoType eType);
+	bool removeWidgetFromMain(E_WindowType eType);
 
 	UFUNCTION(BlueprintCallable)
-	bool addWidgetToMain(E_WindwoType eType);
+	bool addWidgetToMain(E_WindowType eType);
 
 	UFUNCTION(BlueprintPure)
-	bool isWidgetOpened(E_WindwoType eType) const;
+	bool isWidgetOpened(E_WindowType eType) const;
+
+	UFUNCTION(BlueprintCallable)
+	UC_GameWindowWidget* getGameWindowWidget(E_WindowType eType);
 protected:
 	virtual void BeginPlay() override;
 		

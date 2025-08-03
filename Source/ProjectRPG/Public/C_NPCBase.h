@@ -22,6 +22,8 @@ public:
 
 	virtual bool beginSearchingEvent_Implementation(AActor* pOther) override;
 	virtual bool endSearchingEvent_Implementation(AActor* pOther) override;
+	virtual bool runEvent_Implementation(AActor* pOther) override;
+	virtual bool endEvent_Implementation() override;
 protected:
 	virtual void BeginPlay() override;
 

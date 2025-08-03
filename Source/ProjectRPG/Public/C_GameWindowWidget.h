@@ -5,7 +5,7 @@
 #include "C_GameWindowWidget.generated.h"
 
 UENUM(BlueprintType)
-enum class E_WindwoType :  uint8
+enum class E_WindowType :  uint8
 {
 	E_NONE			UMETA(Hidden),
 	E_Inventory 	UMETA(DisplayName = "Inventory"),
@@ -22,8 +22,10 @@ class PROJECTRPG_API UC_GameWindowWidget : public UUserWidget
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	E_WindwoType m_eWindowType;
+	UPROPERTY(EditDefaultsOnly ,Category = "UC_GameWindowWidget")
+	E_WindowType m_eWindowType;
+	UPROPERTY(EditDefaultsOnly, Category = "UC_GameWindowWidget")
+	bool m_bIsInitialized;
 private:
 	bool m_bIsOpened = true;	
 public:
@@ -45,9 +47,10 @@ public:
 
 	virtual void addWidgetToMain_Implementation();
 
-	E_WindwoType getWindowType() const { return m_eWindowType; }	
+	E_WindowType getWindowType() const { return m_eWindowType; }
 
 
+	bool getIsInitialized() const { return m_bIsInitialized; }
 protected:
 	virtual void NativeOnInitialized() override;
 };

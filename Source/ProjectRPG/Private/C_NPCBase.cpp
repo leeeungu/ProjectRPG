@@ -18,6 +18,16 @@ bool AC_NPCBase::endSearchingEvent_Implementation(AActor* pOther)
 	return false;
 }
 
+bool AC_NPCBase::runEvent_Implementation(AActor* pOther)
+{
+	return false;
+}
+
+bool AC_NPCBase::endEvent_Implementation()
+{
+	return false;
+}
+
 void AC_NPCBase::BeginPlay()
 {
 	ACharacter::BeginPlay();
