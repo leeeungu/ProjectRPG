@@ -11,7 +11,8 @@ enum class E_EItemType : uint8
 	E_Equip			UMETA(DisplayName = "EquipmentItem"),
 	E_BattleItem	UMETA(DisplayName = "BattleItem"),
 	E_QuestItem		UMETA(DisplayName = "QuestItem"),
-	E_Materialitem	UMETA(DisplayName = "Materialitem"),
+	E_Materialitem	UMETA(DisplayName = "MaterialItem"),
+	E_Currency		UMETA(DisplayName = "CurrencyItem"),
 };
 
 UENUM(BlueprintType, meta = (Bitflags))
@@ -19,17 +20,17 @@ enum class E_EItemState : uint8
 {
 	None = 0					UMETA(DisplayName = "None", Hidden),
 	// 아이템을 분해할 수 있는 상태
-	CanDisassemble = 1 << 0     UMETA(DisplayName = "Disassembleable"),		
+	CanDisassemble = 1     UMETA(DisplayName = "Disassembleable"),		
 	// 아이템을 버릴 수 있는 상태
-	CanDiscard = 1 << 1         UMETA(DisplayName = "Discardable"),			
+	CanDiscard = 2         UMETA(DisplayName = "Discardable"),			
 	// 아이템을 상점에 판매할 수 있는 상태
-	CanSell = 1 << 2            UMETA(DisplayName = "Sellable"),			
+	CanSell = 4           UMETA(DisplayName = "Sellable"),			
 	// 아이템을 다른 플레이어와 거래할 수 있는 상태
-	CanTrade = 1 << 3           UMETA(DisplayName = "Tradeable"),			
+	CanTrade = 8          UMETA(DisplayName = "Tradeable"),			
 	// 아이템을 사용할 수 있는 상태
-	CanUse = 1 << 4             UMETA(DisplayName = "Useable"),	
+	CanUse = 16            UMETA(DisplayName = "Useable"),	
 	// 아이템을 인벤토리에서 겹칠 수 있는 상태
-	CanStackable = 1 << 5		UMETA(DisplayName = "Stackable"),
+	CanStackable = 32		UMETA(DisplayName = "Stackable"),
 };
 
 
@@ -50,9 +51,8 @@ struct FS_ItemData : public FTableRowBase
 	E_EItemType eItemType = E_EItemType::None;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data", meta = (Bitmask, BitmaskEnum = E_EItemState))
-	uint8 eltemState;
+	int32 eltemStateFlag = 255;
 };
-
 
 UCLASS()
 class PROJECTRPG_API UC_ItemDataSubsystem : public UGameInstanceSubsystem
@@ -64,6 +64,7 @@ protected:
 	FString m_strDataTablePath = TEXT("/Game/Item/DataTable/DT_ItemData.DT_ItemData");
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData;
+	static UC_ItemDataSubsystem* m_pInstance;
 public:
 	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -71,17 +72,20 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool getItemDataByID(int ItemID, FS_ItemData& OutData) const;
+	static bool getItemDataByID_CPP(int ItemID, FS_ItemData& OutData);
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool isValidItemID(int ItemID) const;
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	int getUnValidItemID() const { return -1; }
+	int getUnValidItemID() const { return getUnValidItemID_CPP(); }
+
+	static int getUnValidItemID_CPP() { return -1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	int getCurrencyGoldItemID() const { return 0; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask) const;
+	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
 
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;

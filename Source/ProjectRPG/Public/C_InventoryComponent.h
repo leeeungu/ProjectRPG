@@ -1,28 +1,27 @@
-#pragma once
+Ôªø#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include <C_ItemDataSubsystem.h>
+#include "C_InventorySlotInterface.h"
 #include "C_InventoryComponent.generated.h"
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
-
-USTRUCT(BlueprintType)
-struct FS_InventorySlotData
+USTRUCT()
+struct FS_InventorySlot
 {
 	GENERATED_USTRUCT_BODY()
-	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemID = -1;
-	UPROPERTY(BlueprintReadWrite, Category = "S_InventorySlotData")
-	int nItemCount = 0;
-	bool bLockSort;
+	FS_InventorySlotData sData;
+	UPROPERTY()
+	TScriptInterface< IC_InventorySlotInterface> pSlotInterface;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "UC_InventoryComponent")
 	FOnPushItem m_onPushItem;
@@ -35,10 +34,12 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
 	int m_nInventorySize;
-	UPROPERTY(VisibleAnywhere, Category = "UC_InventoryComponent")
-	TArray<FS_InventorySlotData> m_arrInventory;
-	FS_InventorySlotData m_sDummyItemData;
 
+	UPROPERTY()
+	TArray<FS_InventorySlot> m_arrInventory;
+	FS_InventorySlot m_sDummyItemData;
+
+	TMap<int, int > m_mapItemCount;
 	UC_ItemDataSubsystem* m_pItemDataSubsystem;
 public:	
 	UC_InventoryComponent();
@@ -47,7 +48,7 @@ public:
 	 * getItemID atIndex ((nY  * Inventory MaxWidth) + nX)
 	 * @param nY - Inventory Height/Row Index
 	 * @param nX - Inventory Width/Col Index
-	 * @return ¡ˆ¡§µ» ¿ßƒ°¿« æ∆¿Ã≈€ ID. «ÿ¥Á ¿ßƒ°∞° ¿Œ∫•≈‰∏Æ π¸¿ß∏¶ π˛æÓ≥™∏È -1¿ª π›»Ø«’¥œ¥Ÿ.
+	 * @return ÏßÄÏ†ïÎêú ÏúÑÏπòÏùò ÏïÑÏù¥ÌÖú ID. Ìï¥Îãπ ÏúÑÏπòÍ∞Ä Ïù∏Î≤§ÌÜ†Î¶¨ Î≤îÏúÑÎ•º Î≤óÏñ¥ÎÇòÎ©¥ -1ÏùÑ Î∞òÌôòÌï©ÎãàÎã§.
 	 */
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
 	int getItemID(int nY, int nX);
@@ -112,7 +113,18 @@ public:
 
 
 	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
-	int getItemCount(int nY, int nX);
+	bool getItemCountAtSlot(int nY, int nX, int& nCount);
+
+	UFUNCTION(BlueprintPure, Category = "UC_InventoryComponent")
+	bool getItemCountByID(int nItemID, int & nCount);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool removeItem(int nItemID, int nCount);
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool removeItemAtSlot(int nY, int nX, int nCount);
+
+	void setSlotInterface(int nY, int nX, UObject* pInterface);
 protected:
 	virtual void BeginPlay() override;
 
@@ -128,7 +140,7 @@ private:
 	/**
 	* getInventorySlotData
 	*/
-	FS_InventorySlotData* getInventorySlotData(int nY, int nX) ;
+	FS_InventorySlot* getInventorySlotData(int nY, int nX) ;
 	/**
 	* Calculate Array index
 	 * @param nY - Inventory Height/Row Index
@@ -136,6 +148,7 @@ private:
 	 * @return - Array Index
 	 */
 	int getArrayIndex(int nY, int nX) const;
-	void resetItemSlot(FS_InventorySlotData* pItemSlot);
+	void resetItemSlot(FS_InventorySlot* pItemSlot);
+	void runSlotChangeInterface(FS_InventorySlot* pItemSlot);
 
 };

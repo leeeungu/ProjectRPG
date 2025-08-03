@@ -18,8 +18,8 @@ EBTNodeResult::Type UC_BTTaskChase::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
-	UBlackboardComponent* pBb = OwnerComp.GetBlackboardComponent();
-	APawn* pTarget = Cast<APawn>(pBb->GetValueAsObject(m_sTargetActorKey.SelectedKeyName));
+	UBlackboardComponent* pBBcomp = OwnerComp.GetBlackboardComponent();
+	APawn* pTarget = Cast<APawn>(pBBcomp->GetValueAsObject(m_sTargetActorKey.SelectedKeyName));
 
 	if (!pTarget)
 	{

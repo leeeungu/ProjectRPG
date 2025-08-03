@@ -1,6 +1,7 @@
-#include "C_InventoryComponent.h"
+ï»¿#include "C_InventoryComponent.h"
 #include <map>
 #include <queue>
+#include <C_GameAlertSubsystem.h>
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
@@ -9,8 +10,8 @@ UC_InventoryComponent::UC_InventoryComponent()
 
 int UC_InventoryComponent::getItemID(int nY, int nX) 
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
-	return pSlotData->nItemID;
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	return pSlotData->sData.nItemID;
 }
 
 void UC_InventoryComponent::sortInventoryByItemID()
@@ -27,21 +28,21 @@ void UC_InventoryComponent::sortInventoryByItemID()
 	// Reset the inventory slots that are not locked
 	for (int i = 0; i < m_nInventorySize; i++)
 	{
-		if (m_pItemDataSubsystem->isValidItemID(m_arrInventory[i].nItemID) && !m_arrInventory[i].bLockSort)
+		if (m_pItemDataSubsystem->isValidItemID(m_arrInventory[i].sData.nItemID) && !m_arrInventory[i].sData.bLockSort)
 		{
-			ItemQueue.push({ m_arrInventory[i].nItemID, m_arrInventory[i].nItemCount });
+			ItemQueue.push({ m_arrInventory[i].sData.nItemID, m_arrInventory[i].sData.nItemCount });
 			resetItemSlot(&m_arrInventory[i]);
 		}
 	}
 
-	int NextIndex = 0; // ´ÙÀ½ ¾ÆÀÌÅÛÀÌ »ğÀÔµÉ ÀÎµ¦½º
-	int CurrentIndex = 0; // ÇöÀç ¾ÆÀÌÅÛÀÌ »ğÀÔ µÇ´Â ÀÎµ¦½º
+	int NextIndex = 0; // ë‹¤ìŒ ì•„ì´í…œì´ ì‚½ì…ë  ì¸ë±ìŠ¤
+	int CurrentIndex = 0; // í˜„ì¬ ì•„ì´í…œì´ ì‚½ì… ë˜ëŠ” ì¸ë±ìŠ¤
 	while (!ItemQueue.empty() && CurrentIndex < m_nInventorySize)
 	{
-		// ´ÙÀ½ ÀÎµ¦½º°¡ À¯È¿ÇÑÁö È®ÀÎÇÏ°í, ¾ÆÀÌÅÛÀÌ À¯È¿ÇÏÁö ¾Ê°Å³ª Àá±İ »óÅÂ°¡ ¾Æ´Ñ °æ¿ì¿¡¸¸ ÁøÇà
+		// ë‹¤ìŒ ì¸ë±ìŠ¤ê°€ ìœ íš¨í•œì§€ í™•ì¸í•˜ê³ , ì•„ì´í…œì´ ìœ íš¨í•˜ì§€ ì•Šê±°ë‚˜ ì ê¸ˆ ìƒíƒœê°€ ì•„ë‹Œ ê²½ìš°ì—ë§Œ ì§„í–‰
 		while (NextIndex < m_nInventorySize && 
-			m_arrInventory[NextIndex].nItemID != m_pItemDataSubsystem->getUnValidItemID() &&
-			m_arrInventory[NextIndex].bLockSort)
+			m_arrInventory[NextIndex].sData.nItemID != m_pItemDataSubsystem->getUnValidItemID() &&
+			m_arrInventory[NextIndex].sData.bLockSort)
 		{
 			NextIndex++;
 		}
@@ -49,103 +50,213 @@ void UC_InventoryComponent::sortInventoryByItemID()
 		ItemQueue.pop();
 		
 		// Check if the current item can be stacked with the existing item at CurrentIndex
-		if (item.first == m_arrInventory[CurrentIndex].nItemID)
+		if (item.first == m_arrInventory[CurrentIndex].sData.nItemID)
 		{
-			// °°Àº ¾ÆÀÌÅÛ ÀÌ°í ½ºÅÃ °¡´É ÇÒ¶§
+			// ê°™ì€ ì•„ì´í…œ ì´ê³  ìŠ¤íƒ ê°€ëŠ¥ í• ë•Œ
 			if (m_pItemDataSubsystem->hasItemStateFlag(item.first, (int32)E_EItemState::CanStackable))
 			{
-				m_arrInventory[CurrentIndex].nItemCount += item.second;
-			} 
-			else // °°Àº ¾ÆÀÌÅÛ ÀÌÁö¸¸ ½ºÅÃ ºÒ°¡´É ÇÒ¶§
+				m_arrInventory[CurrentIndex].sData.nItemCount += item.second;
+			}
+			else // ê°™ì€ ì•„ì´í…œ ì´ì§€ë§Œ ìŠ¤íƒ ë¶ˆê°€ëŠ¥ í• ë•Œ
 			{
 				CurrentIndex = NextIndex;
-				m_arrInventory[CurrentIndex].nItemID = item.first;
-				m_arrInventory[CurrentIndex].nItemCount = item.second;
+				m_arrInventory[CurrentIndex].sData.nItemID = item.first;
+				m_arrInventory[CurrentIndex].sData.nItemCount = item.second;
 				NextIndex++;
 			}
 		}
-		else // ´Ù¸¥ ¾ÆÀÌÅÛ ÀÏ¶§
+		else // ë‹¤ë¥¸ ì•„ì´í…œ ì¼ë•Œ
 		{
 			CurrentIndex = NextIndex;
-			m_arrInventory[CurrentIndex].nItemCount = item.second; // ¾ÆÀÌÅÛ °³¼ö ¼³Á¤
-			m_arrInventory[CurrentIndex].nItemID = item.first; // ¾ÆÀÌÅÛ ID ¼³Á¤
+			m_arrInventory[CurrentIndex].sData.nItemCount = item.second; // ì•„ì´í…œ ê°œìˆ˜ ì„¤ì •
+			m_arrInventory[CurrentIndex].sData.nItemID = item.first; // ì•„ì´í…œ ID ì„¤ì •
 			NextIndex++;
 		}
+		runSlotChangeInterface(&m_arrInventory[CurrentIndex]);
 	}
 }
 
 void UC_InventoryComponent::setItemID(int nY, int nX, int nVal)
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return;
-	pSlotData->nItemID = nVal;
+	pSlotData->sData.nItemID = nVal;
+	runSlotChangeInterface(pSlotData);
 }
 
 void UC_InventoryComponent::getInventorySlotData(int nY, int nX, FS_InventorySlotData& sData)
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return;
-	sData = *pSlotData;
+	sData = pSlotData->sData;
 }
 
 void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX)
 {
-	FS_InventorySlotData* pSrcSlotData = getInventorySlotData(nSrcY, nSrcX);
-	FS_InventorySlotData* pDstSlotData = getInventorySlotData(nDstY, nDstX);
+	FS_InventorySlot* pSrcSlotData = getInventorySlotData(nSrcY, nSrcX);
+	FS_InventorySlot* pDstSlotData = getInventorySlotData(nDstY, nDstX);
 	if (pSrcSlotData == &m_sDummyItemData || pDstSlotData == &m_sDummyItemData)
 		return;
-	Swap<FS_InventorySlotData>(*pSrcSlotData,*pDstSlotData);
+	Swap<FS_InventorySlotData>(pSrcSlotData->sData,pDstSlotData->sData);
+	runSlotChangeInterface(pSrcSlotData);
+	runSlotChangeInterface(pDstSlotData);
 }
 
 bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 {
-	FS_InventorySlotData* pSlotData = &m_sDummyItemData;
+	FS_InventorySlot* pSlotData = &m_sDummyItemData;
+	bool bStackable = m_pItemDataSubsystem->hasItemStateFlag(nItemID, (int32)E_EItemState::CanStackable);
 	for (int i = 0; i < m_nInventorySize && pSlotData  == &m_sDummyItemData; i++)
 	{
-		if (m_arrInventory[i].nItemID == m_pItemDataSubsystem->getUnValidItemID())
+		if (m_arrInventory[i].sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
+			//|| (nItemID == m_arrInventory[i].sData.nItemID && bStackable))
+		{
 			pSlotData = &m_arrInventory[i];
+		}
 	}
 	if (pSlotData != &m_sDummyItemData)
 	{
-		pSlotData->nItemID = nItemID;
-		pSlotData->nItemCount = nItemCount;
+		pSlotData->sData.nItemID = nItemID;
+		pSlotData->sData.nItemCount += nItemCount;
 		if (m_onPushItem.IsBound())
-			m_onPushItem.Broadcast(pSlotData->nItemID, pSlotData->nItemCount);
+		{
+			int& sCount = m_mapItemCount.FindOrAdd(pSlotData->sData.nItemID);
+			sCount += pSlotData->sData.nItemCount;
+			m_onPushItem.Broadcast(pSlotData->sData.nItemID, pSlotData->sData.nItemCount);
+		}
+		runSlotChangeInterface(pSlotData);
 	}
+	else
+	{
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("ì¸ë²¤í† ë¦¬ì˜ ê³µê°„ì´ ì—†ìŠµë‹ˆë‹¤."));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+	}
+
 	return  pSlotData != &m_sDummyItemData;
 }
 
 void UC_InventoryComponent::setItemSlotLock(int nY, int nX, bool bLock)
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return;
-	pSlotData->bLockSort  = bLock;
+	pSlotData->sData.bLockSort  = bLock;
+	runSlotChangeInterface(pSlotData);
 }
 
 bool UC_InventoryComponent::getItemSlotlock(int nY, int nX)
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return false;
-	return pSlotData->bLockSort;
+	return pSlotData->sData.bLockSort;
 }
 
-int UC_InventoryComponent::getItemCount(int nY, int nX) 
+bool UC_InventoryComponent::getItemCountAtSlot(int nY, int nX, int& nCount)
 {
-	FS_InventorySlotData* pSlotData = getInventorySlotData(nY, nX);
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
-		return 0;
-	return pSlotData->nItemCount;
+		return false;
+	nCount = pSlotData->sData.nItemCount;
+	return true;
+}
+
+bool UC_InventoryComponent::getItemCountByID(int nItemID, int& nCount)
+{
+	int* pCount = m_mapItemCount.Find(nItemID);
+	if (!pCount)
+		return false;
+	nCount = *pCount;
+	return true;
+}
+
+bool UC_InventoryComponent::removeItem(int nItemID, int nCount)
+{
+	TArray<FS_InventorySlot*> arrSlotData{};
+	arrSlotData.Reserve(m_nInventorySize);
+	int nSum = nCount;
+	for (int i = 0; i < m_nInventorySize && nSum > 0; i++)
+	{
+		if (m_arrInventory[i].sData.nItemID == nItemID && nSum > 0)
+		{
+			arrSlotData.Push(&m_arrInventory[i]);
+			nSum -= m_arrInventory[i].sData.nItemCount;
+		}
+	}
+
+	if (nSum > 0)
+	{
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("ì•„ì´í…œì´ ì¶©ë¶„í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤."));
+		if (nItemID == UC_ItemDataSubsystem::getUnValidItemID_CPP())
+			config.strDefaultAlertMessage = FText::FromString(TEXT(""));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+		return false; // ì•„ì´í…œì´ ì¶©ë¶„í•˜ì§€ ì•ŠìŒ
+	}
+
+	int& sCount = m_mapItemCount.FindOrAdd(nItemID);
+	sCount -= nCount;
+	if (sCount <= 0)
+		m_mapItemCount.Remove(nItemID);
+
+	for (FS_InventorySlot* pSlotData : arrSlotData)
+	{
+		if (pSlotData->sData.nItemCount > nCount)
+		{
+			pSlotData->sData.nItemCount -= nCount;
+			nCount = 0;
+		}
+		else
+		{
+			nCount -= pSlotData->sData.nItemCount;
+			resetItemSlot(pSlotData);
+		}
+		runSlotChangeInterface(pSlotData);
+	}
+	return true;
+}
+
+bool UC_InventoryComponent::removeItemAtSlot(int nY, int nX, int nCount)
+{
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData || pSlotData->sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
+		return false;
+	if (pSlotData->sData.nItemCount >= nCount)
+	{
+		int& sCount = m_mapItemCount.FindOrAdd(pSlotData->sData.nItemID);
+		sCount -= nCount;
+		pSlotData->sData.nItemCount -= nCount;
+		if (pSlotData->sData.nItemCount <= 0)
+		{
+			resetItemSlot(pSlotData);
+			m_mapItemCount.Remove(pSlotData->sData.nItemID);
+		}
+		runSlotChangeInterface(pSlotData);
+		return true;
+	}
+	FS_GameAlertSubsystemConfig config{};
+	config.strDefaultAlertMessage = FText::FromString(TEXT("ì•„ì´í…œì´ ì¶©ë¶„í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤."));
+	UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+	return false;
+}
+
+void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface)
+{
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData || !pInterface || !pInterface->Implements<UC_InventorySlotInterface>())
+		return ;
+	pSlotData->pSlotInterface = TScriptInterface< IC_InventorySlotInterface>(pInterface);
+	runSlotChangeInterface(pSlotData);
 }
 
 void UC_InventoryComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 	if (m_nInventorySize > 0)
-		m_arrInventory.Init(FS_InventorySlotData{}, m_nInventorySize);
+		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
 
 	if (!GetWorld())
 		return;
@@ -173,7 +284,7 @@ bool UC_InventoryComponent::isBound(int nY, int nX)  const
 	return true;
 }
 
-FS_InventorySlotData* UC_InventoryComponent::getInventorySlotData(int nY, int nX) 
+FS_InventorySlot* UC_InventoryComponent::getInventorySlotData(int nY, int nX)
 {
 	if (nY < 0 || nY >= m_nInventoryHeight || nX < 0 || nX >= m_nInventoryWidth)
 		return &m_sDummyItemData;
@@ -185,11 +296,20 @@ int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 	return nY * m_nInventoryWidth + nX;
 }
 
-void UC_InventoryComponent::resetItemSlot(FS_InventorySlotData* pItemSlot)
+void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
 {
-	pItemSlot->nItemID = m_pItemDataSubsystem->getUnValidItemID(); // ¾ÆÀÌÅÛ ID¸¦ -1·Î ¼³Á¤ÇÏ¿© ÇØ´ç ½½·ÔÀ» ºñ¿ò
-	pItemSlot->nItemCount = 0; // ¾ÆÀÌÅÛ °³¼öµµ 0À¸·Î ¼³Á¤
-	pItemSlot->bLockSort = false;
+	pItemSlot->sData.nItemID = m_pItemDataSubsystem->getUnValidItemID(); // ì•„ì´í…œ IDë¥¼ -1ë¡œ ì„¤ì •í•˜ì—¬ í•´ë‹¹ ìŠ¬ë¡¯ì„ ë¹„ì›€
+	pItemSlot->sData.nItemCount = 0; // ì•„ì´í…œ ê°œìˆ˜ë„ 0ìœ¼ë¡œ ì„¤ì •
+	pItemSlot->sData.bLockSort = false;
+	runSlotChangeInterface(pItemSlot);
+}
+
+void UC_InventoryComponent::runSlotChangeInterface(FS_InventorySlot* pItemSlot)
+{
+	if (pItemSlot->pSlotInterface && pItemSlot->pSlotInterface.GetInterface())
+	{
+		pItemSlot->pSlotInterface.GetInterface()->slotChangeEvent(&pItemSlot->sData);
+	}
 }
 
 
