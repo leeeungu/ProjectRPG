@@ -15,12 +15,12 @@ UC_StaggerComponent::UC_StaggerComponent()
 	// ...
 }
 
-void UC_StaggerComponent::applyStagger(float fDamage)
+void UC_StaggerComponent::applyStagger(float fStagger)
 {
 	if (m_bIsBroken)
 		return;
 
-	m_fCurrentStagger += fDamage;
+	m_fCurrentStagger += fStagger;
 
 	if (m_fCurrentStagger >= m_fMaxStagger)
 	{

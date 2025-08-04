@@ -44,7 +44,7 @@ public:
 	UC_StaggerComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
-	void applyStagger(float fDamage);
+	void applyStagger(float fStagger);
 
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
 	bool isBroken();
