@@ -45,7 +45,7 @@ public:
 	void playAttackMontage();
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool takeStaggerEvent(float fStagger);
+	virtual void takeStaggerEvent(float fStagger);
 
 	UFUNCTION()
 	void onStaggerBroken();

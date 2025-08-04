@@ -9,9 +9,10 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 	AIControllerClass = AC_MonsterAiController::StaticClass();
 }
 
-bool AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
+void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 {
-	return false;
+	m_pStaggerComp->applyStagger(fStagger);
+
 }
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
