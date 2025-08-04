@@ -38,6 +38,20 @@ UC_GameWindowWidget* UC_GameWindowManager::getGameWindowWidget(E_WindowType eTyp
 	return m_pMainWidget->getGameWindowWidget(eType);
 }
 
+void UC_GameWindowManager::setStoreMode(bool bSetStoreMode)
+{
+	if (bSetStoreMode)
+	{
+		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::removeWidgetFromMain);
+		runWidgetFunc({ E_WindowType::E_Inventory, E_WindowType::E_Store }, &UC_GameWindowManager::addWidgetToMain);
+	}
+	else
+	{
+		runWidgetFunc({ E_WindowType::E_Inventory, E_WindowType::E_Store }, &UC_GameWindowManager::removeWidgetFromMain);
+		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::addWidgetToMain);
+	}
+}
+
 //bool UC_GameWindowManager::onoffMainWidget(bool bVal)
 //{
 //	if (!m_pMainWidget || m_bMainWidgetOpened == bVal)
@@ -61,4 +75,18 @@ void UC_GameWindowManager::BeginPlay()
 	if (!m_pMainWidget)
 		return;
 	m_pMainWidget->AddToViewport();
+}
+
+void UC_GameWindowManager::runWidgetFunc(std::initializer_list<E_WindowType> arrWidget, bool(UC_GameWindowManager::* pFunc)(E_WindowType))
+{
+	/**
+	* initializer_list 는 연속된 배열에 저장된다는 것 이 보장이 되서
+	* E_WindowType*, int 인 함수 프로토 타임을 std::initializer_list<E_WindowType>으로 변경 했음
+	*/
+	int nSize = arrWidget.size();
+	const E_WindowType* arWidgets = arrWidget.begin();
+	for (int i = 0 ; i < nSize && pFunc; i ++)
+	{
+		(this->*pFunc)(arWidgets[i]);
+	}
 }

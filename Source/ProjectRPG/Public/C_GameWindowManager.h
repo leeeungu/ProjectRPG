@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "C_GameWindowWidget.h"
+#include <initializer_list>
 #include "C_GameWindowManager.generated.h"
 
 class APlayerController;
@@ -35,7 +36,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UC_GameWindowWidget* getGameWindowWidget(E_WindowType eType);
+
+	UFUNCTION(BlueprintCallable)
+	void setStoreMode(bool bSetStoreMode);
 protected:
 	virtual void BeginPlay() override;
 		
+private:
+	void runWidgetFunc(std::initializer_list< E_WindowType> arrWidget, bool (UC_GameWindowManager::* pFunc)(E_WindowType));
 };

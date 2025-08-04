@@ -11,6 +11,8 @@ class PROJECTRPG_API UC_InteractionComponent : public UCapsuleComponent
 {
 	GENERATED_BODY()
 protected:
+
+public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnInteractionEvent m_onInteraction{};
 
