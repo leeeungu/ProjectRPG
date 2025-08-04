@@ -28,7 +28,7 @@ EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		rLookAt.Roll = 0.0f;
 		pMonster->SetActorRotation(rLookAt);
 		
-		pMonster->playMontage();
+		pMonster->playAttackMontage();
 		return EBTNodeResult::Succeeded;
 	}
 

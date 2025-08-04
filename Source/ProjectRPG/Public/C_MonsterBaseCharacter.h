@@ -6,6 +6,7 @@
 #include "C_BaseCharacter.h"
 #include "C_MonsterAiController.h"
 #include "AIController.h"
+#include "C_StaggerComponent.h"
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
@@ -25,21 +26,31 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 {
 	GENERATED_BODY()
 
-public:
-	AC_MonsterBaseCharacter();
+private:
+	UPROPERTY(EditAnywhere, Category = "Attack Montage")
+	UAnimMontage* m_pAttackMontage;
+
+	UC_StaggerComponent* m_pStaggerComp;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Attack Montage")
-	UAnimMontage* m_pAttackMontage;
+protected:
+	virtual void BeginPlay() override;
 
 public:
-	void playMontage();
+	AC_MonsterBaseCharacter();
 
+	void playAttackMontage();
 
+	UFUNCTION(BlueprintCallable)
+	virtual bool takeStaggerEvent(float fStagger);
 
+	UFUNCTION()
+	void onStaggerBroken();
+
+	UFUNCTION()
+	void onStaggerRecover();
 	
 };

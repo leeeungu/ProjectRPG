@@ -8,7 +8,7 @@ AC_BaseCharacter::AC_BaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	m_nHp = m_nMaxHp;
+	m_fHp = m_fMaxHp;
 
 }
 
@@ -33,33 +33,45 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-void AC_BaseCharacter::setHp(int nHp)
+bool AC_BaseCharacter::takeDamageEvent(float fDamage)
 {
-	m_nHp = nHp;
+	if (m_fHp >= 0)
+	{
+		m_fHp -= fDamage;
+		return true;
+	}
+
+	return false;
+	
 }
 
-int AC_BaseCharacter::getHp() const
+void AC_BaseCharacter::setHp(float fHp)
 {
-	return m_nHp;
+	m_fHp = fHp;
 }
 
-void AC_BaseCharacter::setMaxHp(int nMaxHp)
+float AC_BaseCharacter::getHp() const
 {
-	m_nMaxHp = nMaxHp;
+	return m_fHp;
 }
 
-int AC_BaseCharacter::getMaxHp() const
+void AC_BaseCharacter::setMaxHp(float fMaxHp)
 {
-	return m_nMaxHp;
+	m_fMaxHp = fMaxHp;
 }
 
-void AC_BaseCharacter::setAtck(int nAtck)
+float AC_BaseCharacter::getMaxHp() const
 {
-	m_nAtk = nAtck;
+	return m_fMaxHp;
 }
 
-int AC_BaseCharacter::getAtck() const
+void AC_BaseCharacter::setAtk(float fAtk)
 {
-	return m_nAtk;
+	m_fAtk = fAtk;
+}
+
+float AC_BaseCharacter::getAtk() const
+{
+	return m_fAtk;
 }
 
