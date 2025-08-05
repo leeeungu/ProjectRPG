@@ -7,41 +7,63 @@
 class UAnimMontage;
 class UC_InteractionComponent;
 class ACharacter;
+class USkeletalMeshComponent;
 class ATargetPoint;
+class UArrowComponent;
+
+USTRUCT(BlueprintType)
+struct FS_InteractionAnimationData
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "FS_InteractionAnimationData")
+
+	UAnimMontage* pPlayMontage;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FS_InteractionAnimationData")
+	FVector startLocation;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FS_InteractionAnimationData")
+	FVector endLocation;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "FS_InteractionAnimationData")
+	float fMoveSpeed;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "FS_InteractionAnimationData")
+	float fNextMontageTime;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "FS_InteractionAnimationData")
+	float fDistance;
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class PROJECTRPG_API AC_AnimationInteraction : public AActor
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AC_AnimationInteraction")
-	UAnimMontage* m_pStartMontage{};
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AC_AnimationInteraction")
-	UAnimMontage* m_pLoopMontage{};
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AC_AnimationInteraction")
-	UAnimMontage* m_pEndMontage{};
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AC_AnimationInteraction")
-	float m_fLoopMoveSpeed = 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
+	USceneComponent* m_pRoot{};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
+	UArrowComponent* m_pStartDirection;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	UC_InteractionComponent* m_pInteractionCollision{};
-	USceneComponent* m_pRoot{};
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	ATargetPoint* m_pEndPoint;
 
-	UPROPERTY(EditAnyWhere, Category = "AC_AnimationInteraction")
-	float m_fLoopPlayTime{};
-	
-	FRotator m_sRotate{};
-	FVector m_sDirection;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	FS_InteractionAnimationData m_sStartAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	FS_InteractionAnimationData m_sLoopAnimation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	FS_InteractionAnimationData m_sEndAnimation;
+
 private:
 	ACharacter* m_pDetector{};
 	UAnimInstance* m_pInstance{};
-	bool m_bLoopMove{};
-	float m_fDistance;
+
 public:	
 	AC_AnimationInteraction();
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -52,4 +74,5 @@ private:
 	void playLoopAnimation();
 	void playEndAnimation();
 	void resetAnimation();
+	void setAnimationData(FS_InteractionAnimationData* pData);
 };
