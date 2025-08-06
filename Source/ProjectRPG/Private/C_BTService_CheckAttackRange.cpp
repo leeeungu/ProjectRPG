@@ -44,7 +44,7 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 
 	pBb->SetValueAsBool("IsInAttackRange", bInRange);
 
-	UE_LOG(LogTemp, Warning, TEXT("attackRange: %.f"), fAttackRange);
+	//UE_LOG(LogTemp, Warning, TEXT("attackRange: %.f"), fAttackRange);
 
 
 }

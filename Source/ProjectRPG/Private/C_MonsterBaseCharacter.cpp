@@ -14,17 +14,42 @@ void AC_MonsterBaseCharacter::playAttackMontage()
 	if (m_arrAttackList.Num() == 0)
 		return;
 
-	int32 nRanIndex = FMath::RandRange(0, m_arrAttackList.Num() - 1);
-	m_nCurrentAttackIndex = nRanIndex;
-	FS_AttackData& sAttackData = m_arrAttackList[nRanIndex];
-
-	if (sAttackData.pAttackMontage)
+	TArray<int32> arrValidIndex;
+	for (int32 i = 0; i < m_arrAttackList.Num(); i++)
 	{
-		if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(sAttackData.pAttackMontage))
+		if (!m_arrAttackList[i].bIsCool)
 		{
-			GetMesh()->GetAnimInstance()->Montage_Play(sAttackData.pAttackMontage);
-			//startAttackCoolTime(sAttackData);
+			arrValidIndex.Add(i);
 		}
+	}
+
+	if (arrValidIndex.Num() == 0)
+		return;
+
+
+
+	int32 nRanIndex = FMath::RandRange(0, arrValidIndex.Num() - 1);
+	m_nCurrentAttackIndex = nRanIndex;
+
+	FS_AttackData& sAttackData = m_arrAttackList[nRanIndex];
+	if (sAttackData.bIsCool)
+		return;
+
+	if (sAttackData.pAttackMontage && !GetMesh()->GetAnimInstance()->Montage_IsPlaying(sAttackData.pAttackMontage))
+	{
+
+		GetMesh()->GetAnimInstance()->Montage_Play(sAttackData.pAttackMontage);
+
+		sAttackData.bIsCool = true;
+		UE_LOG(LogTemp, Warning, TEXT("CoolTime Start: %s, duration: %.2fÃÊ"), *sAttackData.strAttackName, sAttackData.fCoolTime);
+		FTimerHandle sCooldownHandle{};
+		GetWorld()->GetTimerManager().SetTimer(sCooldownHandle, FTimerDelegate::CreateLambda([&sAttackData]() {
+			sAttackData.bIsCool = false;
+			UE_LOG(LogTemp, Warning, TEXT("CoolTime end: %s"), *sAttackData.strAttackName);
+
+			}), sAttackData.fCoolTime, false);
+		
+
 	}
 }
 

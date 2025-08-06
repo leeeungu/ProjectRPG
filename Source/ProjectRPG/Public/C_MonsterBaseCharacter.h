@@ -50,7 +50,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TArray<FS_AttackData> m_arrAttackList;
 
-	int m_nCurrentAttackIndex;
+	int32 m_nCurrentAttackIndex;
 
 	FTimerHandle m_timeHandle;
 
