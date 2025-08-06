@@ -9,6 +9,25 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 	AIControllerClass = AC_MonsterAiController::StaticClass();
 }
 
+void AC_MonsterBaseCharacter::playAttackMontage()
+{
+	if (m_arrAttackList.Num() == 0)
+		return;
+
+	int32 nRanIndex = FMath::RandRange(0, m_arrAttackList.Num() - 1);
+	m_nCurrentAttackIndex = nRanIndex;
+	FS_AttackData& sAttackData = m_arrAttackList[nRanIndex];
+
+	if (sAttackData.pAttackMontage)
+	{
+		if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(sAttackData.pAttackMontage))
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(sAttackData.pAttackMontage);
+			//startAttackCoolTime(sAttackData);
+		}
+	}
+}
+
 void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 {
 	m_pStaggerComp->applyStagger(fStagger);
@@ -30,13 +49,25 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	*/
 }
 
-void AC_MonsterBaseCharacter::playAttackMontage()
+float AC_MonsterBaseCharacter::getAttackRange() const
 {
-	if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(m_pAttackMontage))
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(m_pAttackMontage);
-	}
-	
+	return m_arrAttackList[m_nCurrentAttackIndex].fAttackRange;
+}
+
+void AC_MonsterBaseCharacter::startAttackCoolTime(FS_AttackData& sAttackData)
+{
+	if (sAttackData.bIsCool)
+		return;
+
+	sAttackData.bIsCool = true;
+
+	GetWorld()->GetTimerManager().SetTimer(m_timeHandle, this, &AC_MonsterBaseCharacter::resetAttackCoolTime, sAttackData.fCoolTime, false);
+
+}
+
+void AC_MonsterBaseCharacter::resetAttackCoolTime()
+{
+	m_arrAttackList[m_nCurrentAttackIndex].bIsCool = false;
 }
 
 void AC_MonsterBaseCharacter::BeginPlay()
@@ -52,5 +83,6 @@ void AC_MonsterBaseCharacter::BeginPlay()
 			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
 		}
 	}
+
 	
 }

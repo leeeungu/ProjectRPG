@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "AIController.h"
-#include "C_MonsterAiController.h"
 #include "C_BTService_CheckAttackRange.generated.h"
 
 /**

@@ -14,7 +14,9 @@ EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(pAiController->GetPawn());
 
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	pAiController->SetFocus(pPlayer);
+	//pAiController->SetFocus(pPlayer);
+
+
 	
 
 	if (pMonster && pPlayer)

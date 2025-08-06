@@ -3,6 +3,10 @@
 
 #include "C_BTService_CheckAttackRange.h"
 
+#include "C_MonsterBaseCharacter.h"
+#include "AIController.h"
+#include "C_MonsterAiController.h"
+
 UC_BTService_CheckAttackRange::UC_BTService_CheckAttackRange()
 {
 	NodeName = TEXT("Check Attack Range");
@@ -21,22 +25,26 @@ void UC_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, 
 	if (!pAiController || !pBb)
 		return;
 
-	APawn* pAiPawn = pAiController->GetPawn();
+	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(pAiController->GetPawn());
 	APawn* pTarget = Cast<APawn>(pBb->GetValueAsObject("TargetActor"));
 
-	if (!pAiPawn || !pTarget)
+	
+
+
+	if (!pMonster || !pTarget)
 	{
 		pBb->SetValueAsBool("IsInAttackRange", false);
 		return;
 	}
-		
 
-	float fDistance = FVector::Dist(pAiPawn->GetActorLocation(), pTarget->GetActorLocation());
-	bool bInRange = fDistance <= 200.0f;
+	float fAttackRange = pMonster->getAttackRange();
+
+	float fDistance = FVector::Dist(pMonster->GetActorLocation(), pTarget->GetActorLocation());
+	bool bInRange = fDistance <= fAttackRange;
 
 	pBb->SetValueAsBool("IsInAttackRange", bInRange);
 
-	UE_LOG(LogTemp, Warning, TEXT("Distance: %f, InRange: %s"), fDistance, bInRange ? TEXT("true") : TEXT("false"));
+	UE_LOG(LogTemp, Warning, TEXT("attackRange: %.f"), fAttackRange);
 
 
 }

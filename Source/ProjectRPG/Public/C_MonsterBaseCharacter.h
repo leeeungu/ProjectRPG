@@ -18,6 +18,21 @@ enum class E_MonsterRank : uint8
 	Boss	UMETA(DisplayName = "Boss")
 };
 
+USTRUCT(BlueprintType)
+struct FS_AttackData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString strAttackName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* pAttackMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fCoolTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fAttackRange;
+	bool bIsCool = false;
+};
 /**
  * 
  */
@@ -32,9 +47,20 @@ private:
 
 	UC_StaggerComponent* m_pStaggerComp;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TArray<FS_AttackData> m_arrAttackList;
+
+	int m_nCurrentAttackIndex;
+
+	FTimerHandle m_timeHandle;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
+
+private:
+	void startAttackCoolTime(FS_AttackData& sAttackData);
+	void resetAttackCoolTime();
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,5 +78,7 @@ public:
 
 	UFUNCTION()
 	void onStaggerRecover();
+
+	float getAttackRange() const;
 	
 };
