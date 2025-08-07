@@ -76,6 +76,7 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
     AC_ItemActorBase* pItem = GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
     if (pItem)
     {
+		pItem->setItemID(ItemID);
         pItem->SetInstigator(pInstigator);
         pItem->FinishSpawning(transfrom);
     }

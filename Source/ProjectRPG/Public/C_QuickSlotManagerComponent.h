@@ -34,12 +34,15 @@ private:
 public:
 	UC_QuickSlotManagerComponent();
 
-	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
-	bool useQuickSlot(E_QuickSlotType QuickSlotType,int& useItemID, int nCount = 1);
+	//UFUNCTION(BlueprintCallable, Category = "QuickSlot")
+	//bool useQuickSlot(E_QuickSlotType QuickSlotType,int& useItemID, int nCount = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	void setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID);
 
+
+	UFUNCTION(BlueprintPure, Category = "QuickSlot")
+	bool getQuickSlotItemID(E_QuickSlotType QuickSlotType, int& useItemID) const;
 protected:
 	virtual void BeginPlay() override;
 

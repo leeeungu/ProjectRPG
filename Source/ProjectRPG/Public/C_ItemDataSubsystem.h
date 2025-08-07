@@ -95,6 +95,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
+
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;
 };

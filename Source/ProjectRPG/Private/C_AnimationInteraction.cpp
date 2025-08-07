@@ -1,16 +1,14 @@
 ﻿#include "C_AnimationInteraction.h"
 #include <GameFramework/Character.h>
-#include <Components/SkeletalMeshComponent.h>
 #include <Components/ArrowComponent.h>
-#include <GameFramework/CharacterMovementComponent.h>
-#include <Engine/TargetPoint.h>
-#include <Animation/AnimInstance.h>
+#include <Components/WidgetComponent.h>
 #include <C_InteractionComponent.h>
 #include <Kismet/KismetMathLibrary.h>
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
 {
+	PrimaryActorTick.bCanEverTick = false;
 	m_pRoot = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(m_pRoot);
 
@@ -21,6 +19,18 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pStartDirection->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 
 	m_pEndCollision = CreateDefaultSubobject< UC_InteractionComponent>("EndCollision");
+
+	m_pInteractionWidget = CreateDefaultSubobject< UWidgetComponent>("InteractionWidget");
+	m_pInteractionWidget->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	m_pInteractionWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	m_pInteractionWidget->SetDrawSize(FVector2D{64,64});
+	//Script/Engine.Texture2D'/Game/UI/Interaction/Texture/T_InteractionKey.T_InteractionKey'
+	///Script/UMGEditor.WidgetBlueprint'/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI'
+	static ConstructorHelpers::FClassFinder<UUserWidget> Texture(TEXT("/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI_C"));
+	if (Texture.Succeeded())
+	{
+		m_pInteractionWidget->SetWidgetClass(Texture.Class);
+	}
 }
 
 void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -41,7 +51,6 @@ void AC_AnimationInteraction::PostEditMove(bool bFinished)
 	if (m_bLookEndCollision)
 	{
 		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision->GetComponentLocation());
-
 		Rot.Roll = 0.0;
 		Rot.Pitch = 0.0;
 		m_pStartDirection->SetWorldRotation(Rot);

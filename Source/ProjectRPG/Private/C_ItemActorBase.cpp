@@ -8,13 +8,11 @@ AC_ItemActorBase::AC_ItemActorBase()
 
 bool AC_ItemActorBase::useItemActor()
 {
-	//m_pInstigator = pInstigator;
-	if (findActor(m_pTargetActor) && itemEffect())
+	if (findActor(m_pTargetActor) && checkItemUseable())
 	{
-		return true;
+		return itemEffect();
 	}
 	useFail();
-	m_pInstigator = nullptr;
 	m_pTargetActor = nullptr;
 	return false;
 }
@@ -30,6 +28,11 @@ bool AC_ItemActorBase::itemEffect_Implementation()
 }
 
 bool AC_ItemActorBase::useFail_Implementation()
+{
+	return false;
+}
+
+bool AC_ItemActorBase::checkItemUseable_Implementation()
 {
 	return false;
 }

@@ -5,11 +5,9 @@
 #include "C_TravelManagerComponent.h"
 #include "C_AnimationInteraction.generated.h"
 
-class UAnimMontage;
+class UWidgetComponent;
 class UC_InteractionComponent;
 class ACharacter;
-class USkeletalMeshComponent;
-class ATargetPoint;
 class UArrowComponent;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -25,13 +23,16 @@ protected:
 	UC_InteractionComponent* m_pStartCollision{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	UC_InteractionComponent* m_pEndCollision{};
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
+	UWidgetComponent* m_pInteractionWidget{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	E_TrabelType m_eStartType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	E_TrabelType m_eEndType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	bool m_bLookEndCollision{};
+
+
 private:
 	ACharacter* m_pDetector{};
 	UC_TravelManagerComponent* m_pTravelManagerComponent{};

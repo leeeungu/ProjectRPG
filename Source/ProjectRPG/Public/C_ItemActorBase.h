@@ -12,18 +12,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "AC_ItemActorBase")
 	AActor* m_pTargetActor{};
 	UPROPERTY(BlueprintReadOnly, Category = "AC_ItemActorBase")
-	AActor* m_pInstigator{};
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AC_ItemActorBase")
 	int m_nItemID{};
-
 public:	
 	AC_ItemActorBase();
 
 	UFUNCTION(BlueprintCallable)
 	bool useItemActor();
 
+	void setItemID(int nItemID) { m_nItemID = nItemID; }
 protected:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintPure, BlueprintNativeEvent)
 	bool findActor(AActor*& pTargetActor);
 	virtual bool findActor_Implementation(AActor*& pTargetActor);
 
@@ -35,11 +33,11 @@ protected:
 	bool useFail();
 	virtual bool useFail_Implementation();
 
+	UFUNCTION(BlueprintPure, BlueprintNativeEvent)
+	bool checkItemUseable();
+	virtual bool checkItemUseable_Implementation();
+
 protected:
 	virtual void BeginPlay() override;
-
-	//bool FindActor_Internal(AActor*& m_pTargetActor);
-	//bool UseItem_Internal();
-public:	
 
 };
