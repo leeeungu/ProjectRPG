@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "C_MonsterAiController.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "C_BTTaskChase.generated.h"
 

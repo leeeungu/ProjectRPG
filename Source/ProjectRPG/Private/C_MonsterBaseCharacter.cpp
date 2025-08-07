@@ -17,6 +17,7 @@ void AC_MonsterBaseCharacter::playAttackMontage()
 	TArray<int32> arrValidIndex;
 	for (int32 i = 0; i < m_arrAttackList.Num(); i++)
 	{
+
 		if (!m_arrAttackList[i].bIsCool)
 		{
 			arrValidIndex.Add(i);
@@ -29,9 +30,11 @@ void AC_MonsterBaseCharacter::playAttackMontage()
 
 
 	int32 nRanIndex = FMath::RandRange(0, arrValidIndex.Num() - 1);
-	m_nCurrentAttackIndex = nRanIndex;
+	int32 nSelectedIndex = arrValidIndex[nRanIndex];
 
-	FS_AttackData& sAttackData = m_arrAttackList[nRanIndex];
+
+	FS_AttackData& sAttackData = m_arrAttackList[nSelectedIndex];
+
 	if (sAttackData.bIsCool)
 		return;
 
@@ -41,21 +44,19 @@ void AC_MonsterBaseCharacter::playAttackMontage()
 		GetMesh()->GetAnimInstance()->Montage_Play(sAttackData.pAttackMontage);
 
 		sAttackData.bIsCool = true;
-		UE_LOG(LogTemp, Warning, TEXT("CoolTime Start: %s, duration: %.2fÃÊ"), *sAttackData.strAttackName, sAttackData.fCoolTime);
+
+
+
 		FTimerHandle sCooldownHandle{};
-		GetWorld()->GetTimerManager().SetTimer(sCooldownHandle, FTimerDelegate::CreateLambda([&sAttackData]() {
-			sAttackData.bIsCool = false;
-			UE_LOG(LogTemp, Warning, TEXT("CoolTime end: %s"), *sAttackData.strAttackName);
-
-			}), sAttackData.fCoolTime, false);
-		
-
+		GetWorld()->GetTimerManager().SetTimer(sCooldownHandle, FTimerDelegate::CreateUObject(this, &AC_MonsterBaseCharacter::resetAttackCoolTime, nSelectedIndex),
+			 sAttackData.fCoolTime, false);
 	}
 }
 
 void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 {
-	m_pStaggerComp->applyStagger(fStagger);
+	if (m_pStaggerComp)
+		m_pStaggerComp->applyStagger(fStagger);
 
 }
 
@@ -74,25 +75,48 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	*/
 }
 
-float AC_MonsterBaseCharacter::getAttackRange() const
+float AC_MonsterBaseCharacter::getMaxVaildAttackRange() const
 {
-	return m_arrAttackList[m_nCurrentAttackIndex].fAttackRange;
+	float fMaxRange{};
+
+	for (const FS_AttackData& sAttackData : m_arrAttackList)
+	{
+		if (!sAttackData.bIsCool)
+			fMaxRange = FMath::Max(fMaxRange, sAttackData.fAttackRange);
+	}
+
+	return fMaxRange;
 }
 
-void AC_MonsterBaseCharacter::startAttackCoolTime(FS_AttackData& sAttackData)
+bool AC_MonsterBaseCharacter::hasAnyVaildAttack() const
 {
-	if (sAttackData.bIsCool)
-		return;
-
-	sAttackData.bIsCool = true;
-
-	GetWorld()->GetTimerManager().SetTimer(m_timeHandle, this, &AC_MonsterBaseCharacter::resetAttackCoolTime, sAttackData.fCoolTime, false);
-
+	for (const FS_AttackData& sData : m_arrAttackList)
+	{
+		if (!sData.bIsCool)
+			return true;
+	}
+	return false;
 }
 
-void AC_MonsterBaseCharacter::resetAttackCoolTime()
+bool AC_MonsterBaseCharacter::isPlayingAttackMontage() const
 {
-	m_arrAttackList[m_nCurrentAttackIndex].bIsCool = false;
+	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
+
+	if (!pAnim)
+		return false;
+
+	for (const FS_AttackData& sData : m_arrAttackList)
+	{
+		if (sData.pAttackMontage && pAnim->Montage_IsPlaying(sData.pAttackMontage))
+			return true;
+	}
+	return false;
+}
+
+void AC_MonsterBaseCharacter::resetAttackCoolTime(int32 nIndex)
+{
+	if (m_arrAttackList.IsValidIndex(nIndex))
+		m_arrAttackList[nIndex].bIsCool = false;
 }
 
 void AC_MonsterBaseCharacter::BeginPlay()
@@ -101,7 +125,9 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 	if (m_eMonsterRank >= E_MonsterRank::Named)
 	{
-		if (m_pStaggerComp && m_pStaggerComp == GetOwner()->FindComponentByClass<UC_StaggerComponent>())
+		m_pStaggerComp = GetOwner()->FindComponentByClass<UC_StaggerComponent>();
+
+		if (m_pStaggerComp)
 		{
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
 

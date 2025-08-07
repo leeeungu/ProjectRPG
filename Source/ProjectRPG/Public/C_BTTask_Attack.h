@@ -15,10 +15,13 @@ class PROJECTRPG_API UC_BTTask_Attack : public UBTTaskNode
 {
 	GENERATED_BODY()
 
+private:
+	bool m_bIsAttacking;
+
 public:
 	UC_BTTask_Attack();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	
-
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

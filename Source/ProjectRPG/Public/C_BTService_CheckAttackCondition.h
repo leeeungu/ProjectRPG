@@ -5,18 +5,18 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "C_BTService_CheckAttackRange.generated.h"
+#include "C_BTService_CheckAttackCondition.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTRPG_API UC_BTService_CheckAttackRange : public UBTService_BlackboardBase
+class PROJECTRPG_API UC_BTService_CheckAttackCondition : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 
 public:
-	UC_BTService_CheckAttackRange();
+	UC_BTService_CheckAttackCondition();
 
 protected:
 	/**
