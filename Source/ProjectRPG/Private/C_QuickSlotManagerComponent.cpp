@@ -13,8 +13,9 @@ UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 	}
 }
 
-bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, int nCount)
+bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, int& useItemID, int nCount)
 {
+	useItemID = UC_ItemDataSubsystem::getUnValidItemID_CPP();
 	if (!m_pInventoryComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UC_QuickSlotManagerComponent::useQuickSlot - m_pInventoryComponent is null"));
@@ -27,6 +28,7 @@ bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, i
 	}
 	
 	int ItemID = m_arrQuickSlotItem[(int)QuickSlotType];
+	useItemID = ItemID;
 	if (ItemID == UC_ItemDataSubsystem::getUnValidItemID_CPP())
 	{
 		FS_GameAlertSubsystemConfig config{};

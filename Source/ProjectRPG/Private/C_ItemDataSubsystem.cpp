@@ -1,5 +1,6 @@
 ﻿#include "C_ItemDataSubsystem.h"
 #include "Kismet/DataTableFunctionLibrary.h" 
+#include "C_ItemActorBase.h"
 
 UC_ItemDataSubsystem* UC_ItemDataSubsystem::m_pInstance = nullptr;
 
@@ -63,6 +64,22 @@ bool UC_ItemDataSubsystem::getItemDataByID_CPP(int ItemID, FS_ItemData& OutData)
 bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const
 {
     return ItemID != getUnValidItemID();
+}
+
+AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInstigator)
+{
+    FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
+    if (!pItemData || !pInstigator || !pItemData->cEffectItemClass.Get())
+        return nullptr;
+    FTransform transfrom = pInstigator->GetActorTransform();
+
+    AC_ItemActorBase* pItem = GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
+    if (pItem)
+    {
+        pItem->SetInstigator(pInstigator);
+        pItem->FinishSpawning(transfrom);
+    }
+    return pItem;
 }
 
 FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const

@@ -6,6 +6,7 @@
 #include <Engine/TargetPoint.h>
 #include <Animation/AnimInstance.h>
 #include <C_InteractionComponent.h>
+#include <Kismet/KismetMathLibrary.h>
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
@@ -20,6 +21,36 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pStartDirection->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 
 	m_pEndCollision = CreateDefaultSubobject< UC_InteractionComponent>("EndCollision");
+}
+
+void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	AActor::PostEditChangeProperty(PropertyChangedEvent);
+	if (m_bLookEndCollision)
+	{
+		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision->GetComponentLocation());
+		Rot.Roll = 0.0;
+		Rot.Pitch = 0.0;
+		m_pStartDirection->SetWorldRotation(Rot);
+	}
+}
+
+void AC_AnimationInteraction::PostEditMove(bool bFinished)
+{
+	AActor::PostEditMove(bFinished);
+	if (m_bLookEndCollision)
+	{
+		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision->GetComponentLocation());
+
+		Rot.Roll = 0.0;
+		Rot.Pitch = 0.0;
+		m_pStartDirection->SetWorldRotation(Rot);
+	}
+}
+
+void AC_AnimationInteraction::Tick(float DeltaTime)
+{
+	AActor::Tick(DeltaTime);
 }
 
 void AC_AnimationInteraction::BeginPlay()
@@ -38,7 +69,6 @@ void AC_AnimationInteraction::playAnimation(AActor* pDetectedActor)
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
 	if (!m_pDetector || !m_pTravelManagerComponent)
 		return;
-
 	m_pDetector->SetActorRotation(m_pStartDirection->GetComponentRotation());
 	m_pDetector->SetActorLocation(m_pStartDirection->GetComponentLocation());
 	m_pTravelManagerComponent->setTravelType(m_eStartType);

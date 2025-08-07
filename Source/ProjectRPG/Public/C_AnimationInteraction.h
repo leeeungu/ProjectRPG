@@ -30,13 +30,17 @@ protected:
 	E_TrabelType m_eStartType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	E_TrabelType m_eEndType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	bool m_bLookEndCollision{};
 private:
 	ACharacter* m_pDetector{};
 	UC_TravelManagerComponent* m_pTravelManagerComponent{};
 	bool m_bPlay{};
 public:	
 	AC_AnimationInteraction();
-
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditMove(bool bFinished) override;
+	virtual void Tick(float DeltaTime) override;
 protected:
 	virtual void BeginPlay() override;
 

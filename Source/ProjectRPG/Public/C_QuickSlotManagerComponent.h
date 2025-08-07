@@ -35,7 +35,7 @@ public:
 	UC_QuickSlotManagerComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
-	bool useQuickSlot(E_QuickSlotType QuickSlotType, int nCount = 1);
+	bool useQuickSlot(E_QuickSlotType QuickSlotType,int& useItemID, int nCount = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	void setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID);
