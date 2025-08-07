@@ -53,6 +53,11 @@ void AC_MonsterBaseCharacter::playAttackMontage()
 	}
 }
 
+void AC_MonsterBaseCharacter::playStaggerMontage()
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(m_pStaggerMontage);
+}
+
 void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 {
 	if (m_pStaggerComp)
@@ -62,19 +67,28 @@ void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
 {
-	/*
-	* 무력화 애님 몽타주
-	* AI 정지
-	*/
+	AAIController* pAiCon = Cast<AAIController>(GetController());
+
+	if (pAiCon)
+	{
+		pAiCon->StopMovement();
+
+		if (UBehaviorTreeComponent* pBtComp = Cast<UBehaviorTreeComponent>(pAiCon->BrainComponent))
+		{
+			pBtComp->StopTree(EBTStopMode::Safe);
+		}
+	}
+
+	playStaggerMontage();
 }
 
 void AC_MonsterBaseCharacter::onStaggerRecover()
 {
-	/*
-	* AI 가동
-	*/
-}
+	AC_MonsterAiController* pAiCon = Cast<AC_MonsterAiController>(GetController());
 
+	if (pAiCon)
+		pAiCon->restartAi();
+}
 float AC_MonsterBaseCharacter::getMaxVaildAttackRange() const
 {
 	float fMaxRange{};
@@ -125,7 +139,7 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 	if (m_eMonsterRank >= E_MonsterRank::Named)
 	{
-		m_pStaggerComp = GetOwner()->FindComponentByClass<UC_StaggerComponent>();
+		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
 		if (m_pStaggerComp)
 		{

@@ -45,6 +45,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Attack Montage")
 	UAnimMontage* m_pAttackMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
+	UAnimMontage* m_pStaggerMontage;
+
 	UC_StaggerComponent* m_pStaggerComp;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -67,6 +70,8 @@ public:
 	AC_MonsterBaseCharacter();
 
 	void playAttackMontage();
+
+	void playStaggerMontage();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void takeStaggerEvent(float fStagger);
