@@ -88,6 +88,8 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 	if (pAiCon)
 		pAiCon->restartAi();
+
+	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 }
 float AC_MonsterBaseCharacter::getMaxVaildAttackRange() const
 {

@@ -29,7 +29,10 @@ EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	FRotator rLookAt = vToPlayer.Rotation();
 	rLookAt.Pitch = 0.0f;
 	rLookAt.Roll = 0.0f;
-	pMonster->SetActorRotation(rLookAt);
+
+	FQuat qCurLook = pMonster->GetViewRotation().Quaternion();
+	qCurLook = FQuat::Slerp(qCurLook, rLookAt.Quaternion(), 7.f * GetWorld()->GetDeltaSeconds());
+	pMonster->SetActorRotation(qCurLook);
 
 	pMonster->playAttackMontage();
 	m_bIsAttacking = true;

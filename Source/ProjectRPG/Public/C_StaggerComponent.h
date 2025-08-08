@@ -23,7 +23,7 @@ protected:
 	float m_fMaxStagger = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
 	float m_fCurrentStagger = 0.0f;
-	UPROPERTY(VisibleAnywhere, Category = "Stagger")
+	UPROPERTY(EditAnywhere, Category = "Stagger")
 	float m_fBrokenDuration = 3.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
 	bool m_bIsBroken = false;

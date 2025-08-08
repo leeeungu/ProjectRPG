@@ -45,7 +45,4 @@ void UC_BTService_CheckAttackCondition::TickNode(UBehaviorTreeComponent& OwnerCo
 
 	pBb->SetValueAsBool("CanAttack", bCanAttack);
 
-	//UE_LOG(LogTemp, Warning, TEXT("attackRange: %.f"), fAttackRange);
-
-
 }
