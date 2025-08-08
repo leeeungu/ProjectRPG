@@ -45,12 +45,6 @@ EBTNodeResult::Type UC_BTTaskChase::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 
 
 	float Distance = FVector::Dist(pMonster->GetActorLocation(), pTarget->GetActorLocation());
-	if (Distance <= pMonster->getMaxVaildAttackRange())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Close enough ¡æ Chase ends"));
-		return EBTNodeResult::Succeeded;
-	}
-
 
 	return EBTNodeResult::InProgress;
 }

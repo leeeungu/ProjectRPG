@@ -13,15 +13,20 @@ UC_BTTask_Attack::UC_BTTask_Attack()
 EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 
-	AAIController* pAiController = OwnerComp.GetAIOwner();
-	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(pAiController->GetPawn());
-
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	//pAiController->SetFocus(pPlayer);
-
-
-	if (!pMonster && !pPlayer)
+	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	if (!pMonster)
 		return EBTNodeResult::Failed;
+	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+
+	TArray<int32> arrCandidates = pMonster->filterAvailablePatterns();
+	if (arrCandidates.Num() == 0)
+		return EBTNodeResult::Failed;
+
+	int32 nIndex = pMonster->selectPatternByWeight(arrCandidates);
+	if (nIndex == INDEX_NONE)
+		return EBTNodeResult::Failed;
+
 	/*
 	* 공격 직전에 플레이어 쪽으로 회전
 	*/
@@ -34,20 +39,7 @@ EBTNodeResult::Type UC_BTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	qCurLook = FQuat::Slerp(qCurLook, rLookAt.Quaternion(), 7.f * GetWorld()->GetDeltaSeconds());
 	pMonster->SetActorRotation(qCurLook);
 
-	pMonster->playAttackMontage();
-	m_bIsAttacking = true;
-
-
-	return EBTNodeResult::InProgress;
-}
-
-
-void UC_BTTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-{
-	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-
-	if (m_bIsAttacking)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	}
+	pMonster->playPattern(nIndex);
+		return EBTNodeResult::Succeeded;
+	
 }

@@ -19,19 +19,26 @@ enum class E_MonsterRank : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FS_AttackData
+struct FS_PatternData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString strAttackName;
+	FName strAttackName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* pAttackMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fCoolTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fAttackRange;
-	bool bIsCool = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 nWeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fMinHpPercent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fMaxHpPercent;
+
+	float LastUsedTime = -100.f;
 };
 /**
  * 
@@ -42,16 +49,21 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditAnywhere)
+	TArray<FS_PatternData> m_arrPatternList;
+
 	UPROPERTY(EditAnywhere, Category = "Attack Montage")
 	UAnimMontage* m_pAttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
+	UPROPERTY()
 	UC_StaggerComponent* m_pStaggerComp;
 
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TArray<FS_AttackData> m_arrAttackList;
+	bool m_bIsAttacking = false;
+
+	
 
 	FTimerHandle m_timeHandle;
 
@@ -60,7 +72,10 @@ protected:
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
 private:
-	void resetAttackCoolTime(int32 nIndex);
+	float getDistanceToTarget() const;
+
+	void onAttackEnd();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -69,7 +84,11 @@ protected:
 public:
 	AC_MonsterBaseCharacter();
 
-	void playAttackMontage();
+	TArray<int32> filterAvailablePatterns();
+
+	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
+
+	void playPattern(int32 nPatternIndex);
 
 	void playStaggerMontage();
 
@@ -81,11 +100,5 @@ public:
 
 	UFUNCTION()
 	void onStaggerRecover();
-
-	float getMaxVaildAttackRange() const;
-
-	bool hasAnyVaildAttack() const;
-
-	bool isPlayingAttackMontage() const;
 	
 };

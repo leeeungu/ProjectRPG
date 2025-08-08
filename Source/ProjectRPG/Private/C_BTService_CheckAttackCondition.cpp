@@ -18,31 +18,14 @@ void UC_BTService_CheckAttackCondition::TickNode(UBehaviorTreeComponent& OwnerCo
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	AAIController* pAiController = OwnerComp.GetAIOwner();
-	UBlackboardComponent* pBb = OwnerComp.GetBlackboardComponent();
-	if (!pAiController || !pBb)
+	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	if (!pMonster) 
 		return;
 
-	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(pAiController->GetPawn());
-	APawn* pTarget = Cast<APawn>(pBb->GetValueAsObject("TargetActor"));
+	TArray<int32> arrAvailable = pMonster->filterAvailablePatterns();
 
-	
+	bool bCanCheck = arrAvailable.Num() > 0;
 
-
-	if (!pMonster || !pTarget)
-	{
-		pBb->SetValueAsBool("CanAttack", false);
-		return;
-	}
-
-	float fDistance = FVector::Dist(pMonster->GetActorLocation(), pTarget->GetActorLocation());
-
-	bool bHasVaildAttack = pMonster->hasAnyVaildAttack();
-	bool bInRange = fDistance <= pMonster->getMaxVaildAttackRange();
-	bool bNotBusy = !pMonster->isPlayingAttackMontage();
-
-	bool bCanAttack = bHasVaildAttack && bInRange && bNotBusy;
-
-	pBb->SetValueAsBool("CanAttack", bCanAttack);
+	OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("CanAttack"), bCanCheck);
 
 }

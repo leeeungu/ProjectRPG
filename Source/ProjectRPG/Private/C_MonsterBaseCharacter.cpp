@@ -9,50 +9,6 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 	AIControllerClass = AC_MonsterAiController::StaticClass();
 }
 
-void AC_MonsterBaseCharacter::playAttackMontage()
-{
-	if (m_arrAttackList.Num() == 0)
-		return;
-
-	TArray<int32> arrValidIndex;
-	for (int32 i = 0; i < m_arrAttackList.Num(); i++)
-	{
-
-		if (!m_arrAttackList[i].bIsCool)
-		{
-			arrValidIndex.Add(i);
-		}
-	}
-
-	if (arrValidIndex.Num() == 0)
-		return;
-
-
-
-	int32 nRanIndex = FMath::RandRange(0, arrValidIndex.Num() - 1);
-	int32 nSelectedIndex = arrValidIndex[nRanIndex];
-
-
-	FS_AttackData& sAttackData = m_arrAttackList[nSelectedIndex];
-
-	if (sAttackData.bIsCool)
-		return;
-
-	if (sAttackData.pAttackMontage && !GetMesh()->GetAnimInstance()->Montage_IsPlaying(sAttackData.pAttackMontage))
-	{
-
-		GetMesh()->GetAnimInstance()->Montage_Play(sAttackData.pAttackMontage);
-
-		sAttackData.bIsCool = true;
-
-
-
-		FTimerHandle sCooldownHandle{};
-		GetWorld()->GetTimerManager().SetTimer(sCooldownHandle, FTimerDelegate::CreateUObject(this, &AC_MonsterBaseCharacter::resetAttackCoolTime, nSelectedIndex),
-			 sAttackData.fCoolTime, false);
-	}
-}
-
 void AC_MonsterBaseCharacter::playStaggerMontage()
 {
 	GetMesh()->GetAnimInstance()->Montage_Play(m_pStaggerMontage);
@@ -91,48 +47,97 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 }
-float AC_MonsterBaseCharacter::getMaxVaildAttackRange() const
+
+
+
+TArray<int32> AC_MonsterBaseCharacter::filterAvailablePatterns()
 {
-	float fMaxRange{};
+	TArray<int32> arrResult;
+	const float fCurrentTime = GetWorld()->GetTimeSeconds();
+	const float fDistToTarget = getDistanceToTarget();
 
-	for (const FS_AttackData& sAttackData : m_arrAttackList)
+	for (int32 i = 0; i < m_arrPatternList.Num(); i++)
 	{
-		if (!sAttackData.bIsCool)
-			fMaxRange = FMath::Max(fMaxRange, sAttackData.fAttackRange);
-	}
+		const FS_PatternData& sPattern = m_arrPatternList[i];
 
-	return fMaxRange;
+		bool bCoolTimeReady = (fCurrentTime - sPattern.LastUsedTime) >= sPattern.fCoolTime;
+		bool bInAttackRange = fDistToTarget <= sPattern.fAttackRange;
+
+		if (bCoolTimeReady && bInAttackRange)
+			arrResult.Add(i);
+	}
+	return arrResult;
 }
 
-bool AC_MonsterBaseCharacter::hasAnyVaildAttack() const
+int32 AC_MonsterBaseCharacter::selectPatternByWeight(const TArray<int32>& arrCandidates)
 {
-	for (const FS_AttackData& sData : m_arrAttackList)
+	if (arrCandidates.Num() == 0)
+		return INDEX_NONE;
+
+	int32 nTotalWeight = 0;
+	for (int32 nIndex : arrCandidates)
 	{
-		if (!sData.bIsCool)
-			return true;
+		nTotalWeight += m_arrPatternList[nIndex].nWeight;
 	}
-	return false;
+
+	int32 nRan = FMath::RandRange(1, nTotalWeight);
+	int32 nAccWeight = 0;
+
+	for (int32 nIndex : arrCandidates)
+	{
+		nAccWeight += m_arrPatternList[nIndex].nWeight;
+		if (nRan <= nAccWeight)
+			return nIndex;
+	}
+	return arrCandidates[0];
 }
 
-bool AC_MonsterBaseCharacter::isPlayingAttackMontage() const
+void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 {
-	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
+	if (m_bIsAttacking)
+		return;
 
-	if (!pAnim)
-		return false;
 
-	for (const FS_AttackData& sData : m_arrAttackList)
-	{
-		if (sData.pAttackMontage && pAnim->Montage_IsPlaying(sData.pAttackMontage))
-			return true;
-	}
-	return false;
+	m_bIsAttacking = true;
+	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
+		return;
+
+	FS_PatternData& sPattern = m_arrPatternList[nPatternIndex];
+
+	
+	PlayAnimMontage(sPattern.pAttackMontage);
+		
+	
+
+	float fAnimDuration = sPattern.pAttackMontage->GetPlayLength();
+
+	FTimerHandle sAttackEndHandle;
+	GetWorld()->GetTimerManager().SetTimer(sAttackEndHandle, this,
+		&AC_MonsterBaseCharacter::onAttackEnd,fAnimDuration, false);
+
+	sPattern.LastUsedTime = GetWorld()->GetTimeSeconds();
 }
 
-void AC_MonsterBaseCharacter::resetAttackCoolTime(int32 nIndex)
+float AC_MonsterBaseCharacter::getDistanceToTarget() const
 {
-	if (m_arrAttackList.IsValidIndex(nIndex))
-		m_arrAttackList[nIndex].bIsCool = false;
+	AAIController* pAiCon = Cast<AAIController>(GetController());
+	if (!pAiCon)
+		return MAX_FLT;
+
+	UBlackboardComponent* pBbCom = pAiCon->GetBlackboardComponent();
+	if (!pBbCom)
+		return MAX_FLT;
+
+	AActor* pTarget = Cast<AActor>(pBbCom->GetValueAsObject(TEXT("TargetActor")));
+	if (!pTarget)
+		return MAX_FLT;
+
+	return FVector::Dist(GetActorLocation(), pTarget->GetActorLocation());
+}
+
+void AC_MonsterBaseCharacter::onAttackEnd()
+{
+	m_bIsAttacking = false;
 }
 
 void AC_MonsterBaseCharacter::BeginPlay()
