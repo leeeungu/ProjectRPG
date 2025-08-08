@@ -37,7 +37,10 @@ protected:
 	bool checkItemUseable();
 	virtual bool checkItemUseable_Implementation();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool useSuccess();
+	virtual bool useSuccess_Implementation();
+
 protected:
-	virtual void BeginPlay() override;
 
 };

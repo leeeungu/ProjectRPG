@@ -4,11 +4,14 @@
 #include <Components/WidgetComponent.h>
 #include <C_InteractionComponent.h>
 #include <Kismet/KismetMathLibrary.h>
+#include <NavigationSystem.h>
+#include <NavigationPath.h>
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
 {
-	PrimaryActorTick.bCanEverTick = false;
+
+	PrimaryActorTick.bCanEverTick = true;
 	m_pRoot = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(m_pRoot);
 
@@ -24,6 +27,7 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pInteractionWidget->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 	m_pInteractionWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	m_pInteractionWidget->SetDrawSize(FVector2D{64,64});
+	m_pInteractionWidget->SetRelativeRotation({ 0,180,0 });
 	//Script/Engine.Texture2D'/Game/UI/Interaction/Texture/T_InteractionKey.T_InteractionKey'
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI'
 	static ConstructorHelpers::FClassFinder<UUserWidget> Texture(TEXT("/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI_C"));
@@ -60,17 +64,40 @@ void AC_AnimationInteraction::PostEditMove(bool bFinished)
 void AC_AnimationInteraction::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
+
+	if (!m_arrLocations.IsValidIndex(nIndex) || !m_pDetector)
+		return;
+
+	FVector Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
+	Dir.Z = 0.0f;
+	Dir.Normalize();
+	m_pDetector->AddMovementInput(Dir);
+	Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
+	Dir.Z = 0.0f;
+	if (Dir.Length() < 15.0f)
+	{
+		nIndex++;
+		if (!m_arrLocations.IsValidIndex(nIndex))
+		{
+			StartAnimation();
+		}
+	}
+
 }
 
 void AC_AnimationInteraction::BeginPlay()
 {
 	SetActorTickEnabled(false);
+	m_pInteractionWidget->SetVisibility(false);
+
 	AActor::BeginPlay();
-	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::playAnimation);
+	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::interactionStart);
+	m_pStartCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginOverlap);
+	m_pStartCollision->OnComponentEndOverlap.AddDynamic(this, &AC_AnimationInteraction::endOverlap);
 	m_pEndCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginEndCollision);
 }
 
-void AC_AnimationInteraction::playAnimation(AActor* pDetectedActor)
+void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 {
 	if (!pDetectedActor || m_eStartType == E_TrabelType::E_NONE || m_bPlay)
 		return;
@@ -78,6 +105,21 @@ void AC_AnimationInteraction::playAnimation(AActor* pDetectedActor)
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
 	if (!m_pDetector || !m_pTravelManagerComponent)
 		return;
+
+	UNavigationPath* pPath = UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), m_pDetector->GetActorLocation(), m_pStartDirection->GetComponentLocation());
+	if (pPath && pPath->IsValid() && pPath->PathPoints.Num() > 1)
+	{
+		SetActorTickEnabled(true);
+		m_arrLocations = pPath->PathPoints;
+		nIndex = 0;
+	}
+}
+
+void AC_AnimationInteraction::StartAnimation()
+{
+	if (!m_pDetector)
+		return;
+	SetActorTickEnabled(false);
 	m_pDetector->SetActorRotation(m_pStartDirection->GetComponentRotation());
 	m_pDetector->SetActorLocation(m_pStartDirection->GetComponentLocation());
 	m_pTravelManagerComponent->setTravelType(m_eStartType);
@@ -92,4 +134,14 @@ void AC_AnimationInteraction::beginEndCollision(UPrimitiveComponent* OverlappedC
 	m_pDetector = nullptr;
 	m_pTravelManagerComponent = nullptr;
 	m_bPlay = false;
+}
+
+void AC_AnimationInteraction::beginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	m_pInteractionWidget->SetVisibility(true);
+}
+
+void AC_AnimationInteraction::endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	m_pInteractionWidget->SetVisibility(false);
 }

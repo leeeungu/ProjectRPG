@@ -56,6 +56,15 @@ bool UC_QuickSlotManagerComponent::getQuickSlotItemID(E_QuickSlotType QuickSlotT
 		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 		return false;
 	}
+
+	int nCount{};
+	if (!m_pInventoryComponent->getItemCountByID(useItemID, nCount) || nCount <= 0)
+	{
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("아이템이 부족합니다."));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+		return false;
+	}
 	return true;
 }
 

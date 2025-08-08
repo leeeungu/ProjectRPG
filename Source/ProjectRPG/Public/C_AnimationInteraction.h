@@ -32,7 +32,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	bool m_bLookEndCollision{};
 
-
+	TArray<FVector> m_arrLocations{};
+	int nIndex{};
 private:
 	ACharacter* m_pDetector{};
 	UC_TravelManagerComponent* m_pTravelManagerComponent{};
@@ -47,9 +48,16 @@ protected:
 
 private:
 	UFUNCTION()
-	void playAnimation (AActor* pDetectedActor);
+	void interactionStart (AActor* pDetectedActor);
+
+	void StartAnimation();
 
 	UFUNCTION()
 	void beginEndCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void beginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 };

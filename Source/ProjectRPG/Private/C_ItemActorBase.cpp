@@ -8,13 +8,17 @@ AC_ItemActorBase::AC_ItemActorBase()
 
 bool AC_ItemActorBase::useItemActor()
 {
-	if (findActor(m_pTargetActor) && checkItemUseable())
+	bool bResult = findActor(m_pTargetActor) && checkItemUseable();
+	if (bResult)
 	{
-		return itemEffect();
+		bResult = itemEffect();
 	}
-	useFail();
+	if (bResult)
+		useSuccess();
+	else
+		useFail();
 	m_pTargetActor = nullptr;
-	return false;
+	return bResult;
 }
 
 bool AC_ItemActorBase::findActor_Implementation(AActor*& pTargetActor)
@@ -37,7 +41,7 @@ bool AC_ItemActorBase::checkItemUseable_Implementation()
 	return false;
 }
 
-void AC_ItemActorBase::BeginPlay()
+bool AC_ItemActorBase::useSuccess_Implementation()
 {
-	Super::BeginPlay();
+	return false;
 }
