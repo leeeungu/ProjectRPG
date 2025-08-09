@@ -42,13 +42,13 @@ void UC_GameWindowManager::setStoreMode(bool bSetStoreMode)
 {
 	if (bSetStoreMode)
 	{
-		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::removeWidgetFromMain);
+		//runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::removeWidgetFromMain);
 		runWidgetFunc({ E_WindowType::E_Inventory, E_WindowType::E_Store }, &UC_GameWindowManager::addWidgetToMain);
 	}
 	else
 	{
 		runWidgetFunc({ E_WindowType::E_Inventory, E_WindowType::E_Store }, &UC_GameWindowManager::removeWidgetFromMain);
-		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::addWidgetToMain);
+		//runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::addWidgetToMain);
 	}
 }
 

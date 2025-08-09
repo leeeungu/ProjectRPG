@@ -41,6 +41,8 @@ protected:
 	bool useSuccess();
 	virtual bool useSuccess_Implementation();
 
+	UFUNCTION(BlueprintCallable)
+	void setTargetActor(AActor* pTargetActor) { m_pTargetActor = pTargetActor; }
 protected:
 
 };

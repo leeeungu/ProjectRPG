@@ -24,6 +24,18 @@ bool UC_InteractionDetectorComponent::runInteraction()
 	return true;
 }
 
+AActor* UC_InteractionDetectorComponent::getInteractionActor() const
+{
+	if (!m_pFirst)
+		return nullptr;
+	return m_pFirst->GetOwner();
+}
+
+UC_InteractionComponent* UC_InteractionDetectorComponent::getInteractionComponent()
+{
+	return m_pFirst;
+}
+
 void UC_InteractionDetectorComponent::beginDetected(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UC_InteractionComponent* pInteraction = Cast< UC_InteractionComponent>(OtherComp);

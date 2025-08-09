@@ -8,26 +8,6 @@ AC_NPCBase::AC_NPCBase() : ACharacter{}
 	m_pInteractionComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-//bool AC_NPCBase::beginSearchingEvent_Implementation(AActor* pOther)
-//{
-//	return false;
-//}
-//
-//bool AC_NPCBase::endSearchingEvent_Implementation(AActor* pOther)
-//{
-//	return false;
-//}
-//
-//bool AC_NPCBase::runEvent_Implementation(AActor* pOther)
-//{
-//	return false;
-//}
-//
-//bool AC_NPCBase::endEvent_Implementation()
-//{
-//	return false;
-//}
-
 void AC_NPCBase::BeginPlay()
 {
 	ACharacter::BeginPlay();
