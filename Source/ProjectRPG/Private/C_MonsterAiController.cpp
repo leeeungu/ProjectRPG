@@ -46,6 +46,20 @@ void AC_MonsterAiController::OnUnPossess()
 {
 }
 
+void AC_MonsterAiController::restartAi()
+{
+	if (m_pBbAsset && m_pBtAsset)
+	{
+
+		if (UseBlackboard(m_pBbAsset, m_pBB))
+		{
+
+			RunBehaviorTree(m_pBtAsset);
+
+		}
+	}
+}
+
 void AC_MonsterAiController::BeginPlay()
 {
 	Super::BeginPlay();

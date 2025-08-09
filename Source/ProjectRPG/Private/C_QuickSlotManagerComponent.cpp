@@ -13,8 +13,28 @@ UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 	}
 }
 
-bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, int nCount)
+//bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, int& useItemID, int nCount)
+//{
+//	if (!getQuickSlotItemID(QuickSlotType, useItemID))
+//		return false;
+//
+//	bool bResult = m_pInventoryComponent->removeItem(useItemID, nCount);
+//	int nRemainCount{};
+//	if (bResult && m_onQuickSlotNoneDelegate.IsBound()  && (!m_pInventoryComponent->getItemCountByID(useItemID, nRemainCount) || nRemainCount <= 0))
+//	{
+//		m_onQuickSlotNoneDelegate.Broadcast();
+//	}
+//	return bResult;
+//}
+
+void UC_QuickSlotManagerComponent::setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID)
 {
+	m_arrQuickSlotItem[(int)QuickSlotType] = ItemID;
+}
+
+bool UC_QuickSlotManagerComponent::getQuickSlotItemID(E_QuickSlotType QuickSlotType, int& useItemID) const
+{
+	useItemID = UC_ItemDataSubsystem::getUnValidItemID_CPP();
 	if (!m_pInventoryComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UC_QuickSlotManagerComponent::useQuickSlot - m_pInventoryComponent is null"));
@@ -25,28 +45,27 @@ bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, i
 		UE_LOG(LogTemp, Warning, TEXT("UC_QuickSlotManagerComponent::useQuickSlot - Invalid QuickSlotType: %d"), (int)QuickSlotType);
 		return false;
 	}
-	
+
 	int ItemID = m_arrQuickSlotItem[(int)QuickSlotType];
-	if (ItemID == UC_ItemDataSubsystem::getUnValidItemID_CPP())
+	useItemID = ItemID;
+
+	if (useItemID == UC_ItemDataSubsystem::getUnValidItemID_CPP())
 	{
 		FS_GameAlertSubsystemConfig config{};
 		config.strDefaultAlertMessage = FText::FromString(TEXT("퀵슬롯에 아이템이 없습니다."));
 		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 		return false;
 	}
-	bool bResult = m_pInventoryComponent->removeItem(ItemID, nCount);
-	int nRemainCount{};
-	if (bResult && m_onQuickSlotNoneDelegate .IsBound()  && (!m_pInventoryComponent->getItemCountByID(ItemID, nRemainCount) || nRemainCount <= 0))
+
+	int nCount{};
+	if (!m_pInventoryComponent->getItemCountByID(useItemID, nCount) || nCount <= 0)
 	{
-		m_onQuickSlotNoneDelegate.Broadcast();
+		FS_GameAlertSubsystemConfig config{};
+		config.strDefaultAlertMessage = FText::FromString(TEXT("아이템이 부족합니다."));
+		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
+		return false;
 	}
-	return bResult;
-
-}
-
-void UC_QuickSlotManagerComponent::setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID)
-{
-	m_arrQuickSlotItem[(int)QuickSlotType] = ItemID;
+	return true;
 }
 
 void UC_QuickSlotManagerComponent::BeginPlay()

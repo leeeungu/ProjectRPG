@@ -22,9 +22,9 @@ protected:
 
 
 private:
-	int m_nHp;
-	int m_nMaxHp;
-	int m_nAtk;
+	float m_fHp;
+	float m_fMaxHp;
+	float m_fAtk;
 
 
 protected:
@@ -39,17 +39,20 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	void setHp(int nHp);
-	UFUNCTION(BlueprintPure)
-	int getHp() const;
+	virtual bool takeDamageEvent(float fDamage);
 
 	UFUNCTION(BlueprintCallable)
-	void setMaxHp(int nMaxHp);
+	void setHp(float fHp);
 	UFUNCTION(BlueprintPure)
-	int getMaxHp() const;
+	float getHp() const;
 
 	UFUNCTION(BlueprintCallable)
-	void setAtck(int nAtck);
+	void setMaxHp(float fMaxHp);
 	UFUNCTION(BlueprintPure)
-	int getAtck() const;
+	float getMaxHp() const;
+
+	UFUNCTION(BlueprintCallable)
+	void setAtk(float fAtk);
+	UFUNCTION(BlueprintPure)
+	float getAtk() const;
 };

@@ -42,6 +42,8 @@ public:
 
 	virtual void OnUnPossess() override;
 
+	void restartAi();
+
 protected:
 	virtual void BeginPlay() override;
 };

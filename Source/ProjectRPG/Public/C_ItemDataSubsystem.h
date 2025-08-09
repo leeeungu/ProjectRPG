@@ -4,6 +4,9 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "C_ItemDataSubsystem.generated.h"
 
+class AC_ItemActorBase;
+class APawn;
+
 UENUM(BlueprintType)
 enum class E_EItemType : uint8
 {	
@@ -39,19 +42,22 @@ struct FS_ItemData : public FTableRowBase
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	FText strItemName;
+	FText strItemName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	int nItemID = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	FString strItemDescription = TEXT("아무런 효과 없음");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	UTexture2D* pItemIcon;
+	UTexture2D* pItemIcon{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	E_EItemType eItemType = E_EItemType::None;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data", meta = (Bitmask, BitmaskEnum = E_EItemState))
 	int32 eltemStateFlag = 255;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data")
+	TSubclassOf< AC_ItemActorBase> cEffectItemClass;
 };
 
 UCLASS()
@@ -86,6 +92,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
+
+	UFUNCTION(BlueprintCallable, Category = "ItemData")
+	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
 
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;
