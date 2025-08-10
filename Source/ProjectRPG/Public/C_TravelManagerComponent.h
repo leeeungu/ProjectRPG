@@ -14,6 +14,10 @@ enum class E_TrabelType : uint8
 	E_ClimbDownEnd		UMETA(DisplayName = "ClimbDownEnd"),
 	E_SlopDownStart		UMETA(DisplayName = "SlopDownStart"),
 	E_SlopDownEnd		UMETA(DisplayName = "SlopDownEnd"),
+	E_ZipLineStart		UMETA(DisplayName = "ZipLineStart"),
+	E_ZipLineEnd		UMETA(DisplayName = "ZipLineEnd"),
+	E_BalanceBeamStart		UMETA(DisplayName = "BalanceBeamStart"),
+	E_BalanceBeamEnd		UMETA(DisplayName = "BalanceBeamEnd"),
 };
 
 
