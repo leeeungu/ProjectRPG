@@ -19,11 +19,11 @@ public:
 
 
 protected:
-
-
-private:
+	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fHp;
+	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fMaxHp;
+	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fAtk;
 
 

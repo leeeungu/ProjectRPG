@@ -120,10 +120,10 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 	{
 		pSlotData->sData.nItemID = nItemID;
 		pSlotData->sData.nItemCount += nItemCount;
+		int& sCount = m_mapItemCount.FindOrAdd(pSlotData->sData.nItemID);
+		sCount += pSlotData->sData.nItemCount;
 		if (m_onPushItem.IsBound())
 		{
-			int& sCount = m_mapItemCount.FindOrAdd(pSlotData->sData.nItemID);
-			sCount += pSlotData->sData.nItemCount;
 			m_onPushItem.Broadcast(pSlotData->sData.nItemID, pSlotData->sData.nItemCount);
 		}
 		runSlotChangeInterface(pSlotData);

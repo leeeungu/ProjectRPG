@@ -132,7 +132,8 @@ void AC_AnimationInteraction::StartAnimation()
 {
 	if (!m_pDetector)
 		return;
-	SetActorTickEnabled(false);
+	SetActorTickEnabled(false); 
+	m_pDetector->SetActorTickEnabled(false);
 	m_pDetector->SetActorRotation(m_pStartDirection->GetComponentRotation());
 	m_pDetector->SetActorLocation(m_pStartDirection->GetComponentLocation());
 	m_pTravelManagerComponent->setTravelType(m_eStartType);
