@@ -81,6 +81,8 @@ protected:
 public:
 	AC_MonsterBaseCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	TArray<int32> filterAvailablePatterns();
 
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
@@ -101,5 +103,8 @@ public:
 
 	UFUNCTION()
 	void onStaggerRecover();
-	
+
+	UFUNCTION(BlueprintCallable)
+	void onDead();
+
 };

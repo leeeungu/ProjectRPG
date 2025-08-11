@@ -7,6 +7,13 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 {
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AC_MonsterAiController::StaticClass();
+	SetActorTickEnabled(false);
+}
+
+void AC_MonsterBaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 }
 
 void AC_MonsterBaseCharacter::playStaggerMontage()
@@ -57,7 +64,10 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 }
 
-
+void AC_MonsterBaseCharacter::onDead()
+{
+	SetActorTickEnabled(true);
+}
 
 TArray<int32> AC_MonsterBaseCharacter::filterAvailablePatterns()
 {
@@ -165,5 +175,5 @@ void AC_MonsterBaseCharacter::BeginPlay()
 		}
 	}
 
-	
+	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 }
