@@ -116,7 +116,7 @@ void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 		return;
 	m_pDetector = Cast<ACharacter>(pDetectedActor);
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
-	if (!m_pDetector || !m_pTravelManagerComponent)
+	if (!m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
 		return;
 
 	UNavigationPath* pPath = UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), m_pDetector->GetActorLocation(), m_pStartDirection->GetComponentLocation());
