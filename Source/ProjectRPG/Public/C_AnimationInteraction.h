@@ -65,4 +65,5 @@ private:
 	UFUNCTION()
 	void endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void rotateToTarget();
 };

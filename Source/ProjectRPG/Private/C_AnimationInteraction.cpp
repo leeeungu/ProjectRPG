@@ -45,33 +45,13 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	AActor::PostEditChangeProperty(PropertyChangedEvent);
-	if (m_pStartDirection && m_pEndCollision2)
-	{
-		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision2->GetComponentLocation());
-		if (!m_bRotateYaw)
-			Rot.Yaw = 0.0;
-		if (!m_bRotatePitch)
-			Rot.Pitch = 0.0;
-		if (!m_bRotateRoll)
-			Rot.Roll = 0.0;
-		m_pStartDirection->SetWorldRotation(Rot);
-	}
+	rotateToTarget();
 }
 
 void AC_AnimationInteraction::PostEditMove(bool bFinished)
 {
 	AActor::PostEditMove(bFinished);
-	if (m_pStartDirection && m_pEndCollision2)
-	{
-		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision2->GetComponentLocation());
-		if (!m_bRotateYaw)
-			Rot.Yaw = 0.0;
-		if (!m_bRotatePitch)
-			Rot.Pitch = 0.0;
-		if (!m_bRotateRoll)
-			Rot.Roll = 0.0;
-		m_pStartDirection->SetWorldRotation(Rot);
-	}
+	rotateToTarget();
 }
 
 void AC_AnimationInteraction::Tick(float DeltaTime)
@@ -158,4 +138,19 @@ void AC_AnimationInteraction::beginOverlap(UPrimitiveComponent* OverlappedCompon
 void AC_AnimationInteraction::endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	m_pInteractionWidget->SetVisibility(false);
+}
+
+void AC_AnimationInteraction::rotateToTarget()
+{
+	if (m_pStartDirection && m_pEndCollision2)
+	{
+		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision2->GetComponentLocation());
+		if (!m_bRotateYaw)
+			Rot.Yaw = 0.0;
+		if (!m_bRotatePitch)
+			Rot.Pitch = 0.0;
+		if (!m_bRotateRoll)
+			Rot.Roll = 0.0;
+		m_pStartDirection->SetWorldRotation(Rot);
+	}
 }
