@@ -19,10 +19,7 @@ public:
 
 
 protected:
-<<<<<<< Updated upstream
 	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
-=======
->>>>>>> Stashed changes
 	float m_fHp;
 	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fMaxHp;
