@@ -6,7 +6,6 @@
 UC_BTTask_Attack::UC_BTTask_Attack()
 {
 	NodeName = TEXT("Attack");
-	m_bIsAttacking = false;
 	bNotifyTick = true;
 }
 

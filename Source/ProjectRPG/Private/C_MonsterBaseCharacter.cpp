@@ -21,7 +21,7 @@ void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 
 }
 
-void AC_MonsterBaseCharacter::onStaggerBroken()
+void AC_MonsterBaseCharacter::stopAi()
 {
 	AAIController* pAiCon = Cast<AAIController>(GetController());
 
@@ -34,6 +34,13 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 			pBtComp->StopTree(EBTStopMode::Safe);
 		}
 	}
+}
+
+void AC_MonsterBaseCharacter::onStaggerBroken()
+{
+	AAIController* pAiCon = Cast<AAIController>(GetController());
+
+	stopAi();
 
 	playStaggerMontage();
 }

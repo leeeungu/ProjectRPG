@@ -19,12 +19,19 @@ public:
 
 
 protected:
+<<<<<<< Updated upstream
 	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
+=======
+>>>>>>> Stashed changes
 	float m_fHp;
 	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fMaxHp;
 	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
 	float m_fAtk;
+	bool m_bIsDead = false;
+
+private:
+	
 
 
 protected:
@@ -55,4 +62,7 @@ public:
 	void setAtk(float fAtk);
 	UFUNCTION(BlueprintPure)
 	float getAtk() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsDead() const;
 };

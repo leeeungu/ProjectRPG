@@ -35,13 +35,16 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 bool AC_BaseCharacter::takeDamageEvent(float fDamage)
 {
-	if (m_fHp >= 0)
+
+	m_fHp -= fDamage;
+
+	if (m_fHp <= 0)
 	{
-		m_fHp -= fDamage;
+		m_bIsDead = true;
 		return true;
 	}
-
-	return false;
+	
+	return true;
 	
 }
 
@@ -73,5 +76,10 @@ void AC_BaseCharacter::setAtk(float fAtk)
 float AC_BaseCharacter::getAtk() const
 {
 	return m_fAtk;
+}
+
+bool AC_BaseCharacter::getIsDead() const
+{
+	return m_bIsDead;
 }
 
