@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FQuestPluginRuntimeModule : public IModuleInterface
+class FQuestSystemEditorModule : public IModuleInterface
 {
 public:
 

@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "QuestPlugin",
+	"FriendlyName": "QuestSystem",
 	"Description": "",
 	"Category": "Other",
 	"CreatedBy": "",
@@ -16,12 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "QuestPlugin",
+			"Name": "QuestSystemEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "QuestPluginRuntime",
+			"Name": "QuestSystemRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

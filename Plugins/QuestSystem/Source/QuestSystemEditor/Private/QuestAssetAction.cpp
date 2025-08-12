@@ -1,6 +1,6 @@
 ﻿#include "QuestAssetAction.h"
 #include "QuestAsset.h"
-#include "QuestEditorApp.h"
+#include "QuestAssetEditorApp.h"
 
 QuestAssetAction::QuestAssetAction(EAssetTypeCategories::Type categpry)
 {
@@ -9,7 +9,7 @@ QuestAssetAction::QuestAssetAction(EAssetTypeCategories::Type categpry)
 
 FText QuestAssetAction::GetName() const
 {
-	return FText::FromString( TEXT("Quest Asset"));
+	return FText::FromString(TEXT("Quest Asset"));
 }
 
 FColor QuestAssetAction::GetTypeColor() const
@@ -30,13 +30,13 @@ void QuestAssetAction::OpenAssetEditor(const TArray<UObject*>& InObjects, TShare
 		UQuestAsset* questAsset = Cast< UQuestAsset>(object);
 		if (questAsset != nullptr)
 		{
-			TSharedRef<QuestEditorApp> editor(new QuestEditorApp());
+			TSharedRef<QuestAssetEditorApp> editor(new QuestAssetEditorApp());
 			editor->InitEditor(mode, EditWithinLevelEditor, questAsset);
 		}
 	}
 }
 
-uint32 QuestAssetAction::GetCategories() 
+uint32 QuestAssetAction::GetCategories()
 {
 	return _assetCategpry;
 }

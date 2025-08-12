@@ -1,13 +1,11 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
-
-#include "QuestPlugin.h"
+﻿#include "QuestSystemEditor.h"
 #include "QuestAssetAction.h"
 #include "IAssetTools.h"
 #include "AssetToolsModule.h"
 
-#define LOCTEXT_NAMESPACE "FQuestPluginModule"
+#define LOCTEXT_NAMESPACE "FQuestSystemEditorModule"
 
-void FQuestPluginModule::StartupModule()
+void FQuestSystemEditorModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	IAssetTools& assetTool = IAssetTools::Get();
@@ -15,8 +13,7 @@ void FQuestPluginModule::StartupModule()
 	TSharedPtr<QuestAssetAction> questAction = MakeShareable(new QuestAssetAction(assetType));
 	assetTool.RegisterAssetTypeActions(questAction.ToSharedRef());
 }
-
-void FQuestPluginModule::ShutdownModule()
+void FQuestSystemEditorModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
@@ -24,4 +21,4 @@ void FQuestPluginModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FQuestPluginModule, QuestPlugin)
+IMPLEMENT_MODULE(FQuestSystemEditorModule, QuestSystemEditor)

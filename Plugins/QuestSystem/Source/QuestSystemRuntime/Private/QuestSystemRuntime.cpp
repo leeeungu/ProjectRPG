@@ -1,15 +1,15 @@
 ﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "QuestPluginRuntime.h"
+#include "QuestSystemRuntime.h"
 
-#define LOCTEXT_NAMESPACE "FQuestPluginRuntimeModule"
+#define LOCTEXT_NAMESPACE "FQuestSystemRuntimeModule"
 
-void FQuestPluginRuntimeModule::StartupModule()
+void FQuestSystemRuntimeModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 }
 
-void FQuestPluginRuntimeModule::ShutdownModule()
+void FQuestSystemRuntimeModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
@@ -17,4 +17,4 @@ void FQuestPluginRuntimeModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FQuestPluginRuntimeModule, QuestPluginRuntime)
+IMPLEMENT_MODULE(FQuestSystemRuntimeModule, QuestSystemRuntime)

@@ -1,10 +1,10 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
-public class QuestPluginRuntime : ModuleRules
+public class QuestSystem : ModuleRules
 {
-	public QuestPluginRuntime(ReadOnlyTargetRules Target) : base(Target)
+	public QuestSystem(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		

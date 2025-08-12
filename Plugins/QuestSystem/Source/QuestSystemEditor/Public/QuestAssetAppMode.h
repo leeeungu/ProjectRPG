@@ -4,16 +4,18 @@
 #include "WorkflowOrientedApp/ApplicationMode.h"
 #include "WorkflowOrientedApp/WorkflowTabManager.h"
 
-class QuestAppMode : public FApplicationMode
+class QuestAssetEditorApp;
+
+class  QuestAssetAppMode : public FApplicationMode
 {
 public:
-	QuestAppMode(TSharedPtr<class QuestEditorApp> app);
-	
+	QuestAssetAppMode(TSharedPtr<QuestAssetEditorApp> app);
+
 	virtual void RegisterTabFactories(TSharedPtr<FTabManager> InTabManager) override;
 	virtual void PreDeactivateMode() override;
 	virtual void PostActivateMode() override;
 
 private:
-	TWeakPtr<class QuestEditorApp> _app;
+	TWeakPtr<QuestAssetEditorApp> _app;
 	FWorkflowAllowedTabSet _tabs;
 };

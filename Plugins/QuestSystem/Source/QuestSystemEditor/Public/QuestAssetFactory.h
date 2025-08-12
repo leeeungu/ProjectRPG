@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
-#include "QuestFactory.generated.h"
+#include "QuestAssetFactory.generated.h"
 
 UCLASS()
-class UQuestFactory : public UFactory
+class UQuestAssetFactory : public UFactory
 {
 	GENERATED_BODY()
 public:
-	UQuestFactory(const FObjectInitializer& ObjectInitializer);
+	UQuestAssetFactory(const FObjectInitializer& ObjectInitializer);
 
 	virtual UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn, FName CallingContext) override;
 	virtual bool CanCreateNew() const override;

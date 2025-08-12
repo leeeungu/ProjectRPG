@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class QuestPlugin : ModuleRules
+public class QuestSystemEditor : ModuleRules
 {
-	public QuestPlugin(ReadOnlyTargetRules Target) : base(Target)
+	public QuestSystemEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -38,10 +38,9 @@ public class QuestPlugin : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-                "QuestPluginRuntime",
+                "QuestSystemRuntime",
 				"AssetTools",
-				"UnrealEd",
-				"PropertyEditor"
+				"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

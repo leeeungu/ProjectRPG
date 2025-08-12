@@ -3,16 +3,17 @@
 #include "CoreMinimal.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
 
-class QuestEditorApp : public FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook
+class UQuestAsset;
+
+class  QuestAssetEditorApp : public FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook
 {
 public:
-	 virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
-	 void InitEditor(const EToolkitMode::Type mode, const TSharedPtr<IToolkitHost>& initToolkitHostm, UObject* inObject);
+	//virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
+	void InitEditor(const EToolkitMode::Type mode, const TSharedPtr<IToolkitHost>& initToolkitHostm, UObject* inObject);
 
 
-	 class UQuestAsset* GetWorkingAsset() { return _workingAsset; }
+	UQuestAsset* GetWorkingAsset() { return _workingAsset; }
 public:
-	//virtual FName GetToolkitFName() const override = 0;				// Must implement in derived class!
 	virtual FName GetToolkitFName() const override { return FName(TEXT("QuestAssetEditorApp")); }
 	virtual FText GetBaseToolkitName() const override { return FText::FromString(TEXT("QuestAssetEditorApp")); }
 	virtual FString GetWorldCentricTabPrefix() const override { return TEXT("QuestAssetEditorApp"); }
@@ -23,5 +24,5 @@ public:
 
 private:
 	UPROPERTY()
-	class UQuestAsset* _workingAsset = nullptr;
+	UQuestAsset* _workingAsset = nullptr;
 };
