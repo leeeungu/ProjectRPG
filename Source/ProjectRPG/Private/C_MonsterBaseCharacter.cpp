@@ -167,6 +167,8 @@ void AC_MonsterBaseCharacter::BeginPlay()
 	{
 		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
+		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
+
 		if (m_pStaggerComp)
 		{
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
