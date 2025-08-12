@@ -8,6 +8,12 @@ public class ProjectRPG : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" , "UMG", "AIModule", "NavigationSystem", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" , "UMG", "AIModule", "NavigationSystem", "SlateCore" , "QuestPluginRuntime"});
+
+		if (Target.bBuildEditor)
+		{
+            PublicDependencyModuleNames.AddRange(new string[] {"QuestPlugin" });
+
+        }
     }
 }
