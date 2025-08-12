@@ -4,6 +4,7 @@
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
 
 class UQuestAsset;
+class UEdGraph;
 
 class  QuestAssetEditorApp : public FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook
 {
@@ -13,6 +14,7 @@ public:
 
 
 	UQuestAsset* GetWorkingAsset() { return _workingAsset; }
+	UEdGraph* GetWorkingGraph() { return _workingGraph; }
 public:
 	virtual FName GetToolkitFName() const override { return FName(TEXT("QuestAssetEditorApp")); }
 	virtual FText GetBaseToolkitName() const override { return FText::FromString(TEXT("QuestAssetEditorApp")); }
@@ -22,7 +24,19 @@ public:
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>& Toolkit) {}
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) {}
 
+	virtual void OnClose() override;
+	void OnGraphChanged(const FEdGraphEditAction& InAction);
+
+protected:
+	void UpdateWorkingAssetFromGraph();
+	void UpdateEditorGraphFromWorkingAsset();
+
 private:
 	UPROPERTY()
 	UQuestAsset* _workingAsset = nullptr;
+
+	UPROPERTY()
+	UEdGraph* _workingGraph = nullptr;
+
+	FDelegateHandle _graohChangeLisenerHandle;
 };

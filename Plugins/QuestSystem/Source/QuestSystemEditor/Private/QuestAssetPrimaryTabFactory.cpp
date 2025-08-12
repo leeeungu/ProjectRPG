@@ -2,8 +2,12 @@
 #include "QuestAssetEditorApp.h"
 #include "QuestAsset.h"
 #include "IDetailsView.h"
+#include "GraphEditor.h"
+#include "Editor/UnrealEd/Public/Kismet2/BlueprintEditorUtils.h"
+#include "Kismet2/KismetEditorUtilities.h"
 
-QuestAssetPrimaryTabFactory::QuestAssetPrimaryTabFactory(TSharedPtr<QuestAssetEditorApp> app) : FWorkflowTabFactory(FName("QuestPrimaryTab"), app)
+
+QuestAssetPrimaryTabFactory::QuestAssetPrimaryTabFactory(TSharedPtr<QuestAssetEditorApp> app) : FWorkflowTabFactory(FName("QuestAssetPrimaryTab"), app)
 {
 	_app = app;
 	TabLabel = FText::FromString(TEXT("Primary"));
@@ -15,31 +19,16 @@ QuestAssetPrimaryTabFactory::QuestAssetPrimaryTabFactory(TSharedPtr<QuestAssetEd
 TSharedRef<SWidget> QuestAssetPrimaryTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
 	TSharedPtr<QuestAssetEditorApp> app = _app.Pin();
-	FPropertyEditorModule& propertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
 
-   FDetailsViewArgs detailsViewArgs;
-    {
-        detailsViewArgs.bAllowSearch = false;
-        detailsViewArgs.bHideSelectionTip = true;
-        detailsViewArgs.bLockable = false;
-        detailsViewArgs.bSearchInitialKeyFocus = true;
-        detailsViewArgs.bUpdatesFromSelection = false;
-        detailsViewArgs.NotifyHook = nullptr;
-        detailsViewArgs.bShowOptions = true;
-        detailsViewArgs.bShowModifiedPropertiesOption = false;
-        detailsViewArgs.bShowScrollBar = false;
-    }
-
-    TSharedPtr<IDetailsView> detailsView = propertyEditorModule.CreateDetailView(detailsViewArgs);
-    detailsView->SetObject(app->GetWorkingAsset());
-
-    return SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                .FillHeight(1.0f)
-                .HAlign(HAlign_Fill)
-                [
-                    detailsView.ToSharedRef()
-                ];
+	return SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.FillHeight(1.0f)
+		.HAlign(HAlign_Fill)
+		[
+			SNew(SGraphEditor)
+				.IsEditable(true)
+				.GraphToEdit(app->GetWorkingGraph())
+		];
 }
 
 FText QuestAssetPrimaryTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

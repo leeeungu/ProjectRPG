@@ -40,7 +40,11 @@ public class QuestSystemEditor : ModuleRules
 				"SlateCore",
                 "QuestSystemRuntime",
 				"AssetTools",
-				"UnrealEd"
+				"UnrealEd",
+				"PropertyEditor",
+				"Projects",
+				"ToolMenus",
+				"GraphEditor"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "Styling/SlateStyle.h"
 
 class FQuestSystemEditorModule : public IModuleInterface
 {
@@ -12,4 +13,9 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+	TSharedPtr<FSlateStyleSet> _styleSet = nullptr;
+
+	TSharedPtr <struct FQuestPinFactory> _pinFactory = nullptr;
 };

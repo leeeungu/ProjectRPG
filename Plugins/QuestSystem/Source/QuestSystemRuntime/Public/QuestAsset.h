@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "QuestRuntimeGraph.h"
 #include "QuestAsset.generated.h"
 
 UCLASS(BlueprintType)
@@ -17,4 +18,7 @@ public:
 
     UPROPERTY(EditAnywhere)
     bool SomeBool = false;
+
+    UPROPERTY(EditAnywhere)
+    UQuestRuntimeGraph* Graph = nullptr;
 };
