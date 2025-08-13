@@ -2,6 +2,7 @@
 #include "QuestAssetEditorApp.h"
 #include "QuestAsset.h"
 #include "IDetailsView.h"
+#include "QuestNodeInfo.h"
 
 QuestAssetPropertiesTabFactory::QuestAssetPropertiesTabFactory(TSharedPtr<QuestAssetEditorApp> app) : FWorkflowTabFactory(FName("QuestAssetPropertiesTab"), app)
 {
@@ -15,6 +16,11 @@ QuestAssetPropertiesTabFactory::QuestAssetPropertiesTabFactory(TSharedPtr<QuestA
 TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
 	TSharedPtr<QuestAssetEditorApp> app = _app.Pin();
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
+
+
+
+
     FDetailsViewArgs detailsViewArgs;
     {
         detailsViewArgs.bAllowSearch = false;
@@ -28,17 +34,29 @@ TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflo
         detailsViewArgs.bShowScrollBar = false;
     }
 
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
 
     TSharedPtr<IDetailsView> detailsView = propertyEditorModule.CreateDetailView(detailsViewArgs);
     detailsView->SetObject(app->GetWorkingAsset());
 
+    
+    TSharedPtr<IDetailsView> selectedNodeDetailView = propertyEditorModule.CreateDetailView(detailsViewArgs);
+    selectedNodeDetailView->SetObject(nullptr);
+    app->SetSelectedNodeDetailView(selectedNodeDetailView);
+
+    
+    
     return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .FillHeight(1.0f)
         .HAlign(HAlign_Fill)
         [
             detailsView.ToSharedRef()
+        ]
+        +SVerticalBox::Slot()
+        .FillHeight(1.0f)
+        .HAlign(HAlign_Fill)
+        [
+            selectedNodeDetailView.ToSharedRef()
         ];
   
 }

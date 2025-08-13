@@ -26,6 +26,7 @@ public class QuestSystemEditor : ModuleRules
 			new string[]
 			{
 				"Core",
+                   "CoreUObject",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -34,7 +35,7 @@ public class QuestSystemEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
+                "CoreUObject",
 				"Engine",
 				"Slate",
 				"SlateCore",

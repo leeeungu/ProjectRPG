@@ -29,6 +29,46 @@ protected:
 	}
 };
 
+
+class SQuestStartGraphPin : public SGraphPin
+{
+public:
+	SLATE_BEGIN_ARGS(SQuestStartGraphPin) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs, UEdGraphPin* InPin)
+	{
+		SGraphPin::Construct(SGraphPin::FArguments(), InPin);
+	}
+
+
+protected:
+	virtual FSlateColor GetPinColor() const override
+	{
+		return FSlateColor(FLinearColor(1.0f, 0.2f, 0.2f));
+	}
+};
+
+
+class SQuestEndGraphPin : public SGraphPin
+{
+public:
+	SLATE_BEGIN_ARGS(SQuestEndGraphPin) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs, UEdGraphPin* InPin)
+	{
+		SGraphPin::Construct(SGraphPin::FArguments(), InPin);
+	}
+
+
+protected:
+	virtual FSlateColor GetPinColor() const override
+	{
+		return FSlateColor(FLinearColor(0.2f, 0.2f, 1.0f));
+	}
+};
+
 struct FQuestPinFactory : public FGraphPanelPinFactory 
 {
 public:
@@ -38,6 +78,14 @@ public:
 		if (FName(TEXT("QuestPin")) == Pin->PinType.PinSubCategory)
 		{
 			return SNew(SQuestGraphPin, Pin);
+		}
+		else if (FName(TEXT("StartPin")) == Pin->PinType.PinSubCategory)
+		{
+			return SNew(SQuestStartGraphPin, Pin);
+		}
+		else if (FName(TEXT("EndPin")) == Pin->PinType.PinSubCategory)
+		{
+			return SNew(SQuestEndGraphPin, Pin);
 		}
 		return nullptr;
 	}

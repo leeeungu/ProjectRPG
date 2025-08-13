@@ -19,15 +19,22 @@ QuestAssetPrimaryTabFactory::QuestAssetPrimaryTabFactory(TSharedPtr<QuestAssetEd
 TSharedRef<SWidget> QuestAssetPrimaryTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
 	TSharedPtr<QuestAssetEditorApp> app = _app.Pin();
+	SGraphEditor::FGraphEditorEvents graphEvents{};
+	graphEvents.OnSelectionChanged.BindRaw(app.Get(), &QuestAssetEditorApp::OnGraphSelectedChanged);
+
+	TSharedPtr<SGraphEditor> graphEditor =
+		SNew(SGraphEditor)
+		.IsEditable(true)
+		.GraphEvents(graphEvents)
+		.GraphToEdit(app->GetWorkingGraph());
+	app->SetWorkingGraphUI(graphEditor);
 
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
 		.FillHeight(1.0f)
 		.HAlign(HAlign_Fill)
 		[
-			SNew(SGraphEditor)
-				.IsEditable(true)
-				.GraphToEdit(app->GetWorkingGraph())
+			graphEditor.ToSharedRef()
 		];
 }
 

@@ -5,6 +5,9 @@
 
 class UQuestAsset;
 class UEdGraph;
+class IDetailView;
+class UQuestGraphNode;
+class UQuestGraphNodeBase;
 
 class  QuestAssetEditorApp : public FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook
 {
@@ -15,6 +18,11 @@ public:
 
 	UQuestAsset* GetWorkingAsset() { return _workingAsset; }
 	UEdGraph* GetWorkingGraph() { return _workingGraph; }
+	void SetWorkingGraphUI(TSharedPtr<SGraphEditor> workingGraphUI) { _workingGraphUI = workingGraphUI; }
+	void SetSelectedNodeDetailView(TSharedPtr<IDetailsView>  detailsView);
+	void OnGraphSelectedChanged(const FGraphPanelSelectionSet& selection);
+
+
 public:
 	virtual FName GetToolkitFName() const override { return FName(TEXT("QuestAssetEditorApp")); }
 	virtual FText GetBaseToolkitName() const override { return FText::FromString(TEXT("QuestAssetEditorApp")); }
@@ -25,11 +33,16 @@ public:
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) {}
 
 	virtual void OnClose() override;
-	void OnGraphChanged(const FEdGraphEditAction& InAction);
+	void OnNodeDetailViewPropertiesUpdated(const FPropertyChangedEvent& event);
+	void OnWorkingAssetPreSave();
+
+
 
 protected:
 	void UpdateWorkingAssetFromGraph();
 	void UpdateEditorGraphFromWorkingAsset();
+
+	UQuestGraphNodeBase* GetSelectedNode(const FGraphPanelSelectionSet& selection);
 
 private:
 	UPROPERTY()
@@ -38,5 +51,6 @@ private:
 	UPROPERTY()
 	UEdGraph* _workingGraph = nullptr;
 
-	FDelegateHandle _graohChangeLisenerHandle;
+	TSharedPtr<SGraphEditor> _workingGraphUI = nullptr;
+	TSharedPtr<IDetailsView> _SelectedNodeDetailsView = nullptr;
 };

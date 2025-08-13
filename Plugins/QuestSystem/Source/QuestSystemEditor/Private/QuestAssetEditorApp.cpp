@@ -5,12 +5,18 @@
 #include "QuestGraphSchema.h"
 #include "QuestRuntimeGraph.h"
 #include "QuestGraphNode.h"
+#include "IDetailsView.h"
+#include "QuestStartGraphNode.h"
+#include "QuestNodeInfo.h"
+
+
+//DEFINE_LOG_CATEGORY_STATIC(QuestAssetEditorApp, Log, All);
+//#include "uedgraphpannel"
 
 //void QuestAssetEditorApp::RegisterTabSpawners(const TSharedRef< class FTabManager>& TabManager)
 //{
 //	FWorkflowCentricApplication::RegisterTabSpawners(TabManager);
 //}
-
 
 void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TSharedPtr<IToolkitHost>& initToolkitHost, UObject* inObject)
 {
@@ -18,6 +24,7 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
 	ObjectsToEdit.Add(inObject);
 
 	_workingAsset = Cast<UQuestAsset>(inObject);
+    _workingAsset->SetPreSaveListener([this]() {OnWorkingAssetPreSave(); });
 	_workingGraph = FBlueprintEditorUtils::CreateNewGraph(
 		_workingAsset,
 		NAME_None,
@@ -36,21 +43,54 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
 	SetCurrentMode(TEXT("QuestAppMode"));
 
     UpdateEditorGraphFromWorkingAsset();
-    _graohChangeLisenerHandle = _workingGraph->AddOnGraphChangedHandler(
+  /*  _graohChangeLisenerHandle = _workingGraph->AddOnGraphChangedHandler(
         FOnGraphChanged::FDelegate::CreateSP(this, &QuestAssetEditorApp::OnGraphChanged)
-    );
+    );*/
+
+}
+
+void QuestAssetEditorApp::SetSelectedNodeDetailView(TSharedPtr<IDetailsView> detailsView)
+{
+    _SelectedNodeDetailsView = detailsView;
+    _SelectedNodeDetailsView->OnFinishedChangingProperties().AddRaw(this, &QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated);
+}
+
+void QuestAssetEditorApp::OnGraphSelectedChanged(const FGraphPanelSelectionSet& selection)
+{
+    UQuestGraphNodeBase* selectedNode = GetSelectedNode(selection);
+    if (selectedNode)
+    {
+        _SelectedNodeDetailsView->SetObject(selectedNode->GetNodeInfo());
+    }
+    else
+    _SelectedNodeDetailsView->SetObject(nullptr);
 }
 
 void QuestAssetEditorApp::OnClose()
 {
     UpdateWorkingAssetFromGraph();
-    _workingGraph->RemoveOnGraphChangedHandler(_graohChangeLisenerHandle);
+    _workingAsset->SetPreSaveListener(nullptr);
+  //  _workingGraph->RemoveOnGraphChangedHandler(_graohChangeLisenerHandle);
     FAssetEditorToolkit::OnClose();
 }
 
-
-void QuestAssetEditorApp::OnGraphChanged(const FEdGraphEditAction& InAction)
+void QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated(const FPropertyChangedEvent& event)
 {
+    if (_workingGraphUI != nullptr)
+    {
+        UQuestGraphNode* selectedNode = Cast< UQuestGraphNode>(GetSelectedNode(_workingGraphUI->GetSelectedNodes()));
+        if (selectedNode)
+        {
+            selectedNode->SyncPinWithResponses();
+        }
+        _workingGraphUI->NotifyGraphChanged();
+    }
+}
+
+
+void QuestAssetEditorApp::OnWorkingAssetPreSave()
+{
+
     UpdateWorkingAssetFromGraph();
 }
 
@@ -69,6 +109,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
     for (UEdGraphNode* uiNode : _workingGraph->Nodes) {
         UQuestRuntimeNode* runtimeNode = NewObject<UQuestRuntimeNode>(runtimeGraph);
         runtimeNode->Position = FVector2D(uiNode->NodePosX, uiNode->NodePosY);
+       // runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();
 
         for (UEdGraphPin* uiPin : uiNode->Pins) {
             UQuestRuntimePin* runtimePin = NewObject<UQuestRuntimePin>(runtimeNode);
@@ -90,6 +131,17 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
                 runtimeNode->OutputPins.Add(runtimePin);
             }
         }
+        if (uiNode->IsA(UQuestGraphNode::StaticClass()))
+        {
+            UQuestGraphNode* uiGraphNode = Cast<UQuestGraphNode>(uiNode);
+            runtimeNode->NodeType = EQuestNodeType::QuestNode;
+            runtimeNode->QuestInfo = uiGraphNode->GetQuestNodeInfo();;
+        }
+        else  if (uiNode->IsA(UQuestStartGraphNode::StaticClass()))
+        {
+            runtimeNode->NodeType = EQuestNodeType::StartNode;
+            //runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();;
+        }
 
         runtimeGraph->Nodes.Add(runtimeNode);
     }
@@ -104,6 +156,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
 void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
 {
     if (_workingAsset->Graph == nullptr) {
+            _workingGraph->GetSchema()->CreateDefaultNodesForGraph(*_workingGraph);
         return;
     }
 
@@ -111,10 +164,33 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
     TArray<std::pair<FGuid, FGuid>> connections;
     TMap<FGuid, UEdGraphPin*> idToPinMap;
     for (UQuestRuntimeNode* runtimeNode : _workingAsset->Graph->Nodes) {
-        UQuestGraphNode* newNode = NewObject<UQuestGraphNode>(_workingGraph);
+        UQuestGraphNodeBase* newNode{};
+        if (runtimeNode->NodeType == EQuestNodeType::StartNode)
+        {
+            newNode = NewObject<UQuestStartGraphNode>(_workingGraph);
+        }
+        else if (runtimeNode->NodeType == EQuestNodeType::QuestNode)
+        {
+            newNode = NewObject<UQuestGraphNode>(_workingGraph);
+        }
+        else
+        {
+            //UE_LOG(QuestAssetEditorApp, Error, TEXT("QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset: Unknown node Type"));
+            continue;
+        }
+
         newNode->CreateNewGuid();
         newNode->NodePosX = runtimeNode->Position.X;
         newNode->NodePosY = runtimeNode->Position.Y;
+
+        if (runtimeNode->QuestInfo)
+        {
+            newNode->SetNodeInfo(DuplicateObject(runtimeNode->QuestInfo, runtimeNode));
+        }
+        else if (runtimeNode->NodeType != EQuestNodeType::StartNode)
+        {
+            newNode->SetNodeInfo(NewObject<UQuestNodeInfo>(runtimeNode));
+        }
 
         if (runtimeNode->InputPin != nullptr) {
             UQuestRuntimePin* pin = runtimeNode->InputPin;
@@ -146,4 +222,17 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
         fromPin->LinkedTo.Add(toPin);
         toPin->LinkedTo.Add(fromPin);
     }
+}
+
+UQuestGraphNodeBase* QuestAssetEditorApp::GetSelectedNode(const FGraphPanelSelectionSet& selection)
+{
+    for (UObject* obj : selection)
+    {
+        UQuestGraphNodeBase* node = Cast< UQuestGraphNodeBase>(obj);
+        if (node)
+        {
+        return node;
+        }
+    }
+    return nullptr;
 }

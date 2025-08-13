@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "QuestRuntimeGraph.h"
+#include <functional>
 #include "QuestAsset.generated.h"
 
 UCLASS(BlueprintType)
@@ -11,14 +12,17 @@ class QUESTSYSTEMRUNTIME_API UQuestAsset : public UObject
 public:
 
     UPROPERTY(EditAnywhere)
-    FString SomeData = TEXT("DefaultData");
-
-    UPROPERTY(EditAnywhere)
-    int32 SomeNumber = 0;
-
-    UPROPERTY(EditAnywhere)
-    bool SomeBool = false;
+    FString SomeData = TEXT("Enter Dialog Name Here");
 
     UPROPERTY(EditAnywhere)
     UQuestRuntimeGraph* Graph = nullptr;
+
+
+public:
+    void SetPreSaveListener(std::function<void()> onPreSaveListener) { _onPreSaveListener = onPreSaveListener ; }
+
+    virtual void PreSave(FObjectPreSaveContext saveContext) override; 
+
+private:
+    std::function<void()> _onPreSaveListener = nullptr;
 };
