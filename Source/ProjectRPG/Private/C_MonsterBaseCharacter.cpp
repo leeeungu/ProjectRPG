@@ -2,6 +2,11 @@
 
 
 #include "C_MonsterBaseCharacter.h"
+#include "C_StaggerComponent.h"
+#include "C_PhaseComponent.h"
+#include "C_CounterComponent.h"
+#include "C_MonsterAiController.h"
+#include "AIController.h"
 
 AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 {
@@ -62,6 +67,21 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+}
+
+void AC_MonsterBaseCharacter::onCounterSuccess()
+{
+
+	onStaggerBroken();
+
+	FTimerHandle sCounterEndHandle;
+	GetWorld()->GetTimerManager().SetTimer(sCounterEndHandle, this,
+		&AC_MonsterBaseCharacter::onStaggerRecover, 10.f, false);
+}
+
+void AC_MonsterBaseCharacter::onCounterFailed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Counter Failed!!!!!!!!"));
 }
 
 void AC_MonsterBaseCharacter::onDead()
@@ -167,11 +187,22 @@ void AC_MonsterBaseCharacter::BeginPlay()
 	{
 		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
+		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
+
+		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
+
 		if (m_pStaggerComp)
 		{
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
 
 			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
+		}
+
+		if (m_pCounterComp)
+		{
+			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
+
+			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
 		}
 	}
 

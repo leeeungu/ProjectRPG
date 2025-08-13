@@ -14,6 +14,9 @@ class PROJECTRPG_API UC_InputQueueComponant : public UActorComponent
 private:
 	UPROPERTY()
 	TArray<int32> InputQueue;
+	UPROPERTY()
+	TArray<int32> EnterFirst;
+	bool bSubQueueActive = false;
 
 public:	
 	// Sets default values for this component's properties
@@ -25,6 +28,8 @@ public:
 	int32 OutputLastIndex(bool IsPull) const;
 	UFUNCTION(BlueprintCallable, Category = "InputQueue")
 	void ClearList();
+	UFUNCTION(BlueprintCallable, Category = "InputQueue")
+	bool InputTimeOver(float delta);
 
 protected:
 	// Called when the game starts
