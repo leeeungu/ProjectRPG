@@ -4,10 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
-#include "C_MonsterAiController.h"
-#include "AIController.h"
-#include "C_StaggerComponent.h"
-#include "C_PhaseComponent.h"
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
@@ -34,10 +30,6 @@ struct FS_PatternData
 	float fAttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fMinHpPercent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fMaxHpPercent;
 
 	float LastUsedTime = -100.f;
 };
@@ -54,10 +46,13 @@ private:
 	UAnimMontage* m_pStaggerMontage;
 
 	UPROPERTY()
-	UC_StaggerComponent* m_pStaggerComp;
+	class UC_StaggerComponent* m_pStaggerComp;
 
 	UPROPERTY()
-	UC_PhaseComponent* m_pPhaseComp;
+	class UC_PhaseComponent* m_pPhaseComp;
+
+	UPROPERTY()
+	class UC_CounterComponent* m_pCounterComp;
 
 
 	bool m_bIsAttacking = false;
@@ -108,6 +103,12 @@ public:
 
 	UFUNCTION()
 	void onStaggerRecover();
+
+	UFUNCTION()
+	void onCounterSuccess();
+
+	UFUNCTION()
+	void onCounterFailed();
 
 	UFUNCTION(BlueprintCallable)
 	void onDead();

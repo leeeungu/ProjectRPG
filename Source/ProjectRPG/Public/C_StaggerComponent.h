@@ -39,7 +39,12 @@ public:
 private:
 	void recover();
 
-public:	
+	
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:
 	// Sets default values for this component's properties
 	UC_StaggerComponent();
 
@@ -48,12 +53,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
 	bool isBroken();
-
-	
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
