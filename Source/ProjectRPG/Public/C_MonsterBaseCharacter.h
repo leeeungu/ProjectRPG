@@ -52,9 +52,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	TArray<FS_PatternData> m_arrPatternList;
 
-	UPROPERTY(EditAnywhere, Category = "Attack Montage")
-	UAnimMontage* m_pAttackMontage;
-
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
@@ -84,6 +81,8 @@ protected:
 public:
 	AC_MonsterBaseCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	TArray<int32> filterAvailablePatterns();
 
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
@@ -92,13 +91,20 @@ public:
 
 	void playStaggerMontage();
 
+
 	UFUNCTION(BlueprintCallable)
 	virtual void takeStaggerEvent(float fStagger);
+
+	UFUNCTION(BlueprintCallable)
+	void stopAi();
 
 	UFUNCTION()
 	void onStaggerBroken();
 
 	UFUNCTION()
 	void onStaggerRecover();
-	
+
+	UFUNCTION(BlueprintCallable)
+	void onDead();
+
 };

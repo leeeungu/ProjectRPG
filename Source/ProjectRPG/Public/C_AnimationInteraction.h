@@ -7,6 +7,7 @@
 
 class UWidgetComponent;
 class UC_InteractionComponent;
+class UCapsuleComponent;
 class ACharacter;
 class UArrowComponent;
 
@@ -22,7 +23,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	UC_InteractionComponent* m_pStartCollision{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
-	UC_InteractionComponent* m_pEndCollision{};
+	UCapsuleComponent* m_pEndCollision2{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	UWidgetComponent* m_pInteractionWidget{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
@@ -30,7 +31,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	E_TrabelType m_eEndType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
-	bool m_bLookEndCollision{};
+	bool m_bRotateYaw{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	bool m_bRotatePitch{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
+	bool m_bRotateRoll{};
 
 	TArray<FVector> m_arrLocations{};
 	int nIndex{};
@@ -60,4 +65,5 @@ private:
 	UFUNCTION()
 	void endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void rotateToTarget();
 };

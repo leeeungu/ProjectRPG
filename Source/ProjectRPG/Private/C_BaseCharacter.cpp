@@ -8,7 +8,6 @@ AC_BaseCharacter::AC_BaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	m_fHp = m_fMaxHp;
 
 }
 
@@ -24,6 +23,7 @@ void AC_BaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 }
 
 // Called to bind functionality to input
@@ -35,11 +35,14 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 bool AC_BaseCharacter::takeDamageEvent(float fDamage)
 {
-	if (m_fHp >= 0)
-	{
-		m_fHp -= fDamage;
+
+	m_fHp -= fDamage;
+
+	if (m_fHp > 0)
 		return true;
-	}
+
+	if (m_fHp <= 0)
+		m_onDead.Broadcast();
 
 	return false;
 	
@@ -75,3 +78,10 @@ float AC_BaseCharacter::getAtk() const
 	return m_fAtk;
 }
 
+bool AC_BaseCharacter::getIsDead() const
+{
+	if (m_fHp <= 0)
+		return true;
+
+	return false;
+}

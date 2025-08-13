@@ -21,13 +21,18 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pStartDirection = CreateDefaultSubobject< UArrowComponent>("Direction");
 	m_pStartDirection->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 
-	m_pEndCollision = CreateDefaultSubobject< UC_InteractionComponent>("EndCollision");
+	m_pEndCollision2 = CreateDefaultSubobject< UCapsuleComponent>("EndCollision");
+	m_pEndCollision2->SetCollisionProfileName(*UC_InteractionComponent::getInteractionPresetName());
+	m_pEndCollision2->SetCapsuleSize(200.0f, 200.0f);
+	m_pEndCollision2->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 
 	m_pInteractionWidget = CreateDefaultSubobject< UWidgetComponent>("InteractionWidget");
 	m_pInteractionWidget->AttachToComponent(m_pRoot, FAttachmentTransformRules::KeepRelativeTransform);
 	m_pInteractionWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	m_pInteractionWidget->SetDrawSize(FVector2D{64,64});
 	m_pInteractionWidget->SetRelativeRotation({ 0,180,0 });
+	m_pInteractionWidget->SetCollisionProfileName("NoCollision");
+
 	//Script/Engine.Texture2D'/Game/UI/Interaction/Texture/T_InteractionKey.T_InteractionKey'
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI'
 	static ConstructorHelpers::FClassFinder<UUserWidget> Texture(TEXT("/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI_C"));
@@ -40,25 +45,13 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	AActor::PostEditChangeProperty(PropertyChangedEvent);
-	if (m_bLookEndCollision)
-	{
-		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision->GetComponentLocation());
-		Rot.Roll = 0.0;
-		Rot.Pitch = 0.0;
-		m_pStartDirection->SetWorldRotation(Rot);
-	}
+	rotateToTarget();
 }
 
 void AC_AnimationInteraction::PostEditMove(bool bFinished)
 {
 	AActor::PostEditMove(bFinished);
-	if (m_bLookEndCollision)
-	{
-		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision->GetComponentLocation());
-		Rot.Roll = 0.0;
-		Rot.Pitch = 0.0;
-		m_pStartDirection->SetWorldRotation(Rot);
-	}
+	rotateToTarget();
 }
 
 void AC_AnimationInteraction::Tick(float DeltaTime)
@@ -82,7 +75,6 @@ void AC_AnimationInteraction::Tick(float DeltaTime)
 			StartAnimation();
 		}
 	}
-
 }
 
 void AC_AnimationInteraction::BeginPlay()
@@ -94,7 +86,8 @@ void AC_AnimationInteraction::BeginPlay()
 	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::interactionStart);
 	m_pStartCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginOverlap);
 	m_pStartCollision->OnComponentEndOverlap.AddDynamic(this, &AC_AnimationInteraction::endOverlap);
-	m_pEndCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginEndCollision);
+	if (m_pEndCollision2)
+		m_pEndCollision2->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginEndCollision);
 }
 
 void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
@@ -103,7 +96,7 @@ void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 		return;
 	m_pDetector = Cast<ACharacter>(pDetectedActor);
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
-	if (!m_pDetector || !m_pTravelManagerComponent)
+	if (!m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
 		return;
 
 	UNavigationPath* pPath = UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), m_pDetector->GetActorLocation(), m_pStartDirection->GetComponentLocation());
@@ -119,7 +112,8 @@ void AC_AnimationInteraction::StartAnimation()
 {
 	if (!m_pDetector)
 		return;
-	SetActorTickEnabled(false);
+	SetActorTickEnabled(false); 
+	m_pDetector->SetActorTickEnabled(false);
 	m_pDetector->SetActorRotation(m_pStartDirection->GetComponentRotation());
 	m_pDetector->SetActorLocation(m_pStartDirection->GetComponentLocation());
 	m_pTravelManagerComponent->setTravelType(m_eStartType);
@@ -144,4 +138,19 @@ void AC_AnimationInteraction::beginOverlap(UPrimitiveComponent* OverlappedCompon
 void AC_AnimationInteraction::endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	m_pInteractionWidget->SetVisibility(false);
+}
+
+void AC_AnimationInteraction::rotateToTarget()
+{
+	if (m_pStartDirection && m_pEndCollision2)
+	{
+		FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pStartDirection->GetComponentLocation(), m_pEndCollision2->GetComponentLocation());
+		if (!m_bRotateYaw)
+			Rot.Yaw = 0.0;
+		if (!m_bRotatePitch)
+			Rot.Pitch = 0.0;
+		if (!m_bRotateRoll)
+			Rot.Roll = 0.0;
+		m_pStartDirection->SetWorldRotation(Rot);
+	}
 }

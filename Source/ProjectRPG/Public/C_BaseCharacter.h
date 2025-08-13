@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "C_BaseCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDead);
+
 UCLASS()
 class PROJECTRPG_API AC_BaseCharacter : public ACharacter
 {
@@ -16,15 +18,20 @@ public:
 	AC_BaseCharacter();
 
 public:
-
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Dead")
+	FOnDead m_onDead;
+	
 
 protected:
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite ,Category = "AC_BaseCharacter")
+	float m_fMaxHp = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly ,Category = "AC_BaseCharacter")
+	float m_fHp;
+	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
+	float m_fAtk;
 
 private:
-	float m_fHp;
-	float m_fMaxHp;
-	float m_fAtk;
+	
 
 
 protected:
@@ -39,7 +46,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool takeDamageEvent(float fDamage);
+	bool takeDamageEvent(float fDamage);
 
 	UFUNCTION(BlueprintCallable)
 	void setHp(float fHp);
@@ -55,4 +62,8 @@ public:
 	void setAtk(float fAtk);
 	UFUNCTION(BlueprintPure)
 	float getAtk() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsDead() const;
+
 };
