@@ -6,16 +6,17 @@
 
 FText UQuestGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	if (_NodeInfo->Title.IsEmpty())
+	UQuestNodeInfo* nodeInfo = Cast<UQuestNodeInfo>(_NodeInfo);
+	if (nodeInfo && nodeInfo->Title.IsEmpty())
 	{
-		FString questTestStr = _NodeInfo->QuestText.ToString();
+		FString questTestStr = nodeInfo->QuestText.ToString();
 		if (questTestStr.Len() > 15)
 		{
 			questTestStr = questTestStr.Left(15) + TEXT("...");
 		}
 		return FText::FromString(questTestStr);
 	}
-	return _NodeInfo->Title;
+	return nodeInfo->Title;
 }
 
 void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const
@@ -80,26 +81,6 @@ void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 				}
 			))
 	);
-
-	//section.AddMenuEntry
-	//(
-	//	FUICommandInfo
-	//	FText::FromString(TEXT("Delete Pin")),
-	//	FText::FromString(TEXT("Deletes the lastPin")),
-	//	FSlateIcon(TEXT("QuestAssetEditorStyle"), TEXT("QuestAssetEditor.NodeDeletePinIcon")),
-	//	FUIAction(FExecuteAction::CreateLambda(
-	//		[node]()
-	//		{
-	//			UEdGraphPin* pin = node->GetPinAt(node->Pins.Num() - 1);
-	//			if (pin->Direction != EEdGraphPinDirection::EGPD_Input)
-	//			{
-	//				node->RemovePin(pin);
-	//				node->GetGraph()->NotifyGraphChanged();
-	//				node->GetGraph()->Modify();
-	//			}
-	//		}
-	//	))
-	//);
 }
 
 UEdGraphPin* UQuestGraphNode::CreateQuestPin(EEdGraphPinDirection direction, FName name)
@@ -121,7 +102,9 @@ UEdGraphPin* UQuestGraphNode::CreateDefaultInputPin()
 
 void UQuestGraphNode::CreateDefaultOutputPins()
 {
-
+	FString defaultResponse = TEXT("Continue");
+	CreateQuestPin(EEdGraphPinDirection::EGPD_Output, FName(defaultResponse));
+	GetQuestNodeInfo()->QuestResponse.Add(FText::FromString(defaultResponse));
 }
 
 void UQuestGraphNode::SyncPinWithResponses()
@@ -147,6 +130,5 @@ void UQuestGraphNode::SyncPinWithResponses()
 	{
 		GetPinAt(index)->PinName = FName(option.ToString());
 		index++;
-
 	}
 }

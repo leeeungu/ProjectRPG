@@ -16,9 +16,9 @@ class QUESTSYSTEMRUNTIME_API UQuestEndNodeInfo : public UQuestNodeInfoBase
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestEndNodeInfo")
     EQuestNodeAction Action = EQuestNodeAction::None;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestEndNodeInfo")
     FString ActionData = TEXT("");
 };

@@ -22,23 +22,11 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		new FNewNodeAction(
 			UQuestEndGraphNode::StaticClass(),
 			FText::FromString(TEXT("Nodes")),
-			FText::FromString(TEXT("New Nodes")),
-			FText::FromString(TEXT("Make A Quest Node")),
+			FText::FromString(TEXT("New End Nodes")),
+			FText::FromString(TEXT("Make A new End Node")),
 			0
 		)
 	};
-
-
-	//TSharedPtr<FNewNodeAction> newNodeAction
-	//{
-	//	new FNewNodeAction(
-	//		UQuestEndGraphNode::StaticClass(),
-	//		FText::FromString(TEXT("Nodes")),
-	//		FText::FromString(TEXT("New Nodes")),
-	//		FText::FromString(TEXT("Make A Quest Node")),
-	//		0
-	//	)
-	//};
 
 	ContextMenuBuilder.AddAction(newNodeAction);
 	ContextMenuBuilder.AddAction(newEndNodeAction);
@@ -74,46 +62,18 @@ UEdGraphNode* FNewNodeAction::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* 
 	result->CreateNewGuid();
 	result->NodePosX = Location.X;
 	result->NodePosY = Location.Y;
-	result->SetNodeInfo(NewObject<UQuestNodeInfo>(result));
-	/*result->CreatePin(
-		EEdGraphPinDirection::EGPD_Input,
-		TEXT("Inputs"),
-		TEXT("SomeInput")
-	);
-	result->CreatePin(
-		EEdGraphPinDirection::EGPD_Output,
-		TEXT("Outputs"),
-		TEXT("Output1")
-	);
-	result->CreatePin(
-		EEdGraphPinDirection::EGPD_Output,
-		TEXT("Outputs"),
-		TEXT("Output2")
-	);*/
+	result->InitNodeInfo(result);
 
 
 	UEdGraphPin* inputPin = result->CreateDefaultInputPin();
 	result->CreateDefaultOutputPins();
-	//result->CreateQuestPin(EEdGraphPinDirection::EGPD_Output, TEXT("Output1"));
-	// 
-	// 
-	//result->CreateQuestPin(EEdGraphPinDirection::EGPD_Output, TEXT("Output2"));
-	FString defaultResponse = TEXT("Continue");
-	result->CreateQuestPin(EEdGraphPinDirection::EGPD_Output, FName(defaultResponse));
-	if (Cast<UQuestNodeInfo>(result->GetNodeInfo()))
-		Cast<UQuestNodeInfo>(result->GetNodeInfo())->QuestResponse.Add(FText::FromString(defaultResponse));
-
 
 	if (FromPin != nullptr)
 	{
 		FromPin->GetSchema()->TryCreateConnection(FromPin, inputPin);
 	}
 
-
 	ParentGraph->Modify();
 	ParentGraph->AddNode(result, true, true);
-
-
-
 	return result;
 }

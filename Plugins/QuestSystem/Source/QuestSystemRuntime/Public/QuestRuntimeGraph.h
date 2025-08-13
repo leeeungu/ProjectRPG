@@ -6,43 +6,54 @@
 #include "QuestNodeType.h"
 #include "QuestRuntimeGraph.generated.h"
 
+class UQuestAsset;
+class UQuestNodeInfo;
+class UQuestEndNodeInfo;
 
-UCLASS()
+UCLASS(BlueprintType)
 class QUESTSYSTEMRUNTIME_API UQuestRuntimePin : public UObject
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
 	FName PinName;
 	UPROPERTY()
 	FGuid PinId;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
 	UQuestRuntimePin* Connection = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
+	class UQuestRuntimeNode* Parent = nullptr;
 };
 
 
-UCLASS()
+UCLASS(BlueprintType)
 class QUESTSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
 	EQuestNodeType  NodeType = EQuestNodeType::QuestNode;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
 	UQuestRuntimePin* InputPin = nullptr;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestRuntimePin")
 	TArray<UQuestRuntimePin*>  OutputPins;
 	UPROPERTY()
 	FVector2D Position;
 
 	UPROPERTY()
-	UQuestNodeInfo* QuestInfo;
+	UQuestNodeInfoBase* QuestInfo;
 
+
+	UFUNCTION(BlueprintCallable)
+	UQuestNodeInfo* GetChooseNodeInfo(int nIndex);
+	UFUNCTION(BlueprintCallable)
+	UQuestEndNodeInfo* GetEndNodeInfo(int nIndex);
 };
 
 
-UCLASS()
+UCLASS(BlueprintType)
 class QUESTSYSTEMRUNTIME_API UQuestRuntimeGraph: public UObject
 {
 	GENERATED_BODY()

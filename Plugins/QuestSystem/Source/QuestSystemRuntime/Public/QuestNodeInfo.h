@@ -9,10 +9,10 @@ class QUESTSYSTEMRUNTIME_API UQuestNodeInfo : public UQuestNodeInfoBase
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestNodeInfo")
 	FText Title{};
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestNodeInfo")
 	FText QuestText{};
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestNodeInfo")
 	TArray<FText> QuestResponse{};
 };

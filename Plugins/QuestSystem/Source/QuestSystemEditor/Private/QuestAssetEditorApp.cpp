@@ -8,6 +8,7 @@
 #include "IDetailsView.h"
 #include "QuestStartGraphNode.h"
 #include "QuestNodeInfo.h"
+#include "QuestEndGraphNode.h"
 
 
 //DEFINE_LOG_CATEGORY_STATIC(QuestAssetEditorApp, Log, All);
@@ -43,10 +44,6 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
 	SetCurrentMode(TEXT("QuestAppMode"));
 
     UpdateEditorGraphFromWorkingAsset();
-  /*  _graohChangeLisenerHandle = _workingGraph->AddOnGraphChangedHandler(
-        FOnGraphChanged::FDelegate::CreateSP(this, &QuestAssetEditorApp::OnGraphChanged)
-    );*/
-
 }
 
 void QuestAssetEditorApp::SetSelectedNodeDetailView(TSharedPtr<IDetailsView> detailsView)
@@ -78,10 +75,10 @@ void QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated(const FPropertyChang
 {
     if (_workingGraphUI != nullptr)
     {
-        UQuestGraphNode* selectedNode = Cast< UQuestGraphNode>(GetSelectedNode(_workingGraphUI->GetSelectedNodes()));
+        UQuestGraphNodeBase* selectedNode = Cast< UQuestGraphNodeBase>(GetSelectedNode(_workingGraphUI->GetSelectedNodes()));
         if (selectedNode)
         {
-            selectedNode->SyncPinWithResponses();
+            selectedNode->OnPropertiesChanged();
         }
         _workingGraphUI->NotifyGraphChanged();
     }
@@ -115,7 +112,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
             UQuestRuntimePin* runtimePin = NewObject<UQuestRuntimePin>(runtimeNode);
             runtimePin->PinName = uiPin->PinName;
             runtimePin->PinId = uiPin->PinId;
-
+            runtimePin->Parent = runtimeNode;
             // Only record the the output side of the connection since this is a directed graph
             if (uiPin->HasAnyConnections() && uiPin->Direction == EEdGraphPinDirection::EGPD_Output) {
                 // Only 1 connection is allowed so just take the first one
@@ -131,18 +128,20 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
                 runtimeNode->OutputPins.Add(runtimePin);
             }
         }
-        if (uiNode->IsA(UQuestGraphNode::StaticClass()))
-        {
-            UQuestGraphNode* uiGraphNode = Cast<UQuestGraphNode>(uiNode);
-            runtimeNode->NodeType = EQuestNodeType::QuestNode;
-            runtimeNode->QuestInfo = uiGraphNode->GetQuestNodeInfo();;
-        }
-        else  if (uiNode->IsA(UQuestStartGraphNode::StaticClass()))
-        {
-            runtimeNode->NodeType = EQuestNodeType::StartNode;
-            //runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();;
-        }
-
+        //if (uiNode->IsA(UQuestGraphNode::StaticClass()))
+        //{
+        //    UQuestGraphNode* uiGraphNode = Cast<UQuestGraphNode>(uiNode);
+        //    runtimeNode->NodeType = EQuestNodeType::QuestNode;
+        //    runtimeNode->QuestInfo = uiGraphNode->GetQuestNodeInfo();;
+        //}
+        //else  if (uiNode->IsA(UQuestStartGraphNode::StaticClass()))
+        //{
+        //    runtimeNode->NodeType = EQuestNodeType::StartNode;
+        //    //runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();;
+        //}
+        UQuestGraphNodeBase* uiGraphNode = Cast<UQuestGraphNodeBase>(uiNode);
+        runtimeNode->NodeType = uiGraphNode->GetQuestNodeType();
+        runtimeNode->QuestInfo = DuplicateObject( uiGraphNode->GetNodeInfo(), runtimeNode);
         runtimeGraph->Nodes.Add(runtimeNode);
     }
 
@@ -156,7 +155,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
 void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
 {
     if (_workingAsset->Graph == nullptr) {
-            _workingGraph->GetSchema()->CreateDefaultNodesForGraph(*_workingGraph);
+         _workingGraph->GetSchema()->CreateDefaultNodesForGraph(*_workingGraph);
         return;
     }
 
@@ -173,6 +172,10 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
         {
             newNode = NewObject<UQuestGraphNode>(_workingGraph);
         }
+        else if (runtimeNode->NodeType == EQuestNodeType::EndNode)
+        {
+            newNode = NewObject<UQuestEndGraphNode>(_workingGraph);
+        }
         else
         {
             //UE_LOG(QuestAssetEditorApp, Error, TEXT("QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset: Unknown node Type"));
@@ -187,9 +190,9 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
         {
             newNode->SetNodeInfo(DuplicateObject(runtimeNode->QuestInfo, runtimeNode));
         }
-        else if (runtimeNode->NodeType != EQuestNodeType::StartNode)
+        else 
         {
-            newNode->SetNodeInfo(NewObject<UQuestNodeInfo>(runtimeNode));
+            newNode->InitNodeInfo(newNode);
         }
 
         if (runtimeNode->InputPin != nullptr) {
