@@ -42,7 +42,7 @@ public:
 	UPROPERTY()
 	FVector2D Position;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UQuestNodeInfoBase* QuestInfo;
 
 
@@ -50,6 +50,12 @@ public:
 	UQuestNodeInfo* GetChooseNodeInfo(int nIndex);
 	UFUNCTION(BlueprintCallable)
 	UQuestEndNodeInfo* GetEndNodeInfo(int nIndex);
+
+	UFUNCTION(BlueprintCallable)
+	UQuestRuntimeNode* GetNextNode(int nIndex);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetOutputNodeInfo(int nIndex, UQuestNodeInfoBase*& pResultInfo);
 };
 
 

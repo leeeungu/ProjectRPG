@@ -128,17 +128,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
                 runtimeNode->OutputPins.Add(runtimePin);
             }
         }
-        //if (uiNode->IsA(UQuestGraphNode::StaticClass()))
-        //{
-        //    UQuestGraphNode* uiGraphNode = Cast<UQuestGraphNode>(uiNode);
-        //    runtimeNode->NodeType = EQuestNodeType::QuestNode;
-        //    runtimeNode->QuestInfo = uiGraphNode->GetQuestNodeInfo();;
-        //}
-        //else  if (uiNode->IsA(UQuestStartGraphNode::StaticClass()))
-        //{
-        //    runtimeNode->NodeType = EQuestNodeType::StartNode;
-        //    //runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();;
-        //}
+     
         UQuestGraphNodeBase* uiGraphNode = Cast<UQuestGraphNodeBase>(uiNode);
         runtimeNode->NodeType = uiGraphNode->GetQuestNodeType();
         runtimeNode->QuestInfo = DuplicateObject( uiGraphNode->GetNodeInfo(), runtimeNode);
@@ -188,6 +178,7 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
 
         if (runtimeNode->QuestInfo)
         {
+            runtimeNode->QuestInfo->pQuestAsset = _workingAsset;
             newNode->SetNodeInfo(DuplicateObject(runtimeNode->QuestInfo, runtimeNode));
         }
         else 

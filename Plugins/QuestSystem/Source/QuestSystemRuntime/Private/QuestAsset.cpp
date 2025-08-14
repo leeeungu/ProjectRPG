@@ -1,7 +1,7 @@
 ﻿#include "QuestAsset.h"
 #include "UObject/ObjectSaveContext.h"
 #include "QuestRuntimeGraph.h"
-
+#include "QuestConditionCheckInterface.h"
 
 DEFINE_LOG_CATEGORY_STATIC(QuestAsset, Log, All);
 
@@ -11,12 +11,15 @@ UQuestRuntimeNode* UQuestAsset::GetQuestStartNode()
     UQuestRuntimeGraph* pGraph = Graph;
     if (pGraph)
     {
-        for (UQuestRuntimeNode* Node : pGraph->Nodes)
+        int nSize = pGraph->Nodes.Num();
+        for (int i = 0; i < nSize && !pNode;  i++)
         {
+            UQuestRuntimeNode* Node = pGraph->Nodes[i];
             if (Node && Node->NodeType == EQuestNodeType::StartNode)
             {
                 pNode = Node;
-                break;
+                if (Node->OutputPins[0]->Connection)
+                    pNode = Node->OutputPins[0]->Connection->Parent;
             }
         }
     }
@@ -36,4 +39,15 @@ void UQuestAsset::PreSave(FObjectPreSaveContext saveContext)
 	{
 		_onPreSaveListener();
 	}
+}
+
+bool UQuestAsset::CheckIsQuestCompeleted()
+{
+    if (!m_pQuestObject || !m_pQuestObject->Implements< UQuestConditionCheckInterface>())
+    {
+        m_pQuestObject = nullptr;
+        UE_LOG(QuestAsset, Error, TEXT("m_pQuestObject Not have UQuestConditionCheckInterface Interface"));
+        return false;
+    }
+    return IQuestConditionCheckInterface::Execute_CheckCondition(m_pQuestObject);
 }

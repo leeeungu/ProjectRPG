@@ -20,7 +20,8 @@ public:
     UPROPERTY(EditAnywhere)
     UQuestRuntimeGraph* Graph = nullptr;
 
-
+    UPROPERTY(EditAnywhere)
+    UObject* m_pQuestObject;
 public:
     UFUNCTION(BlueprintCallable, Category = "QuestAsset")
     UQuestRuntimeNode* GetQuestStartNode();
@@ -30,6 +31,9 @@ public:
 
     virtual void PreSave(FObjectPreSaveContext saveContext) override; 
 
+
+    UFUNCTION(BlueprintCallable)
+    bool CheckIsQuestCompeleted();
 private:
     std::function<void()> _onPreSaveListener = nullptr;
 };
