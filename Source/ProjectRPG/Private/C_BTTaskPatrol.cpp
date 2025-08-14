@@ -2,10 +2,19 @@
 
 
 #include "C_BTTaskPatrol.h"
+#include "C_MonsterBaseCharacter.h"
+#include "C_MonsterAiController.h"
+#include "BehaviorTree/BlackBoardComponent.h"
+#include "NavigationSystem.h"
+
+UC_BTTaskPatrol::UC_BTTaskPatrol()
+{
+	NodeName = TEXT("Set Patrol Location");
+}
 
 EBTNodeResult::Type UC_BTTaskPatrol::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ACharacter* pMonster = OwnerComp.GetAIOwner()->GetCharacter();
+	AC_MonsterBaseCharacter* pMonster = Cast<AC_MonsterBaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	if (!pMonster)
 		return EBTNodeResult::Failed;
 	
@@ -24,7 +33,7 @@ EBTNodeResult::Type UC_BTTaskPatrol::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (!pBBcomp)
 		return EBTNodeResult::Failed;
 
-	pBBcomp->SetValueAsVector("PatrolLocation", navRandom.Location);
+	pBBcomp->SetValueAsVector(AC_MonsterAiController::PatrolLocationKey, navRandom.Location);
 
 	return EBTNodeResult::Succeeded;
 }

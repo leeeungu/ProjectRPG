@@ -6,6 +6,8 @@
 #include "C_PhaseComponent.h"
 #include "C_CounterComponent.h"
 #include "C_MonsterAiController.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackBoardComponent.h"
 #include "AIController.h"
 
 AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
@@ -24,6 +26,11 @@ void AC_MonsterBaseCharacter::Tick(float DeltaTime)
 void AC_MonsterBaseCharacter::playStaggerMontage()
 {
 	GetMesh()->GetAnimInstance()->Montage_Play(m_pStaggerMontage);
+}
+
+bool AC_MonsterBaseCharacter::getIsAttacking() const
+{
+	return m_bIsAttacking;
 }
 
 void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
@@ -71,6 +78,24 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
 {
+	AAIController* pAiCon = Cast<AAIController>(GetController());
+	if (!pAiCon)
+		return;
+
+	UBlackboardComponent* pBbCom = pAiCon->GetBlackboardComponent();
+	if (!pBbCom)
+		return;
+
+	AActor* pTarget = Cast<AActor>(pBbCom->GetValueAsObject(AC_MonsterAiController::TargetActorKey));
+	if (!pTarget)
+		return;
+
+	FVector vToPlayer = pTarget->GetActorLocation() - GetActorLocation();
+	FRotator rLookAt = vToPlayer.Rotation();
+	rLookAt.Pitch = 0.0f;
+	rLookAt.Roll = 0.0f;
+
+	SetActorRotation(rLookAt);
 
 	onStaggerBroken();
 
@@ -147,7 +172,6 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
 	
-
 	float fAnimDuration = sPattern.pAttackMontage->GetPlayLength();
 
 	FTimerHandle sAttackEndHandle;
@@ -167,7 +191,7 @@ float AC_MonsterBaseCharacter::getDistanceToTarget() const
 	if (!pBbCom)
 		return MAX_FLT;
 
-	AActor* pTarget = Cast<AActor>(pBbCom->GetValueAsObject(TEXT("TargetActor")));
+	AActor* pTarget = Cast<AActor>(pBbCom->GetValueAsObject(AC_MonsterAiController::TargetActorKey));
 	if (!pTarget)
 		return MAX_FLT;
 

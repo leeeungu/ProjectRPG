@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "C_BTService_CheckAttackCondition.generated.h"
 
 /**

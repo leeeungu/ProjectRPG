@@ -91,6 +91,8 @@ public:
 
 	void playStaggerMontage();
 
+	bool getIsAttacking() const;
+
 
 	UFUNCTION(BlueprintCallable)
 	virtual void takeStaggerEvent(float fStagger);
@@ -98,17 +100,34 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
+
+
+
+	/*
+	* 무력화 관련
+	*/
+
 	UFUNCTION()
 	void onStaggerBroken();
 
 	UFUNCTION()
 	void onStaggerRecover();
 
+
+
+
+	/*
+	* 카운터 관련
+	*/
+
 	UFUNCTION()
 	void onCounterSuccess();
 
 	UFUNCTION()
 	void onCounterFailed();
+
+
+
 
 	UFUNCTION(BlueprintCallable)
 	void onDead();

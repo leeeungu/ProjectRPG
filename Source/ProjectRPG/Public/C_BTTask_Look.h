@@ -4,19 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "C_BTTask_Attack.generated.h"
+#include "C_BTTask_Look.generated.h"
+
 
 /**
  * 
  */
 UCLASS()
-class PROJECTRPG_API UC_BTTask_Attack : public UBTTaskNode
+class PROJECTRPG_API UC_BTTask_Look : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UC_BTTask_Attack();
+	UC_BTTask_Look();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
+	
 };
