@@ -6,6 +6,10 @@
 #include "C_BaseCharacter.h"
 #include "C_Player.generated.h"
 
+
+class USpringArmComponent;
+class UCameraComponent;
+
 /**
  * 
  */
@@ -14,9 +18,15 @@ class PROJECTRPG_API AC_Player : public AC_BaseCharacter
 {
 	GENERATED_BODY()
 private:
-	USkeletalMeshComponent* skMesh{};
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* m_springCom{};
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* m_camCom{};
+
+protected:
 
 public:
 	AC_Player();
+
 	
 };
