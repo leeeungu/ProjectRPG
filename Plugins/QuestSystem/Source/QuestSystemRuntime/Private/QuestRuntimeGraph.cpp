@@ -4,34 +4,18 @@
 
 DEFINE_LOG_CATEGORY_STATIC(QuestRuntimeNode, Log, All);
 
-UQuestNodeInfo* UQuestRuntimeNode::GetChooseNodeInfo(int nIndex)
+UQuestRuntimeNode* UQuestRuntimeNode::GetNextNode(int nPinIndex)
 {
-	UQuestRuntimeNode* pCurrent = GetNextNode(nIndex);
-	if (!pCurrent)
-		return nullptr;
-	return Cast< UQuestNodeInfo>(pCurrent->QuestInfo);
-}
-
-UQuestEndNodeInfo* UQuestRuntimeNode::GetEndNodeInfo(int nIndex)
-{
-	UQuestRuntimeNode* pCurrent = GetNextNode(nIndex);
-	if (!pCurrent)
-		return nullptr;
-	return Cast< UQuestEndNodeInfo>(pCurrent->QuestInfo);
-}
-
-UQuestRuntimeNode* UQuestRuntimeNode::GetNextNode(int nIndex)
-{
-	if (!OutputPins.IsValidIndex(nIndex))
+	if (!OutputPins.IsValidIndex(nPinIndex))
 	{
-		UE_LOG(QuestRuntimeNode, Error, TEXT("Invalid Response option At index %d"), nIndex);
+		UE_LOG(QuestRuntimeNode, Error, TEXT("Invalid Response option At index %d"), nPinIndex);
 		return nullptr;
 	}
-	UQuestRuntimePin* pPin = OutputPins[nIndex];
+	UQuestRuntimePin* pPin = OutputPins[nPinIndex];
 	UQuestRuntimeNode* pCurrent{};
 	if (pPin->Connection)
 	{
-		pCurrent = OutputPins[nIndex]->Connection->Parent;
+		pCurrent = OutputPins[nPinIndex]->Connection->Parent;
 	}
 	if (!pCurrent)
 	{
@@ -40,16 +24,3 @@ UQuestRuntimeNode* UQuestRuntimeNode::GetNextNode(int nIndex)
 	}
 	return pCurrent;
 }
-
-bool UQuestRuntimeNode::GetOutputNodeInfo(int nIndex, UQuestNodeInfoBase*& pResultInfo)
-{
-	UQuestRuntimeNode* pCurrent = GetNextNode(nIndex);
-	pResultInfo = nullptr;
-	if (!pCurrent)
-		return false;
-	if (pCurrent->NodeType == EQuestNodeType::UnKnown)
-		return false;
-	pResultInfo = pCurrent->QuestInfo;
-	return true;
-}
-

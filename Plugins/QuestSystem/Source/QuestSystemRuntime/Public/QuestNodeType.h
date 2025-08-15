@@ -3,11 +3,12 @@
 #include "CoreMinimal.h"
 #include "QuestNodeType.generated.h"
 
-UENUM()
-enum class EQuestNodeType
+UENUM(BlueprintType)
+enum class EQuestNodeType : uint8
 {
 	UnKnown,
 	StartNode,
 	QuestNode,
 	EndNode
 };
+

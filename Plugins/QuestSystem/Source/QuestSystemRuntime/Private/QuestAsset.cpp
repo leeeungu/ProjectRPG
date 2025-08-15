@@ -1,7 +1,7 @@
 ﻿#include "QuestAsset.h"
 #include "UObject/ObjectSaveContext.h"
 #include "QuestRuntimeGraph.h"
-#include "QuestConditionCheckInterface.h"
+#include "Interface/QuestConditionCheckInterface.h"
 
 DEFINE_LOG_CATEGORY_STATIC(QuestAsset, Log, All);
 
@@ -41,13 +41,13 @@ void UQuestAsset::PreSave(FObjectPreSaveContext saveContext)
 	}
 }
 
-bool UQuestAsset::CheckIsQuestCompeleted()
-{
-    if (!m_pQuestObject || !m_pQuestObject->Implements< UQuestConditionCheckInterface>())
-    {
-        m_pQuestObject = nullptr;
-        UE_LOG(QuestAsset, Error, TEXT("m_pQuestObject Not have UQuestConditionCheckInterface Interface"));
-        return false;
-    }
-    return IQuestConditionCheckInterface::Execute_CheckCondition(m_pQuestObject);
-}
+//bool UQuestAsset::CheckIsQuestCompeleted()
+//{
+//    if (!m_pQuestObject || !m_pQuestObject.GetDefaultObject()->Implements<UQuestConditionCheckInterface>())
+//    {
+//        m_pQuestObject = nullptr;
+//        UE_LOG(QuestAsset, Error, TEXT("m_pQuestObject Not have UQuestConditionCheckInterface Interface"));
+//        return false;
+//    }
+//    return IQuestConditionCheckInterface::Execute_CheckIsQuestCompeleted(m_pQuestObject.GetDefaultObject());
+//}

@@ -38,6 +38,7 @@ public:
 public:
 	void SyncPinWithResponses();
 
+
 protected:
 	UPROPERTY()
 	UQuestNodeInfo* _NodeInfo = nullptr;

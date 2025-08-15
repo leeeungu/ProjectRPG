@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -38,6 +38,8 @@ public class QuestSystem : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+                "QuestSystemEditor",
+                "QuestSystemRuntime"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -12,13 +12,18 @@ class PROJECTRPG_API UC_NPCQuestComponent : public UActorComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditAnywhere, Category = "C_NPCQuestComponent")
-	UQuestAsset* m_pCurrentQuestAsset{};
+	UQuestAsset* m_pCurrentQuestAsset1{};
+
+	UPROPERTY(EditAnywhere, Category = "C_NPCQuestComponent")
+	UQuestAsset* m_pCurrentQuestAsset2{};
+
+	UQuestAsset* m_CurrentQuestAsset{};
 	bool m_bQuestAccept{};
 public:	
 	UC_NPCQuestComponent();
 
 	UFUNCTION(BlueprintPure)
-	UQuestAsset* getCurrentQuestAsset() const { return m_pCurrentQuestAsset; }
+	UQuestAsset* getCurrentQuestAsset() const { return m_CurrentQuestAsset; }
 	UFUNCTION(BlueprintCallable)
 	void setCurrentQuestAsset(UQuestAsset* pAsset);
 	UFUNCTION(BlueprintCallable)
@@ -28,4 +33,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void onQuestSucceed(UQuestAsset* pAsset);
+	UFUNCTION()
+	void onQuestFail(UQuestAsset* pAsset);
 };

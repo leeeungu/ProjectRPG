@@ -12,6 +12,6 @@ class QUESTSYSTEMRUNTIME_API UQuestNodeInfoBase : public UObject
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	UQuestAsset* pQuestAsset;
 };

@@ -45,17 +45,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UQuestNodeInfoBase* QuestInfo;
 
-
 	UFUNCTION(BlueprintCallable)
-	UQuestNodeInfo* GetChooseNodeInfo(int nIndex);
-	UFUNCTION(BlueprintCallable)
-	UQuestEndNodeInfo* GetEndNodeInfo(int nIndex);
-
-	UFUNCTION(BlueprintCallable)
-	UQuestRuntimeNode* GetNextNode(int nIndex);
-
-	UFUNCTION(BlueprintCallable)
-	bool GetOutputNodeInfo(int nIndex, UQuestNodeInfoBase*& pResultInfo);
+	UQuestRuntimeNode* GetNextNode(int nPinIndex);
 };
 
 

@@ -4,6 +4,10 @@
 #include "UObject/Interface.h"
 #include "QuestConditionCheckInterface.generated.h"
 
+class UQuestAsset;
+class AActor;
+
+
 UINTERFACE(MinimalAPI)
 class UQuestConditionCheckInterface : public UInterface
 {
@@ -13,11 +17,14 @@ class UQuestConditionCheckInterface : public UInterface
 class QUESTSYSTEMRUNTIME_API IQuestConditionCheckInterface
 {
 	GENERATED_BODY()
-public:
+protected:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void UpdateQuestCondition();
+	virtual void UpdateQuestCondition_Implementaion() {}
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	bool CheckCondition();
+	void InitQuestCondition(AActor* pPlayer, UQuestAsset* pQuest);
 
-	virtual bool CheckCondition_Implementaion() { return true; }
+	virtual void InitQuestCondition_Implementaion(AActor* pPlayer, UQuestAsset* pQuest) { }
 };
 

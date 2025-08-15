@@ -10,7 +10,7 @@ QuestAssetPropertiesTabFactory::QuestAssetPropertiesTabFactory(TSharedPtr<QuestA
 	TabLabel = FText::FromString(TEXT("Properties"));
 
 	ViewMenuDescription = FText::FromString(TEXT("Display the Properties view for the current asset"));
-	ViewMenuTooltip = FText::FromString(TEXT("show the Properties niew"));
+	ViewMenuTooltip = FText::FromString(TEXT("show the Properties view"));
 }
 
 TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
@@ -21,7 +21,7 @@ TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflo
 
 
 
-    FDetailsViewArgs detailsViewArgs;
+    FDetailsViewArgs detailsViewArgs{};
     {
         detailsViewArgs.bAllowSearch = false;
         detailsViewArgs.bHideSelectionTip = true;
