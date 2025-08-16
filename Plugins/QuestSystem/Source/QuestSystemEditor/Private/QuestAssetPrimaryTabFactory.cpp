@@ -13,7 +13,7 @@ QuestAssetPrimaryTabFactory::QuestAssetPrimaryTabFactory(TSharedPtr<QuestAssetEd
 	TabLabel = FText::FromString(TEXT("Primary"));
 
 	ViewMenuDescription = FText::FromString(TEXT("Display QuestPrimary"));
-	ViewMenuTooltip = FText::FromString(TEXT("show the primary niew"));
+	ViewMenuTooltip = FText::FromString(TEXT("show the primary view"));
 }
 
 TSharedRef<SWidget> QuestAssetPrimaryTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const

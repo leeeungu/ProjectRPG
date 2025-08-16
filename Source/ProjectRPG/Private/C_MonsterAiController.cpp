@@ -2,6 +2,16 @@
 
 
 #include "C_MonsterAiController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardData.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackBoardComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
+
+const FName AC_MonsterAiController::TargetActorKey = TEXT("TargetActor");
+const FName AC_MonsterAiController::CanAttackKey = TEXT("CanAttack");
+const FName AC_MonsterAiController::PatrolLocationKey = TEXT("PatrolLocation");
 
 
 AC_MonsterAiController::AC_MonsterAiController()

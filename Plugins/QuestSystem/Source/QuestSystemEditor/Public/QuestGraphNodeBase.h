@@ -26,5 +26,9 @@ public:
 	virtual EQuestNodeType GetQuestNodeType() const { return EQuestNodeType::UnKnown; }
 
 	virtual void OnPropertiesChanged() {}
+
+
+protected:
+	void UpdateQuestGraphNodeBase();
 };
 

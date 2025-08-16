@@ -56,6 +56,11 @@ void UQuestGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 	Graph.Modify();
 }
 
+bool UQuestGraphSchema::TryDeleteGraph(UEdGraph* GraphToDelete) const
+{
+	return false;
+}
+
 UEdGraphNode* FNewNodeAction::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode)
 {
 	UQuestGraphNodeBase* result = NewObject<UQuestGraphNodeBase>(ParentGraph, _classTemplate);

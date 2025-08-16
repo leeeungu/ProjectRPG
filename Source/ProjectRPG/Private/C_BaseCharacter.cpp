@@ -33,16 +33,18 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-bool AC_BaseCharacter::takeDamageEvent(float fDamage)
+bool AC_BaseCharacter::takeDamageEvent_Implementation(float fDamage)
 {
 
 	m_fHp -= fDamage;
+
 
 	if (m_fHp > 0)
 		return true;
 
 	if (m_fHp <= 0)
 		m_onDead.Broadcast();
+
 
 	return false;
 	

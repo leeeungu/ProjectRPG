@@ -4,6 +4,8 @@
 #include "QuestNodeInfoBase.h"
 #include "QuestEndNodeInfo.generated.h"
 
+class UQuestAsset;
+
 UENUM(BlueprintType)
 enum class EQuestNodeAction : uint8 {
     None,
@@ -21,4 +23,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestEndNodeInfo")
     FString ActionData = TEXT("");
+
+  
 };

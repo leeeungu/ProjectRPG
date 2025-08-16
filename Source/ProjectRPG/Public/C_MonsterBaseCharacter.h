@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
-#include "C_MonsterAiController.h"
-#include "AIController.h"
-#include "C_StaggerComponent.h"
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
@@ -33,10 +30,6 @@ struct FS_PatternData
 	float fAttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fMinHpPercent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fMaxHpPercent;
 
 	float LastUsedTime = -100.f;
 };
@@ -48,15 +41,19 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere)
-	TArray<FS_PatternData> m_arrPatternList;
-
+private:	
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
 	UPROPERTY()
-	UC_StaggerComponent* m_pStaggerComp;
+	class UC_StaggerComponent* m_pStaggerComp;
+
+	UPROPERTY()
+	class UC_PhaseComponent* m_pPhaseComp;
+
+	UPROPERTY()
+	class UC_CounterComponent* m_pCounterComp;
+
 
 	bool m_bIsAttacking = false;
 
@@ -65,6 +62,9 @@ private:
 	FTimerHandle m_timeHandle;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	TArray<FS_PatternData> m_arrPatternList;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
@@ -91,6 +91,8 @@ public:
 
 	void playStaggerMontage();
 
+	bool getIsAttacking() const;
+
 
 	UFUNCTION(BlueprintCallable)
 	virtual void takeStaggerEvent(float fStagger);
@@ -98,11 +100,34 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
+
+
+
+	/*
+	* 무력화 관련
+	*/
+
 	UFUNCTION()
 	void onStaggerBroken();
 
 	UFUNCTION()
 	void onStaggerRecover();
+
+
+
+
+	/*
+	* 카운터 관련
+	*/
+
+	UFUNCTION()
+	void onCounterSuccess();
+
+	UFUNCTION()
+	void onCounterFailed();
+
+
+
 
 	UFUNCTION(BlueprintCallable)
 	void onDead();

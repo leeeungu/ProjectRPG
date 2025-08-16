@@ -24,6 +24,7 @@ void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 	FToolMenuSection& section = Menu->AddSection(TEXT("SectionName"), FText::FromString(TEXT("Quest Node Actions")));
 
 	UQuestGraphNode* node = (UQuestGraphNode*)this;
+
 	section.AddMenuEntry
 	(
 		TEXT("AddPinEntry"),
@@ -33,19 +34,34 @@ void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 		FUIAction(FExecuteAction::CreateLambda(
 			[node]()
 			{
-				node->GetQuestNodeInfo()->QuestResponse.Add(FText::FromString(TEXT("Response")));
+				if (!node)
+					return; 
+				UQuestNodeInfo* info = node->GetQuestNodeInfo();
+				if (!info)
+					return;
+				info->QuestResponse.Add(FText::FromString(FString::Printf(TEXT("Response %d"), info->QuestResponse.Num())));
 				node->SyncPinWithResponses();
-				node->CreateQuestPin(
-					EEdGraphPinDirection::EGPD_Output,
-					TEXT("Another OutPut")
-				);
-				node->GetGraph()->NotifyGraphChanged();
-				node->GetGraph()->Modify();
+				node->UpdateQuestGraphNodeBase();
 			}
 		))
 	);
 
 
+	section.AddMenuEntry
+	(
+		TEXT("DeleteEntry"),
+		FText::FromString(TEXT("Delete Node")),
+		FText::FromString(TEXT("Deletes the Node")),
+		FSlateIcon(TEXT("QuestAssetEditorStyle"), TEXT("QuestAssetEditor.NodeDeleteNodeIcon")),
+		FUIAction(FExecuteAction::CreateLambda(
+			[node]()
+			{
+				if (!node)
+					return;
+				node->GetGraph()->RemoveNode(node);
+			}
+		))
+	);
 	section.AddMenuEntry
 	(
 		TEXT("DeletePinEntry"),
@@ -55,14 +71,18 @@ void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 		FUIAction(FExecuteAction::CreateLambda(
 			[node]()
 			{
+				if (!node)
+					return;
+				UQuestNodeInfo* info = node->GetQuestNodeInfo();
+				if (info->QuestResponse.Num() <= 1)
+					return;
+
 				UEdGraphPin* pin = node->GetPinAt(node->Pins.Num() - 1);
 				if (pin->Direction != EEdGraphPinDirection::EGPD_Input)
 				{
-					UQuestNodeInfo* info = node->GetQuestNodeInfo();
-					info->QuestResponse.RemoveAt(node->Pins.Num() - 1);
-					node->SyncPinWithResponses();
-					node->GetGraph()->NotifyGraphChanged();
-					node->GetGraph()->Modify();
+					node->RemovePin(pin);
+					info->QuestResponse.RemoveAt(info->QuestResponse.Num() - 1);
+					node->UpdateQuestGraphNodeBase();
 				}
 			}
 		))
@@ -70,16 +90,30 @@ void UQuestGraphNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 
 	section.AddMenuEntry
 	(
-			TEXT("DeleteEntry"),
-			FText::FromString(TEXT("Delete Node")),
-			FText::FromString(TEXT("Deletes the Node")),
-			FSlateIcon(TEXT("QuestAssetEditorStyle"), TEXT("QuestAssetEditor.NodeDeleteNodeIcon")),
-			FUIAction(FExecuteAction::CreateLambda(
-				[node]()
+		TEXT("RestPinEntry"),
+		FText::FromString(TEXT("Delete Rest Response")),
+		FText::FromString(TEXT("Deletes the All Response And Add Deault Response")),
+		FSlateIcon(TEXT("QuestAssetEditorStyle"), TEXT("QuestAssetEditor.NodeDeletePinIcon")),
+		FUIAction(FExecuteAction::CreateLambda(
+			[node]()
+			{
+				if (!node)
+					return;
+				int nSize = node->Pins.Num()- 1;
+				for (int i = nSize; i >= 1; i--)
 				{
-					node->GetGraph()->RemoveNode(node);
+					UEdGraphPin* pin = node->GetPinAt(i);
+					if (pin && pin->Direction == EEdGraphPinDirection::EGPD_Output)
+					{
+						node->RemovePin(pin);
+					}
 				}
-			))
+				node->GetQuestNodeInfo()->QuestResponse.Reset();
+				node->CreateDefaultOutputPins();
+				node->UpdateQuestGraphNodeBase();
+			}
+		)
+		)
 	);
 }
 

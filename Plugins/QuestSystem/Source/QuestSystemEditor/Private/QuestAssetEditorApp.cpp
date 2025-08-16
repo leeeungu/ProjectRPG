@@ -9,15 +9,9 @@
 #include "QuestStartGraphNode.h"
 #include "QuestNodeInfo.h"
 #include "QuestEndGraphNode.h"
+#include "Utility/QuestUtility.h"
 
-
-//DEFINE_LOG_CATEGORY_STATIC(QuestAssetEditorApp, Log, All);
-//#include "uedgraphpannel"
-
-//void QuestAssetEditorApp::RegisterTabSpawners(const TSharedRef< class FTabManager>& TabManager)
-//{
-//	FWorkflowCentricApplication::RegisterTabSpawners(TabManager);
-//}
+DEFINE_LOG_CATEGORY_STATIC(LogQuestAssetEditorApp, Log, All);
 
 void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TSharedPtr<IToolkitHost>& initToolkitHost, UObject* inObject)
 {
@@ -32,8 +26,6 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
 		UEdGraph::StaticClass(),
 		UQuestGraphSchema::StaticClass()
 	);
-
-
 
 	InitAssetEditor(
 		mode, initToolkitHost, TEXT("QuestSystem"), FTabManager::FLayout::NullLayout, true, true, ObjectsToEdit
@@ -67,7 +59,6 @@ void QuestAssetEditorApp::OnClose()
 {
     UpdateWorkingAssetFromGraph();
     _workingAsset->SetPreSaveListener(nullptr);
-  //  _workingGraph->RemoveOnGraphChangedHandler(_graohChangeLisenerHandle);
     FAssetEditorToolkit::OnClose();
 }
 
@@ -83,7 +74,6 @@ void QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated(const FPropertyChang
         _workingGraphUI->NotifyGraphChanged();
     }
 }
-
 
 void QuestAssetEditorApp::OnWorkingAssetPreSave()
 {
@@ -116,8 +106,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
             // Only record the the output side of the connection since this is a directed graph
             if (uiPin->HasAnyConnections() && uiPin->Direction == EEdGraphPinDirection::EGPD_Output) {
                 // Only 1 connection is allowed so just take the first one
-                std::pair<FGuid, FGuid> connection = std::make_pair(uiPin->PinId, uiPin->LinkedTo[0]->PinId);
-                connections.Add(connection);
+                connections.Add(std::make_pair(uiPin->PinId, uiPin->LinkedTo[0]->PinId));
             }
 
             idToPinMap.Add(uiPin->PinId, runtimePin);
@@ -128,17 +117,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
                 runtimeNode->OutputPins.Add(runtimePin);
             }
         }
-        //if (uiNode->IsA(UQuestGraphNode::StaticClass()))
-        //{
-        //    UQuestGraphNode* uiGraphNode = Cast<UQuestGraphNode>(uiNode);
-        //    runtimeNode->NodeType = EQuestNodeType::QuestNode;
-        //    runtimeNode->QuestInfo = uiGraphNode->GetQuestNodeInfo();;
-        //}
-        //else  if (uiNode->IsA(UQuestStartGraphNode::StaticClass()))
-        //{
-        //    runtimeNode->NodeType = EQuestNodeType::StartNode;
-        //    //runtimeNode->QuestInfo = uiGraphNode->GetNodeInfo();;
-        //}
+     
         UQuestGraphNodeBase* uiGraphNode = Cast<UQuestGraphNodeBase>(uiNode);
         runtimeNode->NodeType = uiGraphNode->GetQuestNodeType();
         runtimeNode->QuestInfo = DuplicateObject( uiGraphNode->GetNodeInfo(), runtimeNode);
@@ -146,7 +125,7 @@ void QuestAssetEditorApp::UpdateWorkingAssetFromGraph()
     }
 
     // Now make all the connections
-    for (std::pair<FGuid, FGuid> connection : connections) {
+    for (std::pair<FGuid, FGuid>& connection : connections) {
         UQuestRuntimePin* pin1 = idToPinMap[connection.first];
         UQuestRuntimePin* pin2 = idToPinMap[connection.second];
         pin1->Connection = pin2;
@@ -164,21 +143,9 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
     TMap<FGuid, UEdGraphPin*> idToPinMap;
     for (UQuestRuntimeNode* runtimeNode : _workingAsset->Graph->Nodes) {
         UQuestGraphNodeBase* newNode{};
-        if (runtimeNode->NodeType == EQuestNodeType::StartNode)
+        if (!QuestUtility::CreateQuestGraphNodeBase(_workingGraph, runtimeNode->NodeType, newNode))
         {
-            newNode = NewObject<UQuestStartGraphNode>(_workingGraph);
-        }
-        else if (runtimeNode->NodeType == EQuestNodeType::QuestNode)
-        {
-            newNode = NewObject<UQuestGraphNode>(_workingGraph);
-        }
-        else if (runtimeNode->NodeType == EQuestNodeType::EndNode)
-        {
-            newNode = NewObject<UQuestEndGraphNode>(_workingGraph);
-        }
-        else
-        {
-            //UE_LOG(QuestAssetEditorApp, Error, TEXT("QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset: Unknown node Type"));
+            UE_LOG(LogQuestAssetEditorApp, Error, TEXT("QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset: Unknown node Type Check UQuestGraphNodeBase Class's NodeType"));
             continue;
         }
 
@@ -188,6 +155,7 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
 
         if (runtimeNode->QuestInfo)
         {
+            runtimeNode->QuestInfo->pQuestAsset = _workingAsset;
             newNode->SetNodeInfo(DuplicateObject(runtimeNode->QuestInfo, runtimeNode));
         }
         else 
@@ -219,7 +187,7 @@ void QuestAssetEditorApp::UpdateEditorGraphFromWorkingAsset()
         _workingGraph->AddNode(newNode, true, true);
     }
 
-    for (std::pair<FGuid, FGuid> connection : connections) {
+    for (std::pair<FGuid, FGuid>& connection : connections) {
         UEdGraphPin* fromPin = idToPinMap[connection.first];
         UEdGraphPin* toPin = idToPinMap[connection.second];
         fromPin->LinkedTo.Add(toPin);
@@ -234,7 +202,7 @@ UQuestGraphNodeBase* QuestAssetEditorApp::GetSelectedNode(const FGraphPanelSelec
         UQuestGraphNodeBase* node = Cast< UQuestGraphNodeBase>(obj);
         if (node)
         {
-        return node;
+            return node;
         }
     }
     return nullptr;

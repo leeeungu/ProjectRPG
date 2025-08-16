@@ -4,15 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "C_BaseCharacter.h"
-#include "Kismet/GameplayStatics.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardData.h"
-#include "BehaviorTree/BehaviorTreeComponent.h"
-#include "BehaviorTree/BlackBoardComponent.h"
-#include "UObject/ConstructorHelpers.h"
 #include "C_MonsterAiController.generated.h"
-
 
 /**
  * 
@@ -22,22 +14,27 @@ class PROJECTRPG_API AC_MonsterAiController : public AAIController
 {
 	GENERATED_BODY()
 
-public:
-	AC_MonsterAiController();
+private:
+	UPROPERTY()
+	class UBehaviorTreeComponent* m_pBT;
+	UPROPERTY()
+	class UBlackboardComponent* m_pBB;
 
 protected:
 	UPROPERTY()
-	UBehaviorTree* m_pBtAsset;
+	class UBehaviorTree* m_pBtAsset;
 
 	UPROPERTY()
-	UBlackboardData* m_pBbAsset;
-
-
-private:
-	UBehaviorTreeComponent* m_pBT;
-	UBlackboardComponent* m_pBB;
+	class UBlackboardData* m_pBbAsset;
 
 public:
+	static const FName TargetActorKey;
+	static const FName CanAttackKey;
+	static const FName PatrolLocationKey;
+
+public:
+	AC_MonsterAiController();
+
 	virtual void OnPossess(APawn* pMonster) override;
 
 	virtual void OnUnPossess() override;

@@ -22,6 +22,14 @@ void UC_InputQueueComponant::InputQueueList(int32 InputKeyData, bool InputIsPoss
 	}
 	if (InputIsPossible)
 	{
+		if (bSubQueueActive)//bool check
+		{
+			if (EnterFirst.Num() >= 2)
+			{
+				EnterFirst.RemoveAt(0);
+			}
+			EnterFirst.Add(InputKeyData);
+		}
 		InputQueue.Add(InputKeyData);
 	}
 	else
@@ -48,6 +56,18 @@ int32 UC_InputQueueComponant::OutputLastIndex(bool IsPull) const
 void UC_InputQueueComponant::ClearList()
 {
 	InputQueue.Empty();
+}
+
+bool UC_InputQueueComponant::InputTimeOver(float delta)//*Improve
+{
+	float AllClearTime{};
+	AllClearTime += delta;
+	if (AllClearTime > 2.f)
+	{
+		return true;
+	}
+	else
+		return false;
 }
 
 

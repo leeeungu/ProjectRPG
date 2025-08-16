@@ -2,7 +2,7 @@
 
 
 #include "C_BTService_CheckAttackCondition.h"
-
+#include "BehaviorTree/BlackboardComponent.h"
 #include "C_MonsterBaseCharacter.h"
 #include "AIController.h"
 #include "C_MonsterAiController.h"
@@ -24,8 +24,12 @@ void UC_BTService_CheckAttackCondition::TickNode(UBehaviorTreeComponent& OwnerCo
 
 	TArray<int32> arrAvailable = pMonster->filterAvailablePatterns();
 
-	bool bCanCheck = arrAvailable.Num() > 0;
+	bool bPatternCheck = arrAvailable.Num() > 0;
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("CanAttack"), bCanCheck);
+	bool bIsAttacking = !pMonster->getIsAttacking();
+
+	bool bCanAttack = bPatternCheck && bIsAttacking;
+
+	OwnerComp.GetBlackboardComponent()->SetValueAsBool(AC_MonsterAiController::CanAttackKey, bCanAttack);
 
 }
