@@ -6,20 +6,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "CPP_Player/C_Player.h"
+#include "UObject/ConstructorHelpers.h"
 
 void AC_PlayerController::BeginPlay()
 {
     Super::BeginPlay();
-
-    // Enhanced Input Subsystem 가져오기 (로컬 플레이어)
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-    {
-        if (InputMapping)
-        {
-            // 우선순위 0으로 매핑 추가
-            Subsystem->AddMappingContext(InputMapping, 0);
-        }
-    }
 }
 
 void AC_PlayerController::SetupInputComponent()
@@ -39,5 +31,62 @@ void AC_PlayerController::SetupInputComponent()
 
 void AC_PlayerController::OnTestAction(const FInputActionValue& Value)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Pressed Input Action");
+    FHitResult res;
+    //오브젝트 타입으로 피킹
+    TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes{};
+    objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
+    if (GetHitResultUnderCursorForObjects(objectTypes, false, res))
+    {
+        AC_Player* player = Cast<AC_Player>(GetPawn());
+        //player->OnBattle(res.GetActor()); (배틀모드로 바로 진행)
+    }
+    //트레이스 채널로 피킹
+    else if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("OnTestAction Triggered!"));
+        GetPawn()->SetActorLocation(res.ImpactPoint);
+        AC_Player* player = Cast<AC_Player>(GetPawn());
+        player->OnMoveToPos(res.ImpactPoint);
+    }
+    
+}
+
+AC_PlayerController::AC_PlayerController()
+{
+	bShowMouseCursor = true;
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
+		TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
+	);
+
+	if (IMC.Succeeded())
+	{
+		InputMapping = IMC.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_Test(
+		TEXT("/Game/RPG_Player/Input/Actions/TestAction.TestAction")
+	);
+	if (IA_Test.Succeeded())
+	{
+		TestAction = IA_Test.Object;
+	}
+}
+
+void AC_PlayerController::OnPossess(APawn* pawn)
+{
+    Super::OnPossess(pawn);
+    // Enhanced Input Subsystem 가져오기 (로컬 플레이어)
+    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        if (InputMapping)
+        {
+            // 우선순위 0으로 매핑 추가
+            UE_LOG(LogTemp, Warning, TEXT("MappingContext Added!"));
+            Subsystem->AddMappingContext(InputMapping, 0);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("MappingContext NOT Added!"));
+        }
+    }
 }

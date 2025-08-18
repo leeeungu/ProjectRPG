@@ -28,5 +28,8 @@ protected:
 	UInputAction* TestAction;
 
 	void OnTestAction(const FInputActionValue& Value);
+public:
+	AC_PlayerController();
+	virtual void OnPossess(APawn* pawn) override;
 	
 };

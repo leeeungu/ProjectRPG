@@ -23,10 +23,24 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* m_camCom{};
 
+	float moveSpeed = 200.0f;
+	FVector moveDir{};
+	float remainDist{};
+	float stopDist = 0.1f;
+	float rotDir{};
+	float remainAngle{};
+
+	TArray<FVector> pathList{};
+	int curPathPos = 1;
+
+	void CalMoveData();
+
 protected:
 
 public:
 	AC_Player();
+	virtual void Tick(float DeltaTime) override;
+	void OnMoveToPos(FVector pos);
 
 	
 };
