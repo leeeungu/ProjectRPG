@@ -1,9 +1,9 @@
-﻿#include "Widget/WBP_SlotFrameBorder.h"
+﻿#include "Widget/C_SlotFrameBorder.h"
 #include "Components/CanvasPanelSlot.h"
 
 DEFINE_LOG_CATEGORY_STATIC(WBP_SlotFrameBorder, Log, All);
 
-UWBP_SlotFrameBorder::UWBP_SlotFrameBorder()
+UC_SlotFrameBorder::UC_SlotFrameBorder()
 {
 	static ConstructorHelpers::FObjectFinder<UTexture2D> Texture(TEXT("/Game/UI/Texture/T_SlotFrame.T_SlotFrame"));
 	if (Texture.Succeeded())

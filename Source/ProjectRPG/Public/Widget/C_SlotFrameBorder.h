@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/Border.h"
-#include "WBP_SlotFrameBorder.generated.h"
+#include "C_SlotFrameBorder.generated.h"
 
 
 UCLASS(Blueprintable)
-class PROJECTRPG_API UWBP_SlotFrameBorder : public UBorder
+class PROJECTRPG_API UC_SlotFrameBorder : public UBorder
 {
 	GENERATED_BODY()
 
 public:
-	UWBP_SlotFrameBorder();
+	UC_SlotFrameBorder();
 };
