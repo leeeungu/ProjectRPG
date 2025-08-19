@@ -23,15 +23,15 @@ struct FS_PatternData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName strAttackName;
+	FName strAttackName = NAME_None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* pAttackMontage;
+	UAnimMontage* pAttackMontage = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fCoolTime;
+	float fCoolTime = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fAttackRange;
+	float fAttackRange = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 nWeight;
+	int32 nWeight = 0;
 
 	float LastUsedTime = -100.f;
 };
