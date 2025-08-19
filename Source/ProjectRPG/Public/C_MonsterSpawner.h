@@ -16,6 +16,9 @@ class PROJECTRPG_API AC_MonsterSpawner : public AActor
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	bool m_bIsActive;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Spawner")
+	int32 m_nDeadCount;
 	
 	
 public:	

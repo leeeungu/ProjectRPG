@@ -7,6 +7,8 @@
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMosterDied, AC_MonsterBaseCharacter*, DeadMonster);
+
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
 {
@@ -68,6 +70,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	FName m_strMonsterName;
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnMosterDied m_onMonsterDied;
+
 private:
 	float getDistanceToTarget() const;
 
@@ -76,6 +85,8 @@ private:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void Destroyed() override;
 
 
 public:

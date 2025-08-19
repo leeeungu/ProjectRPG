@@ -232,3 +232,9 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 }
+
+void AC_MonsterBaseCharacter::Destroyed()
+{
+	Super::Destroyed();
+	m_onMonsterDied.Broadcast(this);
+}
