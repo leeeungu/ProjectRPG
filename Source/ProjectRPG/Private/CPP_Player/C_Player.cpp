@@ -9,13 +9,13 @@
 
 void AC_Player::CalMoveData()
 {
-	if (curPathPos >= pathList.Num())//가야할곳이 생겼다? 그럼 IsMove활성화시켜서 애니메이션 작동시킴 먼저.
+	UE_LOG(LogTemp, Warning, TEXT("CalMoveData"));
+	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)
 	{
 		//Cast<UCPP_AnimInstance>(skMesh->GetAnimInstance())->IsMove = false;
 		return;
 	}
-
-	FVector pos = pathList[curPathPos++];
+	FVector pos = pathList[curPathPos++];//(curPathPos는 제일먼저가야할곳, ++는 그다음path포인트임 = 다음위치정보를 담음
 	pos.Z = GetActorLocation().Z;//Z축 맞춤(안맞추면 캐릭터의 default Z인 0.5지점부터 계산이 들어가게됨)
 	moveDir = pos - GetActorLocation();
 	remainDist = moveDir.Length();
@@ -28,14 +28,13 @@ void AC_Player::CalMoveData()
 
 	moveDir.Normalize();
 
-	remainAngle =
-		FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(GetActorForwardVector(), moveDir)));
-	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;
+	remainAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(GetActorForwardVector(), moveDir))); //회전각도
+	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;//회전방향
+	
 }
 
 AC_Player::AC_Player()
 {
-	//skMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SKMESH"));
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> res(TEXT("/Game/RPG_Hero_Character/Assets/Meshes/Adventurer/SK_Adventurer.SK_Adventurer"));
 	if (res.Succeeded())
 	{
@@ -43,14 +42,26 @@ AC_Player::AC_Player()
 	}
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	bUseControllerRotationYaw = false;
 
 	m_springCom = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRING"));
 	m_springCom->SetupAttachment(RootComponent);
 	m_springCom->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
-	m_springCom->SetRelativeLocation(FVector(-450.f, 0.f, 800.f));
-
+	//m_springCom->SetRelativeLocation(FVector(-400.f, 0.f, 600.f));
+	m_springCom->bDoCollisionTest = false; // 흔들림 방지
+	m_springCom->bEnableCameraLag = false;
+	m_springCom->bEnableCameraRotationLag = false;
+	m_springCom->SetUsingAbsoluteRotation(true);
+	m_springCom->bUsePawnControlRotation = false;
+	m_springCom->TargetArmLength = 500.0f;
 	m_camCom = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	m_camCom->SetupAttachment(m_springCom);
+	m_camCom->bUsePawnControlRotation = false;
+}
+
+void AC_Player::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void AC_Player::Tick(float DeltaTime)
@@ -97,20 +108,32 @@ void AC_Player::Tick(float DeltaTime)
 	}
 }
 
-void AC_Player::OnMoveToPos(FVector pos)
+void AC_Player::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// BeginPlay()보다 먼저 호출되어 카메라를 비활성화
+	//UCameraComponent* PawnCamera = FindComponentByClass<UCameraComponent>();
+	//if (PawnCamera)
+	//{
+	//	PawnCamera->Deactivate();
+	//	UE_LOG(LogTemp, Warning, TEXT("Pawn Camera Deactivated in PostInitializeComponents!"));
+	//}
+}
+
+void AC_Player::OnMoveToPosPlayer(FVector pos)
 {
 	//길찾기 패스 구하기
 	UNavigationPath* Path =
 		UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), pos);
-	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)
+	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//네브메시볼륨에 찍혔고, 유효하고, 패스포인트가 2개이상인경우
 	{
-		//패스를 구했다.
 		for (const FVector& Point : Path->PathPoints)
 		{
-			return;
+			UE_LOG(LogTemp, Warning, TEXT("PathPoint: %s"), *Point.ToString());
 		}
-		pathList = Path->PathPoints;
-		curPathPos = 1;
+		pathList = Path->PathPoints;//리스트에 포인팅된 path정보를 담음(장애물이없다면 리스트에 2개가담김->[현재위치][찍은위치]
+		curPathPos = 1;//if문을 넘겼다면 일단 이동해야하기떄문에 curPathPos를 1로 설정
 	}
 
 	CalMoveData();

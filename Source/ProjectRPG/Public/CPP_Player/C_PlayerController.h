@@ -10,6 +10,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UCameraComponent;
 /**
  * 
  */
@@ -20,12 +21,16 @@ class PROJECTRPG_API AC_PlayerController : public APlayerController
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	UInputMappingContext* InputMapping;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* TestAction;
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UCameraComponent* CameraComponent;
 
 	void OnTestAction(const FInputActionValue& Value);
 public:

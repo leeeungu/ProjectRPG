@@ -39,8 +39,10 @@ protected:
 
 public:
 	AC_Player();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void OnMoveToPos(FVector pos);
+	virtual void PostInitializeComponents() override;
+	void OnMoveToPosPlayer(FVector pos);
 
 	
 };
