@@ -15,6 +15,7 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AC_MonsterAiController::StaticClass();
 	SetActorTickEnabled(false);
+
 }
 
 void AC_MonsterBaseCharacter::Tick(float DeltaTime)
@@ -236,5 +237,5 @@ void AC_MonsterBaseCharacter::BeginPlay()
 void AC_MonsterBaseCharacter::Destroyed()
 {
 	Super::Destroyed();
-	m_onMonsterDied.Broadcast(this);
+	m_onMonsterDied.Broadcast();
 }

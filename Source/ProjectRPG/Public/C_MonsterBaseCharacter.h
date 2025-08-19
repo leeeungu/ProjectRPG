@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMosterDied, AC_MonsterBaseCharacter*, DeadMonster);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -23,15 +23,15 @@ struct FS_PatternData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName strAttackName;
+	FName strAttackName = NAME_None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* pAttackMontage;
+	UAnimMontage* pAttackMontage = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fCoolTime;
+	float fCoolTime = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fAttackRange;
+	float fAttackRange = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 nWeight;
+	int32 nWeight = 0;
 
 	float LastUsedTime = -100.f;
 };
@@ -136,8 +136,6 @@ public:
 
 	UFUNCTION()
 	void onCounterFailed();
-
-
 
 
 	UFUNCTION(BlueprintCallable)
