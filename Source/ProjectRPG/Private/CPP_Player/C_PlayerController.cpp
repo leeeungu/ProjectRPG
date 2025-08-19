@@ -7,8 +7,8 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "CPP_Player/C_Player.h"
-#include "Camera/CameraComponent.h"
 #include "UObject/ConstructorHelpers.h"
+
 
 void AC_PlayerController::BeginPlay()
 {
@@ -18,15 +18,7 @@ void AC_PlayerController::BeginPlay()
 void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    APawn* MyPawn = GetPawn();
- /*   if (MyPawn && CameraComponent)
-    {
-        FVector NewCameraLocation = MyPawn->GetActorLocation() + FVector(-400.f, 0.f, 800.f);
-        FRotator NewCameraRotation = FRotator(-45.f, 0.f, 0.f);
-
-        CameraComponent->SetWorldLocation(NewCameraLocation);
-        CameraComponent->SetWorldRotation(NewCameraRotation);
-    }*/
+    GetMousePos(IsOpenMousePointTrigger);
 }
 
 void AC_PlayerController::SetupInputComponent()
@@ -36,15 +28,29 @@ void AC_PlayerController::SetupInputComponent()
     // EnhancedInputComponent로 캐스팅
     if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
     {
-        if (TestAction)
+        if (RightClick)
         {
-            // Q 키가 눌리면 OnTestAction 호출
-            EnhancedInput->BindAction(TestAction, ETriggerEvent::Triggered, this, &AC_PlayerController::OnTestAction);
+            EnhancedInput->BindAction(RightClick, ETriggerEvent::Triggered, this, &AC_PlayerController::OnRightClickAction);
         }
     }
 }
 
-void AC_PlayerController::OnTestAction(const FInputActionValue& Value)
+void AC_PlayerController::GetMousePos(bool IsOpenMousePoint)
+{
+    if (!IsOpenMousePoint) return;
+    else if (IsOpenMousePoint)
+    {
+        FHitResult res;
+        GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res);
+        UE_LOG(LogTemp, Warning, TEXT("OnTestAction Triggered!"));
+        AC_Player* player = Cast<AC_Player>(GetPawn());
+        player->SetMousePointDir(res.ImpactPoint);
+    }
+    
+
+}
+
+void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 {
     FHitResult res;
     //오브젝트 타입으로 피킹
@@ -68,10 +74,6 @@ void AC_PlayerController::OnTestAction(const FInputActionValue& Value)
 AC_PlayerController::AC_PlayerController()
 {
 	bShowMouseCursor = true;//마우스표시
-    //CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CustomCamera"));//카메라세팅
-    //CameraComponent->SetupAttachment(GetRootComponent());
-    //CameraComponent->SetRelativeRotation( FRotator(-45.f, 0.f, 0.f));
-    //CameraComponent->SetRelativeLocation( FVector(-500.f, 0.f, 600.f));
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
 		TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
 	);
@@ -81,21 +83,18 @@ AC_PlayerController::AC_PlayerController()
 		InputMapping = IMC.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> IA_Test(
-		TEXT("/Game/RPG_Player/Input/Actions/TestAction.TestAction")
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
+		TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
 	);
-	if (IA_Test.Succeeded())
+	if (IA_RightClick.Succeeded())
 	{
-		TestAction = IA_Test.Object;
+        RightClick = IA_RightClick.Object;
 	}
 }
 
 void AC_PlayerController::OnPossess(APawn* pawn)
 {
     Super::OnPossess(pawn);
-   // SetViewTarget(pawn);
-   // SetViewTarget(this);
-    // Enhanced Input Subsystem 가져오기 (로컬 플레이어)
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
         if (InputMapping)

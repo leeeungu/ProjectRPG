@@ -19,6 +19,9 @@ class PROJECTRPG_API AC_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+private:
+	bool IsOpenMousePointTrigger = false;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -27,12 +30,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	UInputMappingContext* InputMapping;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* TestAction;
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	UCameraComponent* CameraComponent;
+	UInputAction* RightClick;
 
-	void OnTestAction(const FInputActionValue& Value);
+
+	void GetMousePos(bool IsOpenMousePoint);
+public:
+	void OnRightClickAction(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;

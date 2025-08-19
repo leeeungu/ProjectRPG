@@ -9,7 +9,6 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-
 /**
  * 
  */
@@ -23,17 +22,19 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* m_camCom{};
 
-	float moveSpeed = 200.0f;
+	//이동 및 회전
+	float moveSpeed = 500.0f;
 	FVector moveDir{};
 	float remainDist{};
 	float stopDist = 0.1f;
 	float rotDir{};
 	float remainAngle{};
-
+	//Path값
 	TArray<FVector> pathList{};
 	int curPathPos = 1;
-
 	void CalMoveData();
+
+	FVector MousePointDir{};
 
 protected:
 
@@ -41,8 +42,9 @@ public:
 	AC_Player();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	virtual void PostInitializeComponents() override;
 	void OnMoveToPosPlayer(FVector pos);
+	void SetMousePointDir(FVector pos);
+	FVector GetMousePointDir();
 
 	
 };

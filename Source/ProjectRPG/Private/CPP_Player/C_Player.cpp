@@ -6,13 +6,13 @@
 #include "Camera/CameraComponent.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "CPP_Player/C_PlayerAnimInstance.h"
 
 void AC_Player::CalMoveData()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CalMoveData"));
-	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)
+	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
 	{
-		//Cast<UCPP_AnimInstance>(skMesh->GetAnimInstance())->IsMove = false;
+		Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
 		return;
 	}
 	FVector pos = pathList[curPathPos++];//(curPathPos는 제일먼저가야할곳, ++는 그다음path포인트임 = 다음위치정보를 담음
@@ -30,15 +30,21 @@ void AC_Player::CalMoveData()
 
 	remainAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(GetActorForwardVector(), moveDir))); //회전각도
 	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;//회전방향
+	Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = true;
 	
 }
 
 AC_Player::AC_Player()
 {
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> res(TEXT("/Game/RPG_Hero_Character/Assets/Meshes/Adventurer/SK_Adventurer.SK_Adventurer"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> res(TEXT("/Game/RPG_Hero_Character/Assets/Meshes/Adventurer/SK_Adventurer.SK_Adventurer"));
 	if (res.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(res.Object);
+	}
+	static ConstructorHelpers::FClassFinder<UAnimInstance>anim(TEXT("/Game/RPG_Player/ABP_Player.ABP_Player_C"));
+	if (anim.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(anim.Class);
 	}
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
@@ -53,7 +59,7 @@ AC_Player::AC_Player()
 	m_springCom->bEnableCameraRotationLag = false;
 	m_springCom->SetUsingAbsoluteRotation(true);
 	m_springCom->bUsePawnControlRotation = false;
-	m_springCom->TargetArmLength = 500.0f;
+	m_springCom->TargetArmLength = 1500.0f;
 	m_camCom = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	m_camCom->SetupAttachment(m_springCom);
 	m_camCom->bUsePawnControlRotation = false;
@@ -90,35 +96,22 @@ void AC_Player::Tick(float DeltaTime)
 		remainDist -= delta;
 		if (remainDist <= stopDist)
 		{
-			//Cast<UCPP_AnimInstance>(skMesh->GetAnimInstance())->IsMove = false;
-			CalMoveData();
+			Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
+			CalMoveData();//
 		}
 	}
 	else
 	{
-		//Cast<UCPP_AnimInstance>(skMesh->GetAnimInstance())->IsMove = false;
+		Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
 	}
 
 	if (remainAngle > 0.f)
 	{
-		float delta = 360.0f * DeltaTime;
+		float delta = 500.0f * DeltaTime;
 		if (delta > remainAngle) delta = remainAngle;
 		AddActorWorldRotation(FRotator(0.f, delta * rotDir, 0.f));
 		remainAngle -= delta;
 	}
-}
-
-void AC_Player::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	// BeginPlay()보다 먼저 호출되어 카메라를 비활성화
-	//UCameraComponent* PawnCamera = FindComponentByClass<UCameraComponent>();
-	//if (PawnCamera)
-	//{
-	//	PawnCamera->Deactivate();
-	//	UE_LOG(LogTemp, Warning, TEXT("Pawn Camera Deactivated in PostInitializeComponents!"));
-	//}
 }
 
 void AC_Player::OnMoveToPosPlayer(FVector pos)
@@ -128,16 +121,21 @@ void AC_Player::OnMoveToPosPlayer(FVector pos)
 		UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), pos);
 	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//네브메시볼륨에 찍혔고, 유효하고, 패스포인트가 2개이상인경우
 	{
-		for (const FVector& Point : Path->PathPoints)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PathPoint: %s"), *Point.ToString());
-		}
 		pathList = Path->PathPoints;//리스트에 포인팅된 path정보를 담음(장애물이없다면 리스트에 2개가담김->[현재위치][찍은위치]
 		curPathPos = 1;//if문을 넘겼다면 일단 이동해야하기떄문에 curPathPos를 1로 설정
 	}
-
 	CalMoveData();
-	//Cast<UCPP_AnimInstance>(skMesh->GetAnimInstance())->IsMove = true;
+}
+
+void AC_Player::SetMousePointDir(FVector pos)
+{
+	pos.Z = 0.0f;
+	MousePointDir = pos.GetSafeNormal();
+}
+
+FVector AC_Player::GetMousePointDir()
+{
+	return this->MousePointDir;
 }
 
 
