@@ -2,6 +2,8 @@
 
 
 #include "C_MonsterSpawnerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "C_MonsterSpawner.h"
 
 // Sets default values
 AC_MonsterSpawnerManager::AC_MonsterSpawnerManager()
@@ -22,7 +24,7 @@ void AC_MonsterSpawnerManager::BeginPlay()
 		AC_MonsterSpawner* pSpawner = Cast<AC_MonsterSpawner>(pActor);
 		if (pSpawner)
 		{
-			m_arrSpawner.Add(pSpawner);
+			m_arrFoundSpawner.Add(pSpawner);
 		}
 	}
 
@@ -35,7 +37,7 @@ void AC_MonsterSpawnerManager::onCurrentSpawnerComplete()
 {
 	m_nCurrentIndex++;
 
-	if (m_arrSpawner.IsValidIndex(m_nCurrentIndex))
+	if (m_arrFoundSpawner.IsValidIndex(m_nCurrentIndex))
 	{
 		activateCurrentSpawner();
 	}
@@ -47,9 +49,9 @@ void AC_MonsterSpawnerManager::onCurrentSpawnerComplete()
 
 void AC_MonsterSpawnerManager::activateCurrentSpawner()
 {
-	if (m_arrSpawner.IsValidIndex(m_nCurrentIndex))
+	if (m_arrFoundSpawner.IsValidIndex(m_nCurrentIndex))
 	{
-		AC_MonsterSpawner* pSpawner = m_arrSpawner[m_nCurrentIndex];
+		AC_MonsterSpawner* pSpawner = m_arrFoundSpawner[m_nCurrentIndex];
 		if (pSpawner)
 		{
 			pSpawner->m_onSpawnComplete.AddDynamic(this, &AC_MonsterSpawnerManager::onCurrentSpawnerComplete);

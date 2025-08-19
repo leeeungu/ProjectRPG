@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Kismet/GameplayStatics.h"
-#include "C_MonsterSpawner.h"
 #include "C_MonsterSpawnerManager.generated.h"
 
 UCLASS()
@@ -14,14 +12,10 @@ class PROJECTRPG_API AC_MonsterSpawnerManager : public AActor
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	TArray<AC_MonsterSpawner*> m_arrSpawner;
+	UPROPERTY(EditAnywhere)
+	TArray<AC_MonsterSpawner*> m_arrFoundSpawner;
 	UPROPERTY()
 	int32 m_nCurrentIndex;
-
-public:
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> m_arrFoundSpawner;
 	
 public:	
 	// Sets default values for this actor's properties
