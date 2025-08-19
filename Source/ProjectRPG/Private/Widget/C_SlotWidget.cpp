@@ -14,14 +14,22 @@ void UC_SlotWidget::NativeOnInitialized()
 	if (m_pHoverFrame)
 		m_pHoverFrame->SetVisibility(ESlateVisibility::Hidden);
 	if (m_pSlotImage)
-		m_pSlotImage->Brush.DrawAs = ESlateBrushDrawType::NoDrawType;
+	{
+		FSlateBrush brush{};
+		brush.DrawAs = ESlateBrushDrawType::NoDrawType;
+		m_pSlotImage->SetBrush(brush);
+	}
 }
 
 void UC_SlotWidget::NativePreConstruct()
 {
 	UUserWidget::NativePreConstruct();
 	if (m_pSlotImage)
-		m_pSlotImage->Brush.DrawAs = ESlateBrushDrawType::NoDrawType;
+	{
+		FSlateBrush brush{};
+		brush.DrawAs = ESlateBrushDrawType::NoDrawType;
+		m_pSlotImage->SetBrush(brush);
+	}
 }
 
 void UC_SlotWidget::NativeConstruct()

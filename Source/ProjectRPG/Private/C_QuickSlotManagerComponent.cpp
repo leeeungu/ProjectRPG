@@ -29,7 +29,11 @@ UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 
 void UC_QuickSlotManagerComponent::setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID)
 {
-	m_arrQuickSlotItem[(int)QuickSlotType] = ItemID;
+	m_arrQuickSlotItem[(uint8)QuickSlotType] = ItemID;
+	if (m_onQuickSlotChange[(uint8)QuickSlotType].IsBound())
+	{
+		m_onQuickSlotChange[(uint8)QuickSlotType].Execute(m_arrQuickSlotItem[(uint8)QuickSlotType]);
+	}
 }
 
 bool UC_QuickSlotManagerComponent::getQuickSlotItemID(E_QuickSlotType QuickSlotType, int& useItemID) const
@@ -68,8 +72,26 @@ bool UC_QuickSlotManagerComponent::getQuickSlotItemID(E_QuickSlotType QuickSlotT
 	return true;
 }
 
+void UC_QuickSlotManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UActorComponent::EndPlay(EndPlayReason);
+	UC_ItemDataSubsystem::getInstance()->saveQuickSlotData(this);
+}
+
+int UC_QuickSlotManagerComponent::getQuickSlotID(E_QuickSlotType QuickSlotType) const
+{
+	return m_arrQuickSlotItem[(int)QuickSlotType];
+}
+
+void UC_QuickSlotManagerComponent::bindSlotChangeDelegate(E_QuickSlotType QuickSlotType, FOnQuickSlotChange Delegate)
+{
+	m_onQuickSlotChange[(int)QuickSlotType] = Delegate;
+}
+
 void UC_QuickSlotManagerComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 	m_pInventoryComponent = GetOwner()->GetComponentByClass<UC_InventoryComponent>();
+	UC_ItemDataSubsystem::getInstance()->loadQuickSlotData(this);
+
 }

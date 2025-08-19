@@ -28,15 +28,14 @@ protected:
 public:
 	UC_SlotWidget(const FObjectInitializer& ObjectInitializer);
 
-	virtual void NativeOnInitialized() override;
-	virtual void NativePreConstruct() override;
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
 protected:
-
+	virtual void NativeOnInitialized() override;
+	virtual void NativePreConstruct() override;
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	void hoverStart();
 	void hoverEnd();
 };

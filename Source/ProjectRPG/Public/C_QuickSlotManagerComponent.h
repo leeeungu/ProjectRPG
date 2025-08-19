@@ -7,6 +7,8 @@
 class UC_InventoryComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuickSlotNone);
+UDELEGATE()
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnQuickSlotChange, int, ItemID);
 
 UENUM(BlueprintType)
 enum class E_QuickSlotType : uint8
@@ -26,8 +28,9 @@ class PROJECTRPG_API UC_QuickSlotManagerComponent : public UActorComponent
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite)
-	FOnQuickSlotNone m_onQuickSlotNoneDelegate;
-
+	FOnQuickSlotNone m_onQuickSlotNoneDelegate{};
+	UPROPERTY()
+	FOnQuickSlotChange m_onQuickSlotChange[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
 private:
 	int m_arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX];
 	UC_InventoryComponent* m_pInventoryComponent;
@@ -43,6 +46,13 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "QuickSlot")
 	bool getQuickSlotItemID(E_QuickSlotType QuickSlotType, int& useItemID) const;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION(BlueprintPure, Category = "QuickSlot")
+	int getQuickSlotID(E_QuickSlotType QuickSlotType) const;
+
+	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
+	void bindSlotChangeDelegate(E_QuickSlotType QuickSlotType, FOnQuickSlotChange Delegate);
 protected:
 	virtual void BeginPlay() override;
 

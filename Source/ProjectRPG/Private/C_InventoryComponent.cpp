@@ -252,6 +252,15 @@ void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface
 	runSlotChangeInterface(pSlotData);
 }
 
+void UC_InventoryComponent::setInventorySlotData(int nY, int nX, FS_InventorySlotData& sData)
+{
+	m_arrInventory[getArrayIndex(nY, nX)].sData = sData;
+	if (sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
+		return;
+	int& sCount = m_mapItemCount.FindOrAdd(sData.nItemID);
+	sCount += sData.nItemCount;
+}
+
 void UC_InventoryComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
@@ -262,7 +271,10 @@ void UC_InventoryComponent::BeginPlay()
 		return;
 	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
 	if (GameInstance)
+	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
+		m_pItemDataSubsystem->loadInventroyData(this);
+	}
 }
 
 void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -294,6 +306,12 @@ FS_InventorySlot* UC_InventoryComponent::getInventorySlotData(int nY, int nX)
 int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 { 
 	return nY * m_nInventoryWidth + nX;
+}
+
+void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UActorComponent::EndPlay(EndPlayReason);
+	m_pItemDataSubsystem->saveInventroyData(this);
 }
 
 void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
