@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMosterDied, AC_MonsterBaseCharacter*, DeadMonster);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -136,8 +136,6 @@ public:
 
 	UFUNCTION()
 	void onCounterFailed();
-
-
 
 
 	UFUNCTION(BlueprintCallable)

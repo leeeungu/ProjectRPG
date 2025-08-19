@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "C_MonsterSpawnerManager.generated.h"
 
+
+
+class AC_MonsterSpawner;
+
 UCLASS()
 class PROJECTRPG_API AC_MonsterSpawnerManager : public AActor
 {
@@ -16,7 +20,7 @@ private:
 	TArray<AC_MonsterSpawner*> m_arrFoundSpawner;
 	UPROPERTY()
 	int32 m_nCurrentIndex;
-	
+
 public:	
 	// Sets default values for this actor's properties
 	AC_MonsterSpawnerManager();

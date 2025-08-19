@@ -236,5 +236,5 @@ void AC_MonsterBaseCharacter::BeginPlay()
 void AC_MonsterBaseCharacter::Destroyed()
 {
 	Super::Destroyed();
-	m_onMonsterDied.Broadcast(this);
+	m_onMonsterDied.Broadcast();
 }
