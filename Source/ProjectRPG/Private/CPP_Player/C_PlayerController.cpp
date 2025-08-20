@@ -10,6 +10,44 @@
 #include "UObject/ConstructorHelpers.h"
 
 
+void AC_PlayerController::UpdateMouseHit()
+{
+    FHitResult Hit;
+    CachedHitType = EMouseHitType::None;
+
+    // 1. 오브젝트 타입 피킹
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
+
+    if (GetHitResultUnderCursorForObjects(ObjectTypes, false, Hit))
+    {
+        CachedMouseHit = Hit;
+        CachedHitType = EMouseHitType::Object;
+        // 간단하게 로그 출력
+        if (Hit.GetActor())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Object Hit: %s at %s"),
+                *Hit.GetActor()->GetName(),
+                *Hit.ImpactPoint.ToString());
+        }
+        return;
+    }
+
+    // 2. 트레이스 채널 피킹
+    if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, Hit))
+    {
+        CachedMouseHit = Hit;
+        CachedHitType = EMouseHitType::Ground;
+        // 간단하게 로그 출력
+        UE_LOG(LogTemp, Warning, TEXT("Ground Hit at %s"), *Hit.ImpactPoint.ToString());
+
+        return;
+    }
+
+    // Hit이 없을 때
+    CachedMouseHit = FHitResult();
+}
+
 void AC_PlayerController::BeginPlay()
 {
     Super::BeginPlay();
@@ -18,7 +56,8 @@ void AC_PlayerController::BeginPlay()
 void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    GetMousePos(IsOpenMousePointTrigger);
+    UpdateMouseHit();
+    //GetMousePos(IsOpenMousePointTrigger);
 }
 
 void AC_PlayerController::SetupInputComponent()
@@ -56,27 +95,41 @@ void AC_PlayerController::GetMousePos(bool IsOpenMousePoint)//일단 한번열리면 바
 //마우스 오른쪽클릭
 void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 {
-    FHitResult res;
-    //오브젝트 타입으로 피킹
-    TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes{};
-    objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
-    if (GetHitResultUnderCursorForObjects(objectTypes, false, res))
+    //FHitResult res;
+    ////오브젝트 타입으로 피킹
+    //TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes{};
+    //objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
+    //if (GetHitResultUnderCursorForObjects(objectTypes, false, res))
+    //{
+    //    AC_Player* player = Cast<AC_Player>(GetPawn());
+    //    //player->OnBattle(res.GetActor()); (배틀모드로 바로 진행)
+    //}
+    ////트레이스 채널로 피킹
+    //else if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res))
+    //{
+    //    AC_Player* player = Cast<AC_Player>(GetPawn());
+    //    player->OnMoveToPosPlayer(res.ImpactPoint);
+    //}
+    FHitResult CachedHit;
+    EMouseHitType HitType;
+
+    if (!GetCachedMouseHit(CachedHit, HitType)) return;
+
+    AC_Player* player = Cast<AC_Player>(GetPawn());
+    if (!player) return;
+
+    /*if (HitType == EMouseHitType::Object)
     {
-        AC_Player* player = Cast<AC_Player>(GetPawn());
-        //player->OnBattle(res.GetActor()); (배틀모드로 바로 진행)
-    }
-    //트레이스 채널로 피킹
-    else if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res))
+        player->OnBattle(CachedHit.GetActor());
+    }*/
+    else if (HitType == EMouseHitType::Ground)
     {
-        AC_Player* player = Cast<AC_Player>(GetPawn());
-        player->OnMoveToPosPlayer(res.ImpactPoint);
+        player->OnMoveToPosPlayer(CachedHit.ImpactPoint);
     }
-    
 }
 //스페이스바 입력
 void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 {
-    IsOpenMousePointTrigger = true;
     AC_Player* player = Cast<AC_Player>(GetPawn());
     player->Period();
 }
@@ -117,4 +170,15 @@ void AC_PlayerController::OnPossess(APawn* pawn)
             Subsystem->AddMappingContext(InputMapping, 0);//우선순위0맵핑
         }
     }
+}
+
+bool AC_PlayerController::GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& OutType) const
+{
+    if (CachedHitType != EMouseHitType::None)
+    {
+        OutHit = CachedMouseHit;
+        OutType = CachedHitType;
+        return true;
+    }
+    return false;
 }

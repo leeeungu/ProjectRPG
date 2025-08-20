@@ -14,13 +14,24 @@ class UCameraComponent;
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EMouseHitType : uint8
+{
+	None,
+	Object,
+	Ground
+};
+
 UCLASS()
 class PROJECTRPG_API AC_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
 private:
-	
+	FHitResult CachedMouseHit;
+	EMouseHitType CachedHitType = EMouseHitType::None;
+	void UpdateMouseHit();
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,5 +54,8 @@ public:
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;
+	/** 캐시된 마우스 Hit 결과를 반환 */
+	UFUNCTION(BlueprintCallable, Category = "Mouse")
+	bool GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& OutType) const;
 	
 };
