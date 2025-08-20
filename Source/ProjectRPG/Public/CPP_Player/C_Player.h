@@ -35,7 +35,10 @@ private:
 	void CalMoveData();
 
 	FVector MousePointDir{};
+	bool IsPeriod = false;
+	
 
+	
 protected:
 
 public:
@@ -44,7 +47,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void OnMoveToPosPlayer(FVector pos);
 	void SetMousePointDir(FVector pos);
+	void OpenMousePointOfconstroller();
+	void CloseMousePointOfconstroller();
 	FVector GetMousePointDir();
+	void ClearMoveState();
+	void Period();
 
 	
 };

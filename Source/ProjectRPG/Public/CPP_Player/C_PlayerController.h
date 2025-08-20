@@ -20,7 +20,7 @@ class PROJECTRPG_API AC_PlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
-	bool IsOpenMousePointTrigger = false;
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,11 +31,15 @@ protected:
 	UInputMappingContext* InputMapping;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClick;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* SpaceBar;
 
 
 	void GetMousePos(bool IsOpenMousePoint);
 public:
+	bool IsOpenMousePointTrigger = false;
 	void OnRightClickAction(const FInputActionValue& Value);
+	void OnSpaceBarAction(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;

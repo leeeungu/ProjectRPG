@@ -32,24 +32,28 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(RightClick, ETriggerEvent::Triggered, this, &AC_PlayerController::OnRightClickAction);
         }
+        if (SpaceBar)
+        {
+            EnhancedInput->BindAction(SpaceBar, ETriggerEvent::Started, this, &AC_PlayerController::OnSpaceBarAction);
+        }
     }
 }
 
-void AC_PlayerController::GetMousePos(bool IsOpenMousePoint)
+void AC_PlayerController::GetMousePos(bool IsOpenMousePoint)//일단 한번열리면 바로 값전달하고 false로바꿈 (나중에 계속 열어야되는 때가오면 조건분기달아야함)
 {
     if (!IsOpenMousePoint) return;
     else if (IsOpenMousePoint)
     {
         FHitResult res;
         GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res);
-        UE_LOG(LogTemp, Warning, TEXT("OnTestAction Triggered!"));
         AC_Player* player = Cast<AC_Player>(GetPawn());
         player->SetMousePointDir(res.ImpactPoint);
+        IsOpenMousePointTrigger = false;
     }
     
 
 }
-
+//마우스 오른쪽클릭
 void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 {
     FHitResult res;
@@ -64,11 +68,17 @@ void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
     //트레이스 채널로 피킹
     else if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res))
     {
-        UE_LOG(LogTemp, Warning, TEXT("OnTestAction Triggered!"));
         AC_Player* player = Cast<AC_Player>(GetPawn());
         player->OnMoveToPosPlayer(res.ImpactPoint);
     }
     
+}
+//스페이스바 입력
+void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
+{
+    IsOpenMousePointTrigger = true;
+    AC_Player* player = Cast<AC_Player>(GetPawn());
+    player->Period();
 }
 
 AC_PlayerController::AC_PlayerController()
@@ -77,12 +87,10 @@ AC_PlayerController::AC_PlayerController()
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
 		TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
 	);
-
 	if (IMC.Succeeded())
 	{
 		InputMapping = IMC.Object;
 	}
-
 	static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
 		TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
 	);
@@ -90,6 +98,13 @@ AC_PlayerController::AC_PlayerController()
 	{
         RightClick = IA_RightClick.Object;
 	}
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(
+        TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar")
+    );
+    if (IA_SpaceBar.Succeeded())
+    {
+        SpaceBar = IA_SpaceBar.Object;
+    }
 }
 
 void AC_PlayerController::OnPossess(APawn* pawn)
@@ -99,13 +114,7 @@ void AC_PlayerController::OnPossess(APawn* pawn)
     {
         if (InputMapping)
         {
-            // 우선순위 0으로 매핑 추가
-            UE_LOG(LogTemp, Warning, TEXT("MappingContext Added!"));
-            Subsystem->AddMappingContext(InputMapping, 0);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("MappingContext NOT Added!"));
+            Subsystem->AddMappingContext(InputMapping, 0);//우선순위0맵핑
         }
     }
 }

@@ -7,12 +7,19 @@
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
+#include "CPP_Player/C_PlayerController.h"
 
 void AC_Player::CalMoveData()
 {
 	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
 	{
 		Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
+		//가야할곳이없는데 혹시 remainDist,remainAngle이 남아있다면 초기화
+		if (remainDist > 0.f || remainAngle > 0.f)
+		{
+			remainDist = 0.f;
+			remainAngle = 0.f;
+		}
 		return;
 	}
 	FVector pos = pathList[curPathPos++];//(curPathPos는 제일먼저가야할곳, ++는 그다음path포인트임 = 다음위치정보를 담음
@@ -32,6 +39,23 @@ void AC_Player::CalMoveData()
 	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;//회전방향
 	Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = true;
 	
+}
+
+void AC_Player::Period()
+{
+	ClearMoveState();
+	FRotator TargetRotation = GetMousePointDir().Rotation();
+	UE_LOG(LogTemp, Warning, TEXT("UsingMousePintDir"));
+	SetActorRotation(TargetRotation);
+
+
+
+	// 2. 대시 이동
+	//float DashDistance = 300.0f;
+	//FVector DashOffset = MousePointDir * DashDistance;
+
+	//FHitResult Hit;
+	//AddActorWorldOffset(DashOffset, true, &Hit);  // 충돌 체크 포함
 }
 
 AC_Player::AC_Player()
@@ -112,6 +136,12 @@ void AC_Player::Tick(float DeltaTime)
 		AddActorWorldRotation(FRotator(0.f, delta * rotDir, 0.f));
 		remainAngle -= delta;
 	}
+
+	//period
+	if (IsPeriod)
+	{
+
+	}
 }
 
 void AC_Player::OnMoveToPosPlayer(FVector pos)
@@ -131,11 +161,38 @@ void AC_Player::SetMousePointDir(FVector pos)
 {
 	pos.Z = 0.0f;
 	MousePointDir = pos.GetSafeNormal();
+	UE_LOG(LogTemp, Warning, TEXT("SettinfComplete"));
+}
+
+void AC_Player::OpenMousePointOfconstroller()
+{
+	AController* MyController = GetController();
+	AC_PlayerController* PlayerController = Cast<AC_PlayerController>(MyController);
+	if (PlayerController)
+	{
+		PlayerController->IsOpenMousePointTrigger = true;
+	}
+}
+
+void AC_Player::CloseMousePointOfconstroller()
+{
+	AController* MyController = GetController();
+	AC_PlayerController* PlayerController = Cast<AC_PlayerController>(MyController);
+	if (PlayerController)
+	{
+		PlayerController->IsOpenMousePointTrigger = false;
+	}
 }
 
 FVector AC_Player::GetMousePointDir()
 {
 	return this->MousePointDir;
+}
+
+void AC_Player::ClearMoveState()
+{
+	pathList.Empty();
+	CalMoveData();
 }
 
 
