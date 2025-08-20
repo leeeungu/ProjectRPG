@@ -25,9 +25,14 @@ void UQuestManagerComponent::QuestEnd(UQuestAsset* pQuest)
 	AQuestObject** ppObject = mapQuestObject.Find(pQuest);
 	if (!ppObject || !*ppObject)
 		return;
+	mapQuestObject.Remove(pQuest);
 	if (OnQuestClear.IsBound())
 	{
 		OnQuestClear.Broadcast(pQuest);
+	}
+	if (OnQuestPop.IsBound())
+	{
+		OnQuestPop.Broadcast(pQuest);
 	}
 	(*ppObject)->Destroy();
 	(*ppObject) = nullptr;
@@ -38,13 +43,19 @@ void UQuestManagerComponent::QuestSucceed(UQuestAsset* pQuest)
 	AQuestObject** ppObject = mapQuestObject.Find(pQuest);
 	if (!ppObject || !*ppObject)
 		return;
+	mapQuestObject.Remove(pQuest);
 	if (OnQuestClear.IsBound())
 	{
 		OnQuestClear.Broadcast(pQuest);
 	}
+	if (OnQuestPop.IsBound())
+	{
+		OnQuestPop.Broadcast(pQuest);
+	}
+	pQuest->OnQuestSucceed.RemoveDynamic(this, & UQuestManagerComponent::QuestSucceed);
+	pQuest->OnQuestFail.RemoveDynamic(this, &UQuestManagerComponent::QuestFail);
 	(*ppObject)->Destroy();
 	(*ppObject) = nullptr;
-	pQuest->OnQuestSucceed.RemoveDynamic(this, & UQuestManagerComponent::QuestSucceed);
 }
 
 void UQuestManagerComponent::QuestFail(UQuestAsset* pQuest)
@@ -52,9 +63,15 @@ void UQuestManagerComponent::QuestFail(UQuestAsset* pQuest)
 	AQuestObject** ppObject = mapQuestObject.Find(pQuest);
 	if (!ppObject || !*ppObject)
 		return;
+	mapQuestObject.Remove(pQuest);
+	pQuest->OnQuestFail.RemoveDynamic(this, &UQuestManagerComponent::QuestFail);
+	pQuest->OnQuestSucceed.RemoveDynamic(this, &UQuestManagerComponent::QuestSucceed);
+	if (OnQuestPop.IsBound())
+	{
+		OnQuestPop.Broadcast(pQuest);
+	}
 	(*ppObject)->Destroy();
 	(*ppObject) = nullptr;
-	pQuest->OnQuestFail.RemoveDynamic(this, &UQuestManagerComponent::QuestFail);
 }
 
 bool UQuestManagerComponent::pushQuest(UQuestAsset* pQuest)
@@ -81,5 +98,16 @@ bool UQuestManagerComponent::pushQuest(UQuestAsset* pQuest)
 	ObjectRef->InitQuest(pController->GetPawn(), pQuest);
 	pQuest->OnQuestFail.AddDynamic(this, &UQuestManagerComponent::QuestFail);
 	pQuest->OnQuestSucceed.AddDynamic(this, &UQuestManagerComponent::QuestSucceed);
+	if (OnQuestPush.IsBound())
+	{
+		OnQuestPush.Broadcast(pQuest);
+	}
 	return true;
+}
+
+TArray<UQuestAsset*> UQuestManagerComponent::getQuestAsset() const
+{
+	TArray<UQuestAsset*> arr{};
+	mapQuestObject.GetKeys(arr);
+	return arr;
 }
