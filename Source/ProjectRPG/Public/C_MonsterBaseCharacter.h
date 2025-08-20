@@ -22,14 +22,27 @@ struct FS_PatternData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName strAttackName;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* pAttackMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fCoolTime;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fAttackRange;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* pDecalMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector vDecalSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fDecalDuration;
 
 	float LastUsedTime = -100.f;
 };

@@ -9,6 +9,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
 #include "AIController.h"
+#include "C_DecalUtils.h"
 
 AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 {
@@ -167,6 +168,13 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 		return;
 
 	FS_PatternData& sPattern = m_arrPatternList[nPatternIndex];
+
+	FVector vFowardOffset = GetActorForwardVector() * sPattern.fAttackRange * 1.f;
+
+	FVector vDecalLocation = vFowardOffset + GetActorLocation();
+
+	UC_DecalUtils::spawnDecalAtLocation(GetWorld(), sPattern.pDecalMaterial,
+		vDecalLocation, sPattern.vDecalSize, sPattern.fDecalDuration);
 
 	
 	PlayAnimMontage(sPattern.pAttackMontage);
