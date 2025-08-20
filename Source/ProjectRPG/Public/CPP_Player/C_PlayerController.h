@@ -46,15 +46,13 @@ protected:
 	UInputAction* SpaceBar;
 
 
-	void GetMousePos(bool IsOpenMousePoint);
 public:
-	bool IsOpenMousePointTrigger = false;
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;
-	/** 캐시된 마우스 Hit 결과를 반환 */
+	// 캐시된 마우스 Hit 결과를 반환
 	UFUNCTION(BlueprintCallable, Category = "Mouse")
 	bool GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& OutType) const;
 	

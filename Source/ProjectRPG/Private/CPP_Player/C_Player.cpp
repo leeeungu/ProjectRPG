@@ -9,6 +9,7 @@
 #include "CPP_Player/C_PlayerAnimInstance.h"
 #include "CPP_Player/C_PlayerController.h"
 
+
 void AC_Player::CalMoveData()
 {
 	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
@@ -41,15 +42,36 @@ void AC_Player::CalMoveData()
 	
 }
 
+void AC_Player::CalRotateData(const FVector& TargetPoint)
+{
+	// 현재 위치 → 목표 방향
+	FVector Direction = TargetPoint - GetActorLocation();
+	Direction.Z = 0.0f; // Pitch 무시
+	Direction.Normalize();
+
+	// 목표 Yaw 계산
+	float TargetYaw = Direction.Rotation().Yaw;
+
+	// 현재 Yaw
+	float CurrentYaw = GetActorRotation().Yaw;
+
+	// 두 각도 차이를 최단 경로로 정규화
+	float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentYaw, TargetYaw);
+
+	// 목표 Yaw = 현재 + DeltaYaw
+	float FinalYaw = CurrentYaw + DeltaYaw;
+
+	// 쿼터니언 목표 회전값 저장 (Yaw만)
+	TargetRotationQuat = FRotator(0.f, FinalYaw, 0.f).Quaternion();
+
+	// 틱에서 회전 보간을 켜기 위한 플래그
+	bRotate = true;
+}
+
 void AC_Player::Period()
 {
 	ClearMoveState();
-	FRotator TargetRotation = GetMousePointDir().Rotation();
-	UE_LOG(LogTemp, Warning, TEXT("UsingMousePintDir"));
-	SetActorRotation(TargetRotation);
-
-
-
+	
 	// 2. 대시 이동
 	//float DashDistance = 300.0f;
 	//FVector DashOffset = MousePointDir * DashDistance;
@@ -136,7 +158,26 @@ void AC_Player::Tick(float DeltaTime)
 		AddActorWorldRotation(FRotator(0.f, delta * rotDir, 0.f));
 		remainAngle -= delta;
 	}
+	//마우스포인터위치로 보간회전
+	if (bRotate)
+	{
+		ClearMoveState();
+		FQuat CurrentQuat = GetActorQuat();
+		float Dot = CurrentQuat | TargetRotationQuat;
+		if (Dot < 0.f)
+		{
+			TargetRotationQuat = TargetRotationQuat * -1.f;
+		}
 
+		FQuat NewQuat = FQuat::Slerp(CurrentQuat, TargetRotationQuat, DeltaTime * RotateInterpSpeed);
+		SetActorRotation(NewQuat);
+
+		if (NewQuat.Equals(TargetRotationQuat, 0.05f))
+		{
+			bRotate = false;
+			SetActorRotation(TargetRotationQuat);
+		}
+	}
 	//period
 	if (IsPeriod)
 	{
@@ -157,32 +198,12 @@ void AC_Player::OnMoveToPosPlayer(FVector pos)
 	CalMoveData();
 }
 
-void AC_Player::SetMousePointDir(FVector pos)
-{
-	pos.Z = 0.0f;
-	MousePointDir = pos.GetSafeNormal();
-	UE_LOG(LogTemp, Warning, TEXT("SettinfComplete"));
-}
-
-void AC_Player::OpenMousePointOfconstroller()
-{
-	AController* MyController = GetController();
-	AC_PlayerController* PlayerController = Cast<AC_PlayerController>(MyController);
-	if (PlayerController)
-	{
-		PlayerController->IsOpenMousePointTrigger = true;
-	}
-}
-
-void AC_Player::CloseMousePointOfconstroller()
-{
-	AController* MyController = GetController();
-	AC_PlayerController* PlayerController = Cast<AC_PlayerController>(MyController);
-	if (PlayerController)
-	{
-		PlayerController->IsOpenMousePointTrigger = false;
-	}
-}
+//void AC_Player::SetMousePointDir(FVector pos)
+//{
+//	pos.Z = 0.0f;
+//	MousePointDir = pos.GetSafeNormal();
+//	UE_LOG(LogTemp, Warning, TEXT("SettinfComplete"));
+//}
 
 FVector AC_Player::GetMousePointDir()
 {

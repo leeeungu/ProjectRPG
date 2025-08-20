@@ -78,45 +78,17 @@ void AC_PlayerController::SetupInputComponent()
     }
 }
 
-void AC_PlayerController::GetMousePos(bool IsOpenMousePoint)//일단 한번열리면 바로 값전달하고 false로바꿈 (나중에 계속 열어야되는 때가오면 조건분기달아야함)
-{
-    if (!IsOpenMousePoint) return;
-    else if (IsOpenMousePoint)
-    {
-        FHitResult res;
-        GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res);
-        AC_Player* player = Cast<AC_Player>(GetPawn());
-        player->SetMousePointDir(res.ImpactPoint);
-        IsOpenMousePointTrigger = false;
-    }
-    
-
-}
 //마우스 오른쪽클릭
 void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 {
-    //FHitResult res;
-    ////오브젝트 타입으로 피킹
-    //TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes{};
-    //objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
-    //if (GetHitResultUnderCursorForObjects(objectTypes, false, res))
-    //{
-    //    AC_Player* player = Cast<AC_Player>(GetPawn());
-    //    //player->OnBattle(res.GetActor()); (배틀모드로 바로 진행)
-    //}
-    ////트레이스 채널로 피킹
-    //else if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, res))
-    //{
-    //    AC_Player* player = Cast<AC_Player>(GetPawn());
-    //    player->OnMoveToPosPlayer(res.ImpactPoint);
-    //}
     FHitResult CachedHit;
     EMouseHitType HitType;
-
+    //타입이 None이면false를 리턴함 즉 아무것도 피킹된것이없음
+    //true라는것은 CachedHit에 좌표값이 세팅되고, HIT타입에 타입이 들어옴.
     if (!GetCachedMouseHit(CachedHit, HitType)) return;
 
     AC_Player* player = Cast<AC_Player>(GetPawn());
-    if (!player) return;
+    if (!player || player->IsRotating()) return;//플레이어가 로테이팅중이면 이동불가
 
     /*if (HitType == EMouseHitType::Object)
     {
@@ -131,7 +103,12 @@ void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 {
     AC_Player* player = Cast<AC_Player>(GetPawn());
-    player->Period();
+    if (player && CachedHitType != EMouseHitType::None)
+    {
+        FVector TargetPoint = CachedMouseHit.ImpactPoint;
+        player->CalRotateData(TargetPoint);//마우스포인터위치로 보간
+        player->Period(); // 패링스킬.
+    }
 }
 
 AC_PlayerController::AC_PlayerController()
