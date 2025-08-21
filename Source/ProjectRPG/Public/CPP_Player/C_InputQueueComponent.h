@@ -14,9 +14,19 @@ class PROJECTRPG_API UC_InputQueueComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY()
+	TArray<FInputActionData> InputQueue;
+	static const int32 MaxQueueSize = 3;
 public:	
 	// Sets default values for this component's properties
 	UC_InputQueueComponent();
+	UFUNCTION(BlueprintCallable)
+	void PushInput(const FInputActionData& NewInput);
+	UFUNCTION(BlueprintCallable)
+	bool GetLastInputData(FInputActionData& OutInput) const;
+	UFUNCTION(BlueprintCallable)
+	void ClearQueueList();
 
 protected:
 	// Called when the game starts

@@ -10,8 +10,32 @@ UC_InputQueueComponent::UC_InputQueueComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	InputQueue.Reserve(MaxQueueSize);
 	// ...
+}
+
+void UC_InputQueueComponent::PushInput(const FInputActionData& NewInput)
+{
+	if (InputQueue.Num() >= MaxQueueSize)
+	{
+		InputQueue.RemoveAt(0);
+	}
+	InputQueue.Add(NewInput);
+}
+
+bool UC_InputQueueComponent::GetLastInputData(FInputActionData& OutInput) const
+{
+	if (InputQueue.Num() > 0)
+	{
+		OutInput = InputQueue.Last();
+		return true;
+	}
+	return false;
+}
+
+void UC_InputQueueComponent::ClearQueueList()
+{
+	InputQueue.Empty();
 }
 
 

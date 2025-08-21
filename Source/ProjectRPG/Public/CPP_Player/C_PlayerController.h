@@ -10,7 +10,7 @@
 
 class UInputMappingContext;
 class UInputAction;
-class UCameraComponent;
+class UC_InputQueueComponent;
 /**
  * 
  */
@@ -40,6 +40,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	UInputMappingContext* InputMapping;
+	UPROPERTY(VisibleAnywhere)
+	UC_InputQueueComponent* InputQueueSystem;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClick;
 	UPROPERTY(EditAnywhere, Category = "Input")

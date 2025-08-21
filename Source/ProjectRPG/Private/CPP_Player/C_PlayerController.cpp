@@ -8,6 +8,8 @@
 #include "InputAction.h"
 #include "CPP_Player/C_Player.h"
 #include "UObject/ConstructorHelpers.h"
+#include "CPP_Player/C_InputQueueComponent.h"
+#include "CPP_Player/S_InputActionData.h"
 
 
 
@@ -118,7 +120,28 @@ void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 //Q스킬 입력
 void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
 {
+    // 1. 입력 상태 판별
+    EInputStateType State;
+    if (Value.Get<bool>())  // 눌림/떼짐을 bool로 구분 가능하면 이처럼 사용
+    {
+        State = EInputStateType::Pressed;
+    }
+    else
+    {
+        State = EInputStateType::Released;
+    }
 
+    // 2. 데이터 생성 
+    FInputActionData NewInput;
+    NewInput.ActionIndex = 1;
+    NewInput.InputType = EInputType::Skill; // 데이터테이블로 실제 타입 매칭 가능
+    NewInput.InputState = State;
+
+    // 3. InputQueueSystem에 추가
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInput);
+    }
 }
 
 AC_PlayerController::AC_PlayerController()
@@ -156,6 +179,11 @@ void AC_PlayerController::OnPossess(APawn* pawn)
         {
             Subsystem->AddMappingContext(InputMapping, 0);//우선순위0맵핑
         }
+    }
+    if (pawn)
+    {
+        //플레이어의 인풋큐컴포넌트 가져와서 세팅
+        InputQueueSystem = pawn->FindComponentByClass<UC_InputQueueComponent>();
     }
 }
 
