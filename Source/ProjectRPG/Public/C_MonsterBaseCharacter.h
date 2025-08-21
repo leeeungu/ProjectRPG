@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
-#include "GameFramework/Pawn.h"  
+#include "GameFramework/Pawn.h"
+#include "C_NiagaraUtil.h"
 #include "C_MonsterBaseCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -36,13 +37,13 @@ struct FS_PatternData
 	int32 nWeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UMaterialInterface* pDecalMaterial;
+	UNiagaraSystem* pNiagara;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector vDecalSize;
+	float fNiagaraLife;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fDecalDuration;
+	float fNiagaraScale;
 
 	float LastUsedTime = -100.f;
 };
