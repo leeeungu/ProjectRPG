@@ -8,6 +8,8 @@
 #include "NavigationSystem.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
 #include "CPP_Player/C_PlayerController.h"
+#include "CPP_Player/C_InputQueueComponent.h"
+#include "CPP_Player/C_SkillComponent.h"
 
 
 void AC_Player::CalMoveData()
@@ -49,21 +51,11 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	Direction.Z = 0.0f; // Pitch 무시
 	Direction.Normalize();
 
-	// 목표 Yaw 계산
 	float TargetYaw = Direction.Rotation().Yaw;
-
-	// 현재 Yaw
 	float CurrentYaw = GetActorRotation().Yaw;
-
-	// 두 각도 차이를 최단 경로로 정규화
 	float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentYaw, TargetYaw);
-
-	// 목표 Yaw = 현재 + DeltaYaw
 	float FinalYaw = CurrentYaw + DeltaYaw;
-
-	// 쿼터니언 목표 회전값 저장 (Yaw만)
 	TargetRotationQuat = FRotator(0.f, FinalYaw, 0.f).Quaternion();
-
 	// 틱에서 회전 보간을 켜기 위한 플래그
 	bRotate = true;
 }
@@ -92,6 +84,9 @@ AC_Player::AC_Player()
 	{
 		GetMesh()->SetAnimInstanceClass(anim.Class);
 	}
+	m_inputQueue = CreateDefaultSubobject<UC_InputQueueComponent>(TEXT("C_InputQueueComponent"));
+	m_skillCom = CreateDefaultSubobject<UC_SkillComponent>(TEXT("C_SkillComponent"));
+
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	bUseControllerRotationYaw = false;

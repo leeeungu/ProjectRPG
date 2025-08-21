@@ -9,6 +9,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UC_InputQueueComponent;
+class UC_SkillComponent;
 /**
  * 
  */
@@ -21,6 +23,10 @@ private:
 	USpringArmComponent* m_springCom{};
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* m_camCom{};
+	UPROPERTY(VisibleAnywhere)
+	UC_InputQueueComponent* m_inputQueue{};
+	UPROPERTY(VisibleAnywhere)
+	UC_SkillComponent* m_skillCom{};
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;

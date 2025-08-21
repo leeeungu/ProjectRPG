@@ -10,6 +10,7 @@
 #include "UObject/ConstructorHelpers.h"
 
 
+
 void AC_PlayerController::UpdateMouseHit()
 {
     FHitResult Hit;
@@ -75,6 +76,10 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(SpaceBar, ETriggerEvent::Started, this, &AC_PlayerController::OnSpaceBarAction);
         }
+        if (Q_Skill)
+        {
+            EnhancedInput->BindAction(Q_Skill, ETriggerEvent::Started, this, &AC_PlayerController::OnQ_Action);
+        }
     }
 }
 
@@ -109,6 +114,11 @@ void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
         player->CalRotateData(TargetPoint);//마우스포인터위치로 보간
         player->Period(); // 패링스킬.
     }
+}
+//Q스킬 입력
+void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
+{
+
 }
 
 AC_PlayerController::AC_PlayerController()

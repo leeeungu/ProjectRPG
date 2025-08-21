@@ -44,11 +44,14 @@ protected:
 	UInputAction* RightClick;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SpaceBar;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* Q_Skill;
 
 
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
+	void OnQ_Action(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;
