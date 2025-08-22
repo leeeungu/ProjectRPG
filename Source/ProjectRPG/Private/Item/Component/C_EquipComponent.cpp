@@ -14,7 +14,6 @@ void UC_EquipComponent::registerEquip(AC_ItemActorBase* pItemBase)
 	if (pEquip)
 	{
 		int32 EquipID = pEquip->getEquipID();
-		EquipID = 4;
 		int32 EquipIndex  = pEquip->getEquipIndex();
 		int32* pValue = m_mapEquipData.Find(EquipID);
 		if (pValue)
@@ -27,6 +26,21 @@ void UC_EquipComponent::registerEquip(AC_ItemActorBase* pItemBase)
 		{
 			m_onRegister.Broadcast(EquipID, EquipIndex);
 		}
+	}
+}
+
+void UC_EquipComponent::registerEquip_Text(int32 nEquipID, int32 EquipIndex)
+{
+	int32* pValue = m_mapEquipData.Find(nEquipID);
+	if (pValue)
+	{
+		unRegisterEquip(nEquipID);
+	}
+	m_mapEquipData.Add(nEquipID, EquipIndex);
+	effectEuip(nEquipID, EquipIndex);
+	if (m_onRegister.IsBound())
+	{
+		m_onRegister.Broadcast(nEquipID, EquipIndex);
 	}
 }
 
@@ -59,7 +73,12 @@ void UC_EquipComponent::effectEuip(int32 EquipID, int32 EquipIndex)
 	m_sEffectEquip.nEquipIndex = EquipIndex;
 	if (pPlayer)
 	{
-		effectWeapon(10);
+		//Test
+		if (m_sEffectEquip.nEquipID == 4)
+			effectWeapon(10);
+		if (m_sEffectEquip.nEquipID == 5)
+			effectArmor(10);
+		//Test
 	}
 }
 
@@ -69,7 +88,10 @@ void UC_EquipComponent::unEffectEuip(int32 EquipID, int32 EquipIndex)
 	m_sEffectEquip.nEquipIndex = EquipIndex;
 	if (pPlayer)
 	{
-		unEffectWeapon(10);
+		if (m_sEffectEquip.nEquipID == 4)
+			unEffectWeapon(10);
+		if (m_sEffectEquip.nEquipID == 5)
+			unEffectArmor(10);
 	}
 }
 

@@ -15,7 +15,6 @@ AC_BaseCharacter::AC_BaseCharacter()
 void AC_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -52,6 +51,7 @@ bool AC_BaseCharacter::takeDamageEvent_Implementation(float fDamage)
 
 void AC_BaseCharacter::setHp(float fHp)
 {
+	brodcastStatChange(m_onChangeHP,m_fHp, fHp);
 	m_fHp = fHp;
 }
 
@@ -62,6 +62,7 @@ float AC_BaseCharacter::getHp() const
 
 void AC_BaseCharacter::setMaxHp(float fMaxHp)
 {
+	brodcastStatChange(m_onChangeMaxHP, m_fMaxHp, fMaxHp);
 	m_fMaxHp = fMaxHp;
 }
 
@@ -72,6 +73,7 @@ float AC_BaseCharacter::getMaxHp() const
 
 void AC_BaseCharacter::setAtk(float fAtk)
 {
+	brodcastStatChange(m_onChangeAtk, m_fAtk, fAtk);
 	m_fAtk = fAtk;
 }
 
@@ -86,4 +88,13 @@ bool AC_BaseCharacter::getIsDead() const
 		return true;
 
 	return false;
+}
+
+void AC_BaseCharacter::brodcastStatChange(FOnStatChange& Delegate, float PreValue, float CurValue)
+{
+	if (Delegate.IsBound())
+	{
+		Delegate.Broadcast(PreValue ,CurValue);
+	}
+
 }

@@ -12,8 +12,9 @@ enum class E_WindowType :  uint8
 	E_Alert			UMETA(DisplayName = "Alert"),
 	E_QuickSlot		UMETA(DisplayName = "QuickSlot"),
 	E_Store			UMETA(DisplayName = "Store"),
-	E_SkillBar		UMETA(DisplayName = "SkillBar"),
 	E_SkillWindow	UMETA(DisplayName = "SkillWindow"),
+	E_QuestWindow	UMETA(DisplayName = "QuestWindow"),
+	E_PlayerInfo	UMETA(DisplayName = "PlayerInfo"),
 	E_Max UMETA(Hidden),
 };
 

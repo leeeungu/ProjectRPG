@@ -49,6 +49,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void registerEquip(AC_ItemActorBase* pItemBase);
+
+	UFUNCTION(BlueprintCallable)
+	void registerEquip_Text(int32 nEquipID, int32 EquipIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void unRegisterEquip(int32 nEquipID);
 
