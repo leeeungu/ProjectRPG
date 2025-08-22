@@ -71,8 +71,6 @@ private:
 
 	bool m_bIsAttacking = false;
 
-	
-
 	FTimerHandle m_timeHandle;
 
 protected:
@@ -115,8 +113,6 @@ public:
 	void stopAi();
 
 
-
-
 	/*
 	* 무력화 관련
 	*/
@@ -128,8 +124,6 @@ public:
 	void onStaggerRecover();
 
 
-
-
 	/*
 	* 카운터 관련
 	*/
@@ -139,8 +133,6 @@ public:
 
 	UFUNCTION()
 	void onCounterFailed();
-
-
 
 
 	UFUNCTION(BlueprintCallable)
