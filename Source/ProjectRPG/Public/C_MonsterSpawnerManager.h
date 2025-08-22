@@ -15,8 +15,6 @@ class PROJECTRPG_API AC_MonsterSpawnerManager : public AActor
 
 private:
 	UPROPERTY()
-	TArray<AC_MonsterSpawner*> m_arrSpawner;
-	UPROPERTY()
 	int32 m_nCurrentIndex;
 
 public:
