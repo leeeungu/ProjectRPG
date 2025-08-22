@@ -18,16 +18,6 @@ void AC_MonsterSpawnerManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	for (AActor* pActor : m_arrFoundSpawner)
-	{
-		AC_MonsterSpawner* pSpawner = Cast<AC_MonsterSpawner>(pActor);
-		if (pSpawner)
-		{
-			m_arrFoundSpawner.Add(pSpawner);
-		}
-	}
-
 	m_nCurrentIndex = 0;
 	activateCurrentSpawner();
 	
