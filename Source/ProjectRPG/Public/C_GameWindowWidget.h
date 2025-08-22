@@ -52,6 +52,11 @@ public:
 
 
 	bool getIsInitialized() const { return m_bIsInitialized; }
+
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 protected:
 	virtual void NativeOnInitialized() override;
 };
