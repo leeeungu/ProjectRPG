@@ -10,6 +10,7 @@
 #include "CPP_Player/C_PlayerController.h"
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
+#include "CPP_Player/S_InputActionData.h"
 
 
 void AC_Player::CalMoveData()
@@ -58,6 +59,49 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	TargetRotationQuat = FRotator(0.f, FinalYaw, 0.f).Quaternion();
 	// 틱에서 회전 보간을 켜기 위한 플래그
 	bRotate = true;
+}
+//매인로직 매니저
+void AC_Player::RunningSystemManager()
+{
+	if (!bRunningSystemOpen) return;
+	FInputActionData CurrentInputData{};//비어있는 초기값.
+	if (m_inputQueue->GetLastInputData(CurrentInputData))//마지막인덱스반환
+	{
+		//실행라인
+		switch (CurrentInputData.InputType)
+		{
+		case EInputType::Period:
+			bRunningSystemOpen = false;
+			CalRotateData(CurrentInputData.TargetPoint);
+			//ExecuteSkill(CurrentInputData); // → 스킬 실행 함수
+			break;
+
+		case EInputType::Skill:
+			bRunningSystemOpen = false;
+			CalRotateData(CurrentInputData.TargetPoint);
+			//ExecuteSkill(CurrentInputData); // → 스킬 실행 함수
+			break;
+
+		case EInputType::Item:
+			bRunningSystemOpen = false;
+			//UseItem(CurrentInputData); // → 아이템 사용 처리 함수
+			break;
+
+		case EInputType::AnimItem:
+			bRunningSystemOpen = false;
+			CalRotateData(CurrentInputData.TargetPoint);
+			//PlayItemAnimation(CurrentInputData); // → 아이템 애니메이션용 함수
+			break;
+
+		default:
+			// 처리할 게 없으면 아무것도 안 함
+			break;
+		}
+
+		
+	}
+
+	
 }
 
 void AC_Player::Period()
@@ -153,7 +197,7 @@ void AC_Player::Tick(float DeltaTime)
 		AddActorWorldRotation(FRotator(0.f, delta * rotDir, 0.f));
 		remainAngle -= delta;
 	}
-	//마우스포인터위치로 보간회전
+	//마우스포인터위치로 보간회전(보통 스킬쓸때나 해당위치로 몸을돌리는작업할떄만 열림/
 	if (bRotate)
 	{
 		ClearMoveState();
@@ -173,11 +217,13 @@ void AC_Player::Tick(float DeltaTime)
 			SetActorRotation(TargetRotationQuat);
 		}
 	}
-	//period
-	if (IsPeriod)
-	{
+	////period
+	//if (IsPeriod)
+	//{
 
-	}
+	//}
+	RunningSystemManager();
+
 }
 
 void AC_Player::OnMoveToPosPlayer(FVector pos)

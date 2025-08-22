@@ -8,6 +8,8 @@
 UENUM(BlueprintType)
 enum class EInputType : uint8
 {
+    None,
+    Period,
     Skill,
     ChargeSkill,
     Item,
@@ -34,6 +36,8 @@ public:
     EInputType InputType{};
 
     UPROPERTY(BlueprintReadWrite)
-    EInputStateType InputState{};
+    EInputStateType InputStateType{};
+    UPROPERTY(BlueprintReadWrite)
+    FVector TargetPoint{};
     
 };

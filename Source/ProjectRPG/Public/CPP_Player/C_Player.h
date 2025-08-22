@@ -45,7 +45,9 @@ private:
 	//로테이트 보간
 	bool bRotate = false;               
 	FQuat TargetRotationQuat;                 
-	float RotateInterpSpeed = 10.0f;          
+	float RotateInterpSpeed = 10.0f;     
+
+	bool bRunningSystemOpen = true;//기본값 true 항시열려있음
 
 protected:
 
@@ -59,6 +61,8 @@ public:
 	void ClearMoveState();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
+
+	void RunningSystemManager();
 	void Period();
 	
 

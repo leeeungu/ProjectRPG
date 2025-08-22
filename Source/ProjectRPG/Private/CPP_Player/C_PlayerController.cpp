@@ -11,7 +11,7 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/S_InputActionData.h"
 
-
+DEFINE_LOG_CATEGORY_STATIC(C_PlayerController, Log, All);
 
 void AC_PlayerController::UpdateMouseHit()
 {
@@ -26,13 +26,6 @@ void AC_PlayerController::UpdateMouseHit()
     {
         CachedMouseHit = Hit;
         CachedHitType = EMouseHitType::Object;
-        // 간단하게 로그 출력
-        if (Hit.GetActor())
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Object Hit: %s at %s"),
-                *Hit.GetActor()->GetName(),
-                *Hit.ImpactPoint.ToString());
-        }
         return;
     }
 
@@ -41,9 +34,6 @@ void AC_PlayerController::UpdateMouseHit()
     {
         CachedMouseHit = Hit;
         CachedHitType = EMouseHitType::Ground;
-        // 간단하게 로그 출력
-        UE_LOG(LogTemp, Warning, TEXT("Ground Hit at %s"), *Hit.ImpactPoint.ToString());
-
         return;
     }
 
@@ -82,6 +72,15 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(Q_Skill, ETriggerEvent::Started, this, &AC_PlayerController::OnQ_Action);
         }
+        if (R_Skill)
+        {
+            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Started, this, &AC_PlayerController::OnR_ActionStarted);
+            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Triggered, this, &AC_PlayerController::OnR_ActionOngoing);
+            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Canceled, this, &AC_PlayerController::OnR_ActionCompleted);\
+
+            if (R_Skill->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Skill->Triggers[0].Get()))
+                UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(R_Skill->Triggers[0].Get())->HoldTimeThreshold);
+        }
     }
 }
 
@@ -109,64 +108,69 @@ void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 //스페이스바 입력
 void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 {
-    AC_Player* player = Cast<AC_Player>(GetPawn());
-    if (player && CachedHitType != EMouseHitType::None)
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 1;
+    NewInputData.InputType = EInputType::Period;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
     {
-        FVector TargetPoint = CachedMouseHit.ImpactPoint;
-        player->CalRotateData(TargetPoint);//마우스포인터위치로 보간
-        player->Period(); // 패링스킬.
+        InputQueueSystem->PushInput(NewInputData);
     }
 }
 //Q스킬 입력
 void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
 {
-    // 1. 입력 상태 판별
-    EInputStateType State;
-    if (Value.Get<bool>())  // 눌림/떼짐을 bool로 구분 가능하면 이처럼 사용
-    {
-        State = EInputStateType::Pressed;
-    }
-    else
-    {
-        State = EInputStateType::Released;
-    }
-
-    // 2. 데이터 생성 
-    FInputActionData NewInput;
-    NewInput.ActionIndex = 1;
-    NewInput.InputType = EInputType::Skill; // 데이터테이블로 실제 타입 매칭 가능
-    NewInput.InputState = State;
-
-    // 3. InputQueueSystem에 추가
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 2;
+    NewInputData.InputType = EInputType::Skill; 
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
     if (InputQueueSystem)
     {
-        InputQueueSystem->PushInput(NewInput);
+        InputQueueSystem->PushInput(NewInputData);
     }
 }
 
-AC_PlayerController::AC_PlayerController()
+void AC_PlayerController::OnR_ActionStarted(const FInputActionValue& Value)
 {
-	bShowMouseCursor = true;//마우스표시
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
-		TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
-	);
-	if (IMC.Succeeded())
-	{
-		InputMapping = IMC.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
-		TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
-	);
-	if (IA_RightClick.Succeeded())
-	{
-        RightClick = IA_RightClick.Object;
-	}
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(
-        TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar")
-    );
-    if (IA_SpaceBar.Succeeded())
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 5;
+    NewInputData.InputType = EInputType::ChargeSkill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Started"));
+    if (InputQueueSystem)
     {
-        SpaceBar = IA_SpaceBar.Object;
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+
+void AC_PlayerController::OnR_ActionOngoing(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 5;
+    NewInputData.InputType = EInputType::ChargeSkill;
+    NewInputData.InputStateType = EInputStateType::Held;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Ongoing"));
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+
+void AC_PlayerController::OnR_ActionCompleted(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 5;
+    NewInputData.InputType = EInputType::ChargeSkill;
+    NewInputData.InputStateType = EInputStateType::Released;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
     }
 }
 
@@ -196,4 +200,44 @@ bool AC_PlayerController::GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& O
         return true;
     }
     return false;
+}
+//액션마우스 세팅
+AC_PlayerController::AC_PlayerController()
+{
+    bShowMouseCursor = true;//마우스표시
+    static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
+        TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
+    );
+    if (IMC.Succeeded())
+    {
+        InputMapping = IMC.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
+        TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
+    );
+    if (IA_RightClick.Succeeded())
+    {
+        RightClick = IA_RightClick.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(
+        TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar")
+    );
+    if (IA_SpaceBar.Succeeded())
+    {
+        SpaceBar = IA_SpaceBar.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_QAction(
+        TEXT("/Game/RPG_Player/Input/Actions/Q_Action.Q_Action")
+    );
+    if (IA_QAction.Succeeded())
+    {
+        Q_Skill = IA_QAction.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RAction(
+        TEXT("/Game/RPG_Player/Input/Actions/R_Action.R_Action")
+    );
+    if (IA_RAction.Succeeded())
+    {
+        R_Skill = IA_RAction.Object;
+    }
 }

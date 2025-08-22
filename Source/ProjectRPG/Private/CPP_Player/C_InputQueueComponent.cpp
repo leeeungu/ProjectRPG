@@ -16,11 +16,15 @@ UC_InputQueueComponent::UC_InputQueueComponent()
 
 void UC_InputQueueComponent::PushInput(const FInputActionData& NewInput)
 {
+	if (NewInput.InputType == EInputType::None) return;
 	if (InputQueue.Num() >= MaxQueueSize)
 	{
 		InputQueue.RemoveAt(0);
 	}
 	InputQueue.Add(NewInput);
+	//UE_LOG(LogTemp, Warning, TEXT("skill Index %d"), NewInput.ActionIndex);
+	UE_LOG(LogTemp, Warning, TEXT("skill Index %d"), NewInput.InputStateType);
+	//UE_LOG(LogTemp, Warning, TEXT("skill Index %d"), NewInput.InputType);
 }
 
 bool UC_InputQueueComponent::GetLastInputData(FInputActionData& OutInput) const
