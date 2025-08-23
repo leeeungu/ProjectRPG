@@ -63,45 +63,67 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 //매인로직 매니저
 void AC_Player::RunningSystemManager()
 {
-	if (!bRunningSystemOpen) return;
-	FInputActionData CurrentInputData{};//비어있는 초기값.
-	if (m_inputQueue->GetLastInputData(CurrentInputData))//마지막인덱스반환
+	if (RunningState == ERunningSystemState::Idle)
 	{
-		//실행라인
-		switch (CurrentInputData.InputType)
+		FInputActionData CurrentInputData{};//비어있는 초기값.
+		if (m_inputQueue->GetLastInputData(CurrentInputData))//인풋에 뭔가 들어온다면
 		{
-		case EInputType::Period:
-			bRunningSystemOpen = false;
-			CalRotateData(CurrentInputData.TargetPoint);
-			//ExecuteSkill(CurrentInputData); // → 스킬 실행 함수
-			break;
+			switch (CurrentInputData.InputType)
+			{
+			case EInputType::Skill:
+				RunningState = ERunningSystemState::Busy;
+				CalRotateData(CurrentInputData.TargetPoint);
+				//ExecuteSkill(CurrentInputData); ->실행함수
+				break;
+			case EInputType::AnimItem:
+				RunningState = ERunningSystemState::Busy;
+				CalRotateData(CurrentInputData.TargetPoint);
+				//ExecuteSkill(CurrentInputData); ->실행함수
+				break;
+			case EInputType::Period:
+				RunningState = ERunningSystemState::Busy;
+				CalRotateData(CurrentInputData.TargetPoint);
+				//ExecuteSkill(CurrentInputData); ->실행함수
+				break;
 
-		case EInputType::Skill:
-			bRunningSystemOpen = false;
-			CalRotateData(CurrentInputData.TargetPoint);
-			//ExecuteSkill(CurrentInputData); // → 스킬 실행 함수
-			break;
+			case EInputType::Item:
+				// 즉발 아이템은 Busy/Charging 상태여도 사용 가능하도록 별도 처리
+				//UseItem(CurrentInputData);
+				break;
 
-		case EInputType::Item:
-			bRunningSystemOpen = false;
-			//UseItem(CurrentInputData); // → 아이템 사용 처리 함수
-			break;
+			case EInputType::ChargeSkill:
+				RunningState = ERunningSystemState::Charging;
+				//StartChargeSkill(CurrentInputData);->차징시작함수(시간계산필요, 몽타주홀딩필요)
+				break;
 
-		case EInputType::AnimItem:
-			bRunningSystemOpen = false;
-			CalRotateData(CurrentInputData.TargetPoint);
-			//PlayItemAnimation(CurrentInputData); // → 아이템 애니메이션용 함수
-			break;
-
-		default:
-			// 처리할 게 없으면 아무것도 안 함
-			break;
+			default:
+				break;
+			}
 		}
-
-		
+	}
+	else if (RunningState == ERunningSystemState::Charging)//이미idle에서 차징스타트로 상태변경되서넘어옴
+	{
+		// 차징 스킬 입력만 허용 -> 나머지 무시
+		FInputActionData ChargeInput{};
+		if (m_inputQueue->GetLastInputData(ChargeInput))//계속 해당차징스킬데이터입력이들어올것임(인덱스번호든, Trigged이든)
+		{
+			//같은 인풋타입은 charing이지만 이미 누른순간 스타트는 idle상태에서 인식하고 넘어왔기에 이제 남은건 (Held,Canceld,Completed)
+			switch (ChargeInput.InputStateType)
+			{
+			case EInputStateType::Held:
+				//UpdateChargeSkill(ChargeInput); // Triggered 단계 처리,누르고있는중
+				break;
+			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
+				//ImpactChargeSkill(ChargeInput); // 이때 몽타주에서 다시 Idle상태로 바꿔줘야함.
+				break;
+			}
+		}
+	}
+	else if (RunningState == ERunningSystemState::Busy)
+	{
+		return;//일반 리턴으로 처리(만약에 스킬사용중이나 차징스킬사용중에 뭔가 입력을 받아야한다면 그냥 바로이벤트로 처리(큐에 add X)
 	}
 
-	
 }
 
 void AC_Player::Period()

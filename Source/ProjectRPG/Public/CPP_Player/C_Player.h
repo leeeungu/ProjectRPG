@@ -11,6 +11,13 @@ class USpringArmComponent;
 class UCameraComponent;
 class UC_InputQueueComponent;
 class UC_SkillComponent;
+UENUM()
+enum class ERunningSystemState : uint8
+{
+	Idle,       // 입력 대기
+	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
+	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
+};
 /**
  * 
  */
@@ -27,6 +34,10 @@ private:
 	UC_InputQueueComponent* m_inputQueue{};
 	UPROPERTY(VisibleAnywhere)
 	UC_SkillComponent* m_skillCom{};
+
+	//플레이어 상태
+	UPROPERTY()
+	ERunningSystemState RunningState = ERunningSystemState::Idle;
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;

@@ -76,9 +76,10 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(R_Skill, ETriggerEvent::Started, this, &AC_PlayerController::OnR_ActionStarted);
             EnhancedInput->BindAction(R_Skill, ETriggerEvent::Triggered, this, &AC_PlayerController::OnR_ActionOngoing);
-            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Canceled, this, &AC_PlayerController::OnR_ActionCompleted);\
+            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Canceled, this, &AC_PlayerController::OnR_ActionCanceld);
+            EnhancedInput->BindAction(R_Skill, ETriggerEvent::Completed, this, &AC_PlayerController::OnR_ActionCompleted);\
 
-            if (R_Skill->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Skill->Triggers[0].Get()))
+            if (R_Skill->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Skill->Triggers[0].Get()))//차징 스킬 가중치 테스트
                 UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(R_Skill->Triggers[0].Get())->HoldTimeThreshold);
         }
     }
@@ -131,7 +132,7 @@ void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-
+//R스킬(차징스킬)
 void AC_PlayerController::OnR_ActionStarted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -145,7 +146,6 @@ void AC_PlayerController::OnR_ActionStarted(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-
 void AC_PlayerController::OnR_ActionOngoing(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -159,7 +159,19 @@ void AC_PlayerController::OnR_ActionOngoing(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-
+void AC_PlayerController::OnR_ActionCanceld(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionIndex = 5;
+    NewInputData.InputType = EInputType::ChargeSkill;
+    NewInputData.InputStateType = EInputStateType::Released;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));//실제론 canceld지만 complete와 동일하게처리
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
 void AC_PlayerController::OnR_ActionCompleted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;

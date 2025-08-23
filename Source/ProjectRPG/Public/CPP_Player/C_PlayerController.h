@@ -57,6 +57,7 @@ public:
 	void OnQ_Action(const FInputActionValue& Value);
 	void OnR_ActionStarted(const FInputActionValue& Value);
 	void OnR_ActionOngoing(const FInputActionValue& Value);
+	void OnR_ActionCanceld(const FInputActionValue& Value);
 	void OnR_ActionCompleted(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
