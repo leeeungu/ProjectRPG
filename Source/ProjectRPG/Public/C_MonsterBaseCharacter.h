@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
-#include "GameFramework/Pawn.h"
-#include "C_NiagaraUtil.h"
+#include "GameFramework/Pawn.h"  
 #include "C_MonsterBaseCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -23,27 +22,14 @@ struct FS_PatternData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName strAttackName;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* pAttackMontage;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fCoolTime;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fAttackRange;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* pNiagara;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraLife;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraScale;
 
 	float LastUsedTime = -100.f;
 };
@@ -70,6 +56,8 @@ private:
 
 
 	bool m_bIsAttacking = false;
+
+	
 
 	FTimerHandle m_timeHandle;
 
@@ -113,6 +101,8 @@ public:
 	void stopAi();
 
 
+
+
 	/*
 	* 무력화 관련
 	*/
@@ -124,6 +114,8 @@ public:
 	void onStaggerRecover();
 
 
+
+
 	/*
 	* 카운터 관련
 	*/
@@ -133,6 +125,8 @@ public:
 
 	UFUNCTION()
 	void onCounterFailed();
+
+
 
 
 	UFUNCTION(BlueprintCallable)
