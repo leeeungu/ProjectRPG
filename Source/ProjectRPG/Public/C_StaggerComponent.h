@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
 	bool isBroken();
 
+	void setStaggerPoint(float fStagger);
+	void setBreakDuration(float fDuration);
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

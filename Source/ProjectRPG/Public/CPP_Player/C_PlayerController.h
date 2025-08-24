@@ -10,23 +10,60 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UC_InputQueueComponent;
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EMouseHitType : uint8
+{
+	None,
+	Object,
+	Ground
+};
+
 UCLASS()
 class PROJECTRPG_API AC_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+private:
+	FHitResult CachedMouseHit;
+	EMouseHitType CachedHitType = EMouseHitType::None;
+	void UpdateMouseHit();
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	UInputMappingContext* InputMapping;
+	UPROPERTY(VisibleAnywhere)
+	UC_InputQueueComponent* InputQueueSystem;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* TestAction;
+	UInputAction* RightClick;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* SpaceBar;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* Q_Skill;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* R_Skill;
 
-	void OnTestAction(const FInputActionValue& Value);
+public:
+	void OnRightClickAction(const FInputActionValue& Value);
+	void OnSpaceBarAction(const FInputActionValue& Value);
+	void OnQ_Action(const FInputActionValue& Value);
+	void OnR_ActionStarted(const FInputActionValue& Value);
+	void OnR_ActionOngoing(const FInputActionValue& Value);
+	void OnR_ActionCanceld(const FInputActionValue& Value);
+	void OnR_ActionCompleted(const FInputActionValue& Value);
+public:
+	AC_PlayerController();
+	virtual void OnPossess(APawn* pawn) override;
+	// 캐시된 마우스 Hit 결과를 반환
+	UFUNCTION(BlueprintCallable, Category = "Mouse")
+	bool GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& OutType) const;
 	
 };

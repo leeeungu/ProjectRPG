@@ -7,6 +7,8 @@
 #include "C_BaseCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDead);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStatChange, float , PreValue, float, CurValue);
+
 
 UCLASS()
 class PROJECTRPG_API AC_BaseCharacter : public ACharacter
@@ -20,8 +22,12 @@ public:
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Dead")
 	FOnDead m_onDead;
-	
-
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stat")
+	FOnStatChange m_onChangeMaxHP{};
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stat")
+	FOnStatChange m_onChangeHP{};
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stat")
+	FOnStatChange m_onChangeAtk{};
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,Category = "AC_BaseCharacter")
 	float m_fMaxHp = 100.0f;
@@ -66,4 +72,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool getIsDead() const;
 
+private:
+
+	void brodcastStatChange(FOnStatChange& Delegate, float PreValue, float CurValue);
 };

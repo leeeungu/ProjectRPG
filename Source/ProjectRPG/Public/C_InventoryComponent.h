@@ -8,14 +8,16 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushItem, int, nItemID, int, nItemCount);
+
 USTRUCT()
 struct FS_InventorySlot
 {
 	GENERATED_USTRUCT_BODY()
-	FS_InventorySlotData sData;
+	FS_InventorySlotData sData{};
 	UPROPERTY()
-	TScriptInterface< IC_InventorySlotInterface> pSlotInterface;
+	TScriptInterface< IC_InventorySlotInterface> pSlotInterface{};
 };
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
@@ -125,6 +127,14 @@ public:
 	bool removeItemAtSlot(int nY, int nX, int nCount);
 
 	void setSlotInterface(int nY, int nX, UObject* pInterface);
+	void setInventorySlotData(int nY, int nX, FS_InventorySlotData& sData);
+
+	/**
+	* getInventorySlotData
+	*/
+	FS_InventorySlot* getInventorySlotData(int nY, int nX);
+	int getArrayIndex(int nY, int nX) const;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -138,16 +148,11 @@ private:
 	bool isBound(int nY, int nX) const;
 
 	/**
-	* getInventorySlotData
-	*/
-	FS_InventorySlot* getInventorySlotData(int nY, int nX) ;
-	/**
 	* Calculate Array index
 	 * @param nY - Inventory Height/Row Index
 	 * @param nX - Inventory Width/Col Index
 	 * @return - Array Index
 	 */
-	int getArrayIndex(int nY, int nX) const;
 	void resetItemSlot(FS_InventorySlot* pItemSlot);
 	void runSlotChangeInterface(FS_InventorySlot* pItemSlot);
 

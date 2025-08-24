@@ -2,6 +2,7 @@
 
 
 #include "C_PhaseComponent.h"
+#include "C_MonsterBaseCharacter.h"
 
 // Sets default values for this component's properties
 UC_PhaseComponent::UC_PhaseComponent()
@@ -18,19 +19,49 @@ void UC_PhaseComponent::phaseChange(float fHp)
 	if (fHp <= 0)
 		return;
 
-	float fCurrentHp = fHp;
-	int32 nIndex = 0;
+	if (m_arrPhase.Num() == 0)
+		return;
 
-	if (fCurrentHp <= m_fChangePercentHp && nIndex != m_nCurrentPhaseIndex)
+	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
+		return;
+
+	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
+	
+
+	float fCurrentHp = fHp;
+
+	if (fCurrentHp <= sPhase.fChangePercentHp)
 	{
-		m_nCurrentPhaseIndex = nIndex;
-		m_onPhaseChange.Broadcast();
+		if (!m_pAnim)
+			return;
+
+		if (!m_pAnim->IsAnyMontagePlaying())
+		{
+			m_nCurrentPhaseIndex++;
+			m_onPhaseChange.Broadcast();
+		}
+		else
+		{
+			m_pAnim->OnMontageEnded.AddDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
+		}
+		
 	}
 	else
 		return;
 	
 }
 
+void UC_PhaseComponent::OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (m_pAnim)
+	{
+		m_pAnim->OnMontageEnded.RemoveDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
+	}
+
+	m_nCurrentPhaseIndex++;
+	m_onPhaseChange.Broadcast();
+	
+}
 
 // Called when the game starts
 void UC_PhaseComponent::BeginPlay()
@@ -38,6 +69,12 @@ void UC_PhaseComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
+	if (m_pMonster)
+	{
+		m_pAnim = m_pMonster->GetMesh()->GetAnimInstance();
+	}
 	
 }
 

@@ -20,6 +20,7 @@ public:
 	bool useItemActor();
 
 	void setItemID(int nItemID) { m_nItemID = nItemID; }
+	int getItemID() const { return m_nItemID; }
 protected:
 	UFUNCTION(BlueprintPure, BlueprintNativeEvent)
 	bool findActor(AActor*& pTargetActor);

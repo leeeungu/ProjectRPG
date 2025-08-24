@@ -6,6 +6,8 @@
 
 class AC_ItemActorBase;
 class APawn;
+struct FS_InventorySlotData;
+class UC_QuickSlotManagerComponent;
 
 UENUM(BlueprintType)
 enum class E_EItemType : uint8
@@ -66,15 +68,20 @@ class PROJECTRPG_API UC_ItemDataSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Data")
-	UDataTable* m_pItemDataTable;
+	UDataTable* m_pItemDataTable{};
 	FString m_strDataTablePath = TEXT("/Game/Item/DataTable/DT_ItemData.DT_ItemData");
+	UPROPERTY()
+	TArray<FS_InventorySlotData> m_arrInventory{};
+	int m_arrQuickSlotItem[6]{};
 private:
-	TMap<int, const FS_ItemData*> m_mapItemData;
+	TMap<int, const FS_ItemData*> m_mapItemData{};
 	static UC_ItemDataSubsystem* m_pInstance;
 public:
 	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+
+	static  UC_ItemDataSubsystem* const getInstance()  { return m_pInstance; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool getItemDataByID(int ItemID, FS_ItemData& OutData) const;
@@ -96,6 +103,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
 
+	UFUNCTION(BlueprintCallable)
+	void loadInventroyData(UC_InventoryComponent* pInventory);
+	UFUNCTION(BlueprintCallable)
+	void saveInventroyData(UC_InventoryComponent* pInventory);
+
+	UFUNCTION(BlueprintCallable)
+	void loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot);
+	UFUNCTION(BlueprintCallable)
+	void saveQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot);
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;
 };

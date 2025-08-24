@@ -8,6 +8,7 @@ class UQuestAsset;
 class AQuestObject;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestClear, UQuestAsset*, TargetQuest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestManagerEvent, UQuestAsset*, TargetQuest);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class QUESTSYSTEMRUNTIME_API UQuestManagerComponent : public UActorComponent
@@ -19,6 +20,11 @@ protected:
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnQuestClear OnQuestClear{};
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnQuestManagerEvent OnQuestPush{};
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnQuestManagerEvent OnQuestPop{};
 public:	
 	UQuestManagerComponent();
 
@@ -34,4 +40,7 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	bool pushQuest(UQuestAsset* pQuest);
+
+	UFUNCTION(BlueprintPure)
+	TArray< UQuestAsset*> getQuestAsset() const;
 };

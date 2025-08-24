@@ -1,11 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
-#include "GameFramework/Pawn.h"  
+#include "GameFramework/Pawn.h"
+#include "C_NiagaraUtil.h"
 #include "C_MonsterBaseCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -22,14 +25,27 @@ struct FS_PatternData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName strAttackName;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* pAttackMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fCoolTime;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float fAttackRange;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraSystem* pNiagara;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fNiagaraLife;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float fNiagaraScale;
 
 	float LastUsedTime = -100.f;
 };
@@ -57,8 +73,6 @@ private:
 
 	bool m_bIsAttacking = false;
 
-	
-
 	FTimerHandle m_timeHandle;
 
 protected:
@@ -77,6 +91,9 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnMosterDied m_onMonsterDied;
 
 public:
 	AC_MonsterBaseCharacter();
@@ -101,10 +118,8 @@ public:
 	void stopAi();
 
 
-
-
 	/*
-	* ¹«·ÂÈ­ °ü·Ã
+	* ë¬´ë ¥í™” ê´€ë ¨
 	*/
 
 	UFUNCTION()
@@ -114,10 +129,8 @@ public:
 	void onStaggerRecover();
 
 
-
-
 	/*
-	* Ä«¿îÅÍ °ü·Ã
+	* ì¹´ìš´í„° ê´€ë ¨
 	*/
 
 	UFUNCTION()
@@ -127,9 +140,8 @@ public:
 	void onCounterFailed();
 
 
-
-
 	UFUNCTION(BlueprintCallable)
 	void onDead();
 
+	virtual void Destroyed() override;
 };

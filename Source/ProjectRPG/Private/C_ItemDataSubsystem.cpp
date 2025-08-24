@@ -1,6 +1,8 @@
 ﻿#include "C_ItemDataSubsystem.h"
 #include "Kismet/DataTableFunctionLibrary.h" 
 #include "C_ItemActorBase.h"
+#include "C_InventoryComponent.h"
+#include "C_QuickSlotManagerComponent.h"
 
 UC_ItemDataSubsystem* UC_ItemDataSubsystem::m_pInstance = nullptr;
 
@@ -17,6 +19,12 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
     if (!m_pItemDataTable)
         m_pItemDataTable = LoadObject<UDataTable>(NULL, *m_strDataTablePath, NULL, LOAD_None, NULL);
+
+    for (int i = (uint8)E_QuickSlotType::E_None; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+    {
+        m_arrQuickSlotItem[i] = getUnValidItemID_CPP();
+    }
+
     if (m_pItemDataTable)
     {
         TArray< FS_ItemData*>  arRow{};
@@ -48,6 +56,7 @@ void UC_ItemDataSubsystem::Deinitialize()
 
 bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) const
 {
+    OutData = FS_ItemData{};
     FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
     if (pItemData && pItemData->nItemID == getUnValidItemID())
         pItemData = nullptr;
@@ -81,6 +90,64 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
         pItem->FinishSpawning(transfrom);
     }
     return pItem;
+}
+
+void UC_ItemDataSubsystem::loadInventroyData(UC_InventoryComponent* pInventory)
+{
+    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
+        return;
+
+    int nWidth = pInventory->getInventoryWidth();
+    int nHeight = pInventory->getInventoryHeight();
+    if (m_arrInventory.Num() != nWidth * nHeight)
+        return;
+    for (int i = 0; i < nHeight; i++)
+    {
+        for (int j = 0; j < nWidth; j++)
+        {
+            pInventory->setInventorySlotData(i, j, m_arrInventory[pInventory->getArrayIndex(i, j)]);
+        }
+    }
+}
+
+void UC_ItemDataSubsystem::saveInventroyData(UC_InventoryComponent* pInventory)
+{
+    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
+        return;
+
+    m_arrInventory.Empty();
+	int nWidth = pInventory->getInventoryWidth();
+	int nHeight = pInventory->getInventoryHeight();
+	m_arrInventory.Init(FS_InventorySlotData{}, pInventory->getInventorySize());
+    for (int i = 0; i < nHeight; i++)
+    {
+        for (int j = 0; j < nWidth; j++)
+        {
+            pInventory->getInventorySlotData(i, j, m_arrInventory[pInventory->getArrayIndex(i,j)]);
+        }
+    }
+}
+
+void UC_ItemDataSubsystem::loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
+{
+    if (!pQuickSlot)
+        return;
+
+    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+    {
+        pQuickSlot->setQuickSlotItem((E_QuickSlotType)i, m_arrQuickSlotItem[i]);
+    }
+}
+
+void UC_ItemDataSubsystem::saveQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
+{
+    if (!pQuickSlot)
+        return;
+
+    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+    {
+        m_arrQuickSlotItem[i] = pQuickSlot->getQuickSlotID((E_QuickSlotType)i);
+    }
 }
 
 FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
