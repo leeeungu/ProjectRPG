@@ -15,13 +15,11 @@ class PROJECTRPG_API AC_MonsterSpawnerManager : public AActor
 
 private:
 	UPROPERTY()
-	TArray<AC_MonsterSpawner*> m_arrSpawner;
-	UPROPERTY()
 	int32 m_nCurrentIndex;
 
 public:
 	UPROPERTY(EditAnywhere)
-	TArray<AActor*> m_arrFoundSpawner;
+	TArray<AC_MonsterSpawner*> m_arrFoundSpawner;
 	
 public:	
 	// Sets default values for this actor's properties

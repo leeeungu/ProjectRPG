@@ -9,6 +9,9 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
 #include "AIController.h"
+#include "C_DecalUtils.h"
+
+DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
 AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 {
@@ -168,7 +171,16 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 
 	FS_PatternData& sPattern = m_arrPatternList[nPatternIndex];
 
+	FVector vFowardOffset = GetActorForwardVector() * sPattern.fAttackRange * 1.f;
+	FVector vDecalLocation = vFowardOffset + GetActorLocation();
+	vDecalLocation.Z = 0.1f;
+	FRotator rRot = FRotator(-90.f, 0.f, 0.f);
+
 	
+	UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), sPattern.pNiagara, vDecalLocation, rRot,
+	sPattern.fNiagaraLife, sPattern.fNiagaraScale);
+
+	UE_LOG(C_MonsterBaseCharacte, Warning, TEXT("Spawn Niagara at Time: %f"), GetWorld()->GetTimeSeconds());
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
 	
