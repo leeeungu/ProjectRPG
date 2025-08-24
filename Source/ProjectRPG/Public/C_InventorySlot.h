@@ -35,6 +35,7 @@ protected:
 public:
 	UC_InventorySlot(const FObjectInitializer& ObjectInitializer);
 
+	virtual void NativeConstruct() override;
 	virtual void slotChangeEvent(FS_InventorySlotData* sData) override;
 
 	UFUNCTION(BlueprintCallable, Category = "UC_InventorySlot")

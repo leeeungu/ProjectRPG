@@ -24,6 +24,18 @@ void UC_GameWindowWidget::addWidgetToMain_Implementation()
 {
 }
 
+FReply UC_GameWindowWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UUserWidget::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	return FReply::Handled();
+}
+
+FReply UC_GameWindowWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UUserWidget::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+	return FReply::Handled();
+}
+
 void UC_GameWindowWidget::NativeOnInitialized()
 {
 	UUserWidget::NativeOnInitialized();
