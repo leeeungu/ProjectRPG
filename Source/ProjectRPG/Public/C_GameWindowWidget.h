@@ -15,6 +15,7 @@ enum class E_WindowType :  uint8
 	E_SkillWindow	UMETA(DisplayName = "SkillWindow"),
 	E_QuestWindow	UMETA(DisplayName = "QuestWindow"),
 	E_PlayerInfo	UMETA(DisplayName = "PlayerInfo"),
+	E_NPCWidget 	UMETA(DisplayName = "NPCWidget"),
 	E_Max UMETA(Hidden),
 };
 
