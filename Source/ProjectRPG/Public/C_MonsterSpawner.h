@@ -7,6 +7,7 @@
 #include "C_MonsterSpawner.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMonsterDiedCall);
 
 UCLASS()
 class PROJECTRPG_API AC_MonsterSpawner : public AActor
@@ -28,7 +29,8 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "SpawnerDelegate")
 	FOnSpawnComplete m_onSpawnComplete;
 
-
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MonsterDied")
+	FOnMonsterDiedCall m_onMonsterDiedCall;
 
 protected:
 	// Called when the game starts or when spawned
