@@ -10,6 +10,7 @@
 #include "BehaviorTree/BlackBoardComponent.h"
 #include "AIController.h"
 #include "C_DecalUtils.h"
+#include "C_NiagaraUtil.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 

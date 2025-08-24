@@ -14,7 +14,8 @@ public class ProjectRPG : ModuleRules
 			"EnhancedInput" , 
 			"UMG", 
 			"AIModule", "NavigationSystem",
-			"QuestSystemRuntime"
+			"QuestSystemRuntime",
+			"Niagara"
         });
 
 		if (Target.bBuildEditor)

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #include "GameFramework/Pawn.h"
 #include "C_NiagaraUtil.h"
 #include "C_MonsterBaseCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -89,6 +91,9 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnMosterDied m_onMonsterDied;
 
 public:
 	AC_MonsterBaseCharacter();
@@ -114,7 +119,7 @@ public:
 
 
 	/*
-	* ¹«·ÂÈ­ °ü·Ã
+	* ë¬´ë ¥í™” ê´€ë ¨
 	*/
 
 	UFUNCTION()
@@ -125,7 +130,7 @@ public:
 
 
 	/*
-	* Ä«¿îÅÍ °ü·Ã
+	* ì¹´ìš´í„° ê´€ë ¨
 	*/
 
 	UFUNCTION()
@@ -138,4 +143,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void onDead();
 
+	virtual void Destroyed() override;
 };
