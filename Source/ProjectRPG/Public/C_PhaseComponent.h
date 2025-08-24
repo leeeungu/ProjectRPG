@@ -8,42 +8,24 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseChange);
 
-class AC_MonsterBaseCharacter;
-
-
-USTRUCT(BlueprintType)
-struct FS_PhaseData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fChangePercentHp = 100.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* pPhaseMontage = nullptr;
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_PhaseComponent : public UActorComponent
 {
-	GENERATED_BODY()	
+	GENERATED_BODY()
 
 private:
-	int32 m_nCurrentPhaseIndex = 0;
+	int32 m_nCurrentPhaseIndex = -1;
 
-	UPROPERTY()
-	AC_MonsterBaseCharacter* m_pMonster;
-
-	UPROPERTY()
-	UAnimInstance* m_pAnim;
+	float m_fChangePercentHp = 70.f;
 
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Phase")
 	FOnPhaseChange m_onPhaseChange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phase")
-	TArray<FS_PhaseData> m_arrPhase;
+	UPROPERTY(EditAnywhere, Category = "Phase");
+	TArray<float> m_arrPhase;
 	
 
 public:	
@@ -52,9 +34,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void phaseChange(float fHp);
-
-	UFUNCTION()
-	void OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
 	// Called when the game starts
