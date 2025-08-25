@@ -25,6 +25,11 @@ public:
 	int32 getEquipIndex() const { return m_nEquipIndex; }
 
 	void effectEquip(AC_BaseCharacter* pCharacter);
+public:
+
+	// IC_ItemToolTipInterface을(를) 통해 상속됨
+	virtual FText getItemDesc_Implementation() const override;
+
 protected:
 	virtual bool findActor_Implementation(AActor*& pTargetActor) override;
 	virtual bool itemEffect_Implementation() override;
