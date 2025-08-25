@@ -49,7 +49,6 @@ private:
 	//Path값
 	TArray<FVector> pathList{};
 	int curPathPos = 1;
-	void CalMoveData();
 
 	FVector MousePointDir{};
 	bool IsPeriod = false;
@@ -62,18 +61,22 @@ private:
 
 protected:
 
+private:
+	void CalMoveData();
+	void RunningSystemManager();
+	void ClearMoveState();
+
 public:
 	AC_Player();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void OnMoveToPosPlayer(FVector pos);
+	void OnMoveToPosPlayer(FVector pos);//외부에서도 호출해서 pos값을넣어주면 해당위치로이동함.
 	//void SetMousePointDir(FVector pos);
 	FVector GetMousePointDir();
-	void ClearMoveState();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
 
-	void RunningSystemManager();
+	
 	void Period();
 	
 

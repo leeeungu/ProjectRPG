@@ -60,6 +60,7 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	// 틱에서 회전 보간을 켜기 위한 플래그
 	bRotate = true;
 }
+
 //매인로직 매니저
 void AC_Player::RunningSystemManager()
 {
@@ -73,7 +74,7 @@ void AC_Player::RunningSystemManager()
 			case EInputType::Skill:
 				RunningState = ERunningSystemState::Busy;
 				CalRotateData(CurrentInputData.TargetPoint);
-				//ExecuteSkill(CurrentInputData); ->실행함수
+				m_skillCom->skill1(CurrentInputData.ActionName);
 				break;
 			case EInputType::AnimItem:
 				RunningState = ERunningSystemState::Busy;
