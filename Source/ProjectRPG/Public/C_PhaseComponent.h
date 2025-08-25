@@ -17,7 +17,7 @@ struct FS_PhaseData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fChangePercentHp = 100.f;
+	float fChangePercentHp = 50.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* pPhaseMontage = nullptr;
@@ -51,7 +51,7 @@ public:
 	UC_PhaseComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void phaseChange(float fHp);
+	void phaseChange(float fHp, float fMaxHp);
 
 	UFUNCTION()
 	void OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool bInterrupted);

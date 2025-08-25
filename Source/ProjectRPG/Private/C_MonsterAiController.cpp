@@ -12,6 +12,7 @@
 const FName AC_MonsterAiController::TargetActorKey = TEXT("TargetActor");
 const FName AC_MonsterAiController::CanAttackKey = TEXT("CanAttack");
 const FName AC_MonsterAiController::PatrolLocationKey = TEXT("PatrolLocation");
+const FName AC_MonsterAiController::IsGimmickPlayingKey = TEXT("IsPlayingGimmick");
 
 
 AC_MonsterAiController::AC_MonsterAiController()

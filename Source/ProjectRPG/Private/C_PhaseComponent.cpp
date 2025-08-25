@@ -14,9 +14,9 @@ UC_PhaseComponent::UC_PhaseComponent()
 	// ...
 }
 
-void UC_PhaseComponent::phaseChange(float fHp)
+void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 {
-	if (fHp <= 0)
+	if (fHp <= 0 || fMaxHp <= 0)
 		return;
 
 	if (m_arrPhase.Num() == 0)
@@ -28,9 +28,9 @@ void UC_PhaseComponent::phaseChange(float fHp)
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 	
 
-	float fCurrentHp = fHp;
+	float fCurrentHpPercent = (fHp / fMaxHp ) * 100.f;
 
-	if (fCurrentHp <= sPhase.fChangePercentHp)
+	if (fCurrentHpPercent <= sPhase.fChangePercentHp)
 	{
 		if (!m_pAnim)
 			return;

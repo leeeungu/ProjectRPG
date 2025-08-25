@@ -1,0 +1,35 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Monster/C_StaggerGimmickComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(C_StaggerGimmickComponent, Log, All);
+
+bool UC_StaggerGimmickComponent::canGimmickStart()
+{
+	Super::canGimmickStart();
+	
+	if (!m_pMonster)
+		return false;
+
+	float fHp = m_pMonster->getHp();
+	float fMaxHp = m_pMonster->getMaxHp();
+
+	if (m_fTriggerHp <= (fHp / fMaxHp) * 100.f)
+		return true;
+
+	return false;
+}
+
+void UC_StaggerGimmickComponent::excuteGimmick()
+{
+	Super::excuteGimmick();
+
+	UE_LOG(C_StaggerGimmickComponent, Warning, TEXT("excute Gimmick!!!!!"));
+}
+
+UC_StaggerGimmickComponent::UC_StaggerGimmickComponent()
+{
+	m_fTriggerHp = 40.f;
+	m_fGimmickTime = 150.f;
+}

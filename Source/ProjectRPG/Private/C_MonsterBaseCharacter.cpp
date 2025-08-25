@@ -5,6 +5,7 @@
 #include "C_StaggerComponent.h"
 #include "C_PhaseComponent.h"
 #include "C_CounterComponent.h"
+#include "Monster/C_GimmickComponent.h"
 #include "C_MonsterAiController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
@@ -168,6 +169,7 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 
 
 	m_bIsAttacking = true;
+
 	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
 		return;
 

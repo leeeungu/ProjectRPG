@@ -61,6 +61,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Gimmick")
+	class UC_GimmickComponent* m_pGimmickComp;
+
+	TArray<UC_GimmickComponent*> m_arrGimmickList;
+
 	UPROPERTY()
 	class UC_StaggerComponent* m_pStaggerComp;
 
@@ -76,10 +81,10 @@ private:
 	FTimerHandle m_timeHandle;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Pattern")
 	TArray<FS_PatternData> m_arrPatternList;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Rank")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
 private:
@@ -100,34 +105,36 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void stopAi();
+
+	/*
+	* 전투 관련
+	*/
+
 	TArray<int32> filterAvailablePatterns();
 
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
 
 	void playPattern(int32 nPatternIndex);
 
-	void playStaggerMontage();
-
 	bool getIsAttacking() const;
-
-
-	UFUNCTION(BlueprintCallable)
-	virtual void takeStaggerEvent(float fStagger);
-
-	UFUNCTION(BlueprintCallable)
-	void stopAi();
 
 
 	/*
 	* 무력화 관련
 	*/
 
+	void playStaggerMontage();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void takeStaggerEvent(float fStagger);
+
 	UFUNCTION()
 	void onStaggerBroken();
 
 	UFUNCTION()
 	void onStaggerRecover();
-
 
 	/*
 	* 카운터 관련
@@ -139,6 +146,9 @@ public:
 	UFUNCTION()
 	void onCounterFailed();
 
+	/*
+	* 죽음 소멸 관련 
+	*/
 
 	UFUNCTION(BlueprintCallable)
 	void onDead();

@@ -31,6 +31,7 @@ public:
 	static const FName TargetActorKey;
 	static const FName CanAttackKey;
 	static const FName PatrolLocationKey;
+	static const FName IsGimmickPlayingKey;
 
 public:
 	AC_MonsterAiController();
