@@ -1,4 +1,5 @@
 ﻿#include "Item/Actor/C_EquipItem.h"
+#include "C_ItemDataSubsystem.h"
 #include "Item/Component/C_EquipComponent.h"
 
 AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
@@ -7,6 +8,17 @@ AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
 
 void AC_EquipItem::effectEquip(AC_BaseCharacter* pCharacter)
 {
+}
+
+FText AC_EquipItem::getItemDesc_Implementation() const
+{
+	FS_ItemData Data{};
+	if (!UC_ItemDataSubsystem::getItemDataByID_CPP(m_nItemID, Data))
+		return FText();
+	FTextFormat format{};
+	format.FromString(Data.strItemDescription);
+	float Value = 100.0f;
+	return FText::Format<float>(format, Value); 
 }
 
 bool AC_EquipItem::findActor_Implementation(AActor*& pTargetActor)
