@@ -13,6 +13,11 @@
 #include "CPP_Player/S_InputActionData.h"
 
 
+void AC_Player::HandleChangeRunningState()
+{
+	RunningState = ERunningSystemState::Idle;
+}
+
 void AC_Player::CalMoveData()
 {
 	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
@@ -69,12 +74,13 @@ void AC_Player::RunningSystemManager()
 		FInputActionData CurrentInputData{};//비어있는 초기값.
 		if (m_inputQueue->GetLastInputData(CurrentInputData))//인풋에 뭔가 들어온다면
 		{
+			m_inputQueue->ClearQueueList();//그냥 마지막인덱스를 가져온거기때문에 끝나고 다시 큐에서 가져옴 그렇기떄문에 가져오고나서 리스트를비워줘야 끝나고 자동으로 가져오지않음.
 			switch (CurrentInputData.InputType)
 			{
 			case EInputType::Skill:
 				RunningState = ERunningSystemState::Busy;
 				CalRotateData(CurrentInputData.TargetPoint);
-				m_skillCom->skill1(CurrentInputData.ActionName);
+				m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 				break;
 			case EInputType::AnimItem:
 				RunningState = ERunningSystemState::Busy;
@@ -176,6 +182,20 @@ AC_Player::AC_Player()
 void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (USkeletalMeshComponent* myMesh = GetMesh())
+	{
+		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
+		if (myAnimInstance)
+		{
+			// 여기서 델리게이트 바인딩
+			myAnimInstance->ChangeRunningState.RemoveAll(this);//안전장치(예를들어 캐릭터가 죽고 다시살아날떄.
+			myAnimInstance->ChangeRunningState.AddUObject(this, &AC_Player::HandleChangeRunningState);
+			//이제 노티파이발생시 애님인스턴스에서 브로드캐스트로 플레이어에게 전달
+			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
+		}
+	}
+
 }
 
 void AC_Player::Tick(float DeltaTime)

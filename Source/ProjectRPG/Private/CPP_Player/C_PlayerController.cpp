@@ -131,7 +131,7 @@ void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "Skill_01";
+    NewInputData.ActionName = "S_01";
     NewInputData.InputType = EInputType::Skill; 
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;

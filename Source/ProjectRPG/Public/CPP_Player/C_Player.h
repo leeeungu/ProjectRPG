@@ -60,7 +60,8 @@ private:
 	bool bRunningSystemOpen = true;//기본값 true 항시열려있음
 
 protected:
-
+	UFUNCTION()
+	void HandleChangeRunningState();
 private:
 	void CalMoveData();
 	void RunningSystemManager();

@@ -8,16 +8,16 @@
 UC_SkillComponent::UC_SkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	FSkillData Testskill1;
-	Testskill1.SkillName = "Skill_01";
-	Testskill1.Cooldown = 5.0f;
-	Testskill1.AttackPowerMultiplier = 200.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage_C"));
+	FSkillData SkillNum01;
+	SkillNum01.SkillName = "S_01";
+	SkillNum01.Cooldown = 5.0f;
+	SkillNum01.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
 	if (skill1obj.Succeeded())
 	{
-		Testskill1.SkillMontage = skill1obj.Object;
+		SkillNum01.SkillMontage = skill1obj.Object;
 	}
-	SkillMap.Add(Testskill1.SkillName, Testskill1);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+	SkillMap.Add(SkillNum01.SkillName, SkillNum01);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
 }
 
 
@@ -41,25 +41,18 @@ void UC_SkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
-void UC_SkillComponent::skill1(FName skillName)
+void UC_SkillComponent::UsingSkill(FName skill_Key)
 {
-	if (const FSkillData* Skill = SkillMap.Find(skillName))//스킬맵에 같은이름을가진게있다면 찿아서 Skill변수에 저장->이게 성공하면 true
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//스킬맵에 같은이름을가진게있다면 찿아서 Skill변수에 저장->이게 성공하면 true
 	{
-		//-스킬은 존재하지만, `SkillMontage`가 설정되어 있지 않은 경우 실행 중단
-		//- 즉, ** 애니메이션이 설정되지 않은 스킬은 실행하지 않음**
-		if (!Skill->SkillMontage) return;
-
-		/*-캐릭터의 `Mesh`에서 애니메이션 인스턴스를 가져옴
-		- 이 인스턴스는 현재 캐릭터의 애니메이션을 제어하는 주체*/
-		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-		if (!OwnerCharacter) return;
-
-
-		/*UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
-		if (AnimInstance)
+		//스킬은 존재하지만, `SkillMontage`가 설정되어 있지 않은 경우 실행 중단
+		//즉, **애니메이션이 설정되지 않은 스킬은 실행하지 않음**
+		if (!Skill->SkillMontage)
 		{
-			AnimInstance->Montage_Play(Skill->SkillMontage);
-		}*/
+			UE_LOG(LogTemp, Warning, TEXT("NoMontage"));
+			return;
+		}
+		OnSkillMontageRequested.Broadcast(Skill->SkillMontage);//몽타주실행파트
 	}
 }
 
