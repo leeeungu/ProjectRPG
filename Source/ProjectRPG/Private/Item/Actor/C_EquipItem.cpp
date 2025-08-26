@@ -6,10 +6,6 @@ AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
 {
 }
 
-void AC_EquipItem::effectEquip(AC_BaseCharacter* pCharacter)
-{
-}
-
 FText AC_EquipItem::getItemDesc_Implementation() const
 {
 	FS_ItemData Data{};
@@ -17,21 +13,32 @@ FText AC_EquipItem::getItemDesc_Implementation() const
 		return FText();
 	FTextFormat format{};
 	format.FromString(Data.strItemDescription);
-	float Value = 100.0f;
-	return FText::Format<float>(format, Value); 
+	return FText::Format<float>(format, m_fEquipValue);
 }
 
 bool AC_EquipItem::findActor_Implementation(AActor*& pTargetActor)
 {
-	pTargetActor = GetInstigator();
+	pTargetActor = GetInstigator()->GetInstigatorController();
 	return pTargetActor != nullptr;
 }
 
 bool AC_EquipItem::itemEffect_Implementation()
 {
+	m_pTargetActor = GetInstigator()->GetInstigatorController();
+	if (!m_pTargetActor)
+		return false;
 	UC_EquipComponent* pComponent = m_pTargetActor->GetComponentByClass<UC_EquipComponent>();
 	if (pComponent)
 	{
+		if (m_pEquipItemDataTable)
+		{
+			TArray< FS_EquipItemData*> arrData{};
+			m_pEquipItemDataTable->GetAllRows(TEXT(""), arrData);
+			if (arrData.IsValidIndex(m_nEquipLevel))
+			{
+				m_fEquipValue = arrData[m_nEquipLevel]->fValue;
+			}
+		}
 		pComponent->registerEquip(this);
 		return true;
 	}
