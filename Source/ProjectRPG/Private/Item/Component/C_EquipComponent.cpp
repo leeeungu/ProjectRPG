@@ -20,16 +20,16 @@ void UC_EquipComponent::registerEquip(AC_EquipItem* pItemBase)
 {
 	if (!pItemBase)
 		return;
-	AC_EquipItem*& pValue = m_setEquipData.FindOrAdd(pItemBase->getEquipType(), nullptr); // 여기 메모리 터짐
+	AC_EquipItem** pValue = m_setEquipData.Find(pItemBase->getEquipType()); // 여기 메모리 터짐
 	if (pValue)
 	{
-		unRegisterEquip(pValue);
+		unRegisterEquip(*pValue);
 	}
-	pValue = pItemBase;
-	effectEuip(pValue);
+	m_setEquipData.Add(pItemBase->getEquipType(), pItemBase);	
+	effectEuip(pItemBase);
 	if (m_onRegister.IsBound())
 	{
-		m_onRegister.Broadcast(pValue);
+		m_onRegister.Broadcast(pItemBase);
 	}
 }
 
@@ -79,14 +79,15 @@ void UC_EquipComponent::unEffectEuip(AC_EquipItem* pItemBase)
 void UC_EquipComponent::braodCastEquip(E_EquipEffectType EquipType, bool IsEquip)
 {
 	AC_EquipItem** ppItem = m_setEquipData.Find(EquipType);
-	if (!ppItem)
-		return;
+	AC_EquipItem* pItem{};
+	if (ppItem)
+		pItem = *ppItem;
 
 	for (const FS_EquipEventBinding& Binding : m_arrEquipEvent[(uint8)EquipType])
 	{
 		if (Binding.Delegate.IsBound())
 		{
-			Binding.Delegate.Execute(IsEquip, *ppItem);
+			Binding.Delegate.Execute(IsEquip, pItem);
 		}
 
 	}

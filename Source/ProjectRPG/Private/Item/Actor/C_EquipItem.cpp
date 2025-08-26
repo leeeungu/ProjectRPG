@@ -1,6 +1,7 @@
 ﻿#include "Item/Actor/C_EquipItem.h"
 #include "C_ItemDataSubsystem.h"
 #include "Item/Component/C_EquipComponent.h"
+#include "C_InventoryComponent.h"
 
 AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
 {
@@ -25,6 +26,7 @@ bool AC_EquipItem::findActor_Implementation(AActor*& pTargetActor)
 bool AC_EquipItem::itemEffect_Implementation()
 {
 	m_pTargetActor = GetInstigator()->GetInstigatorController();
+	FText text = IC_ItemToolTipInterface::Execute_getItemDesc(this); // getItemDesc();
 	if (!m_pTargetActor)
 		return false;
 	UC_EquipComponent* pComponent = m_pTargetActor->GetComponentByClass<UC_EquipComponent>();
