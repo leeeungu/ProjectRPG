@@ -79,7 +79,8 @@ void AC_Player::RunningSystemManager()
 			{
 			case EInputType::Skill:
 				RunningState = ERunningSystemState::Busy;
-				CalRotateData(CurrentInputData.TargetPoint);
+				bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
+				CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
 				m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 				break;
 			case EInputType::AnimItem:
@@ -190,7 +191,9 @@ void AC_Player::BeginPlay()
 		{
 			// 여기서 델리게이트 바인딩
 			myAnimInstance->ChangeRunningState.RemoveAll(this);//안전장치(예를들어 캐릭터가 죽고 다시살아날떄.
+			myAnimInstance->SetPlayerMovePointEnabled.RemoveAll(this);
 			myAnimInstance->ChangeRunningState.AddUObject(this, &AC_Player::HandleChangeRunningState);
+			myAnimInstance->SetPlayerMovePointEnabled.AddUObject(this, &AC_Player::SetCanMove);
 			//이제 노티파이발생시 애님인스턴스에서 브로드캐스트로 플레이어에게 전달
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
 		}
@@ -271,6 +274,7 @@ void AC_Player::Tick(float DeltaTime)
 
 void AC_Player::OnMoveToPosPlayer(FVector pos)
 {
+	if (!bCanMove) return;//idle스테이트가 아니면 리턴시킴(마우스포인터로 찍히지만 실제이동은되지않도록)
 	//길찾기 패스 구하기
 	UNavigationPath* Path =
 		UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), pos);

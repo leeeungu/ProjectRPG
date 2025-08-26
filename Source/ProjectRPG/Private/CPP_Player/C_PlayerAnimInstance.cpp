@@ -10,6 +10,11 @@ void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
     {
         Montage_Play(MontageToPlay);
         UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
+        // 엔진 이벤트 델리게이트: 몽타주 끝났을 때 OnEndMontage 호출(블루프린트의 Completed 노드와 같은뜻임)
+        FOnMontageEnded MontageEndedDelegate;
+        MontageEndedDelegate.Unbind();//이전델리게이트해재 (중복방지)
+        MontageEndedDelegate.BindUObject(this, &UC_PlayerAnimInstance::OnEndMontage);
+        Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
     }
 }
 
@@ -32,6 +37,17 @@ void UC_PlayerAnimInstance::NativeInitializeAnimation()
 void UC_PlayerAnimInstance::OnChangeRunningState()
 {
     ChangeRunningState.Broadcast();
+}
+
+void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (bInterrupted)
+    {
+        // 강제 중단된 경우 → 이동 가능 상태 풀지 않음
+        UE_LOG(LogTemp, Warning, TEXT("Montage interrupted. Ignore movement enable."));
+        return;//리턴을 때리면서 브로드캐스트 실행하지않음으로 여전히 이동불가상태로 남아있게됨.
+    }
+    SetPlayerMovePointEnabled.Broadcast();
 }
 
 

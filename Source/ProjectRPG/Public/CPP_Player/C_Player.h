@@ -46,6 +46,7 @@ private:
 	float stopDist = 0.1f;
 	float rotDir{};
 	float remainAngle{};
+	bool bCanMove = true;//마우스포인터 이동가능? 
 	//Path값
 	TArray<FVector> pathList{};
 	int curPathPos = 1;
@@ -53,11 +54,11 @@ private:
 	FVector MousePointDir{};
 	bool IsPeriod = false;
 	//로테이트 보간
-	bool bRotate = false;               
+	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
 	float RotateInterpSpeed = 10.0f;     
 
-	bool bRunningSystemOpen = true;//기본값 true 항시열려있음
+	//bool bRunningSystemOpen = true;//기본값 true 항시열려있음
 
 protected:
 	UFUNCTION()
@@ -76,6 +77,7 @@ public:
 	FVector GetMousePointDir();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
+	void SetCanMove() { bCanMove = true; }//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화)
 
 	
 	void Period();
