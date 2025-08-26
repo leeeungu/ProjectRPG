@@ -5,15 +5,10 @@
 
 DEFINE_LOG_CATEGORY_STATIC(C_StaggerGimmickComponent, Log, All);
 
-bool UC_StaggerGimmickComponent::canGimmickStart()
+bool UC_StaggerGimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
-	Super::canGimmickStart();
-	
-	if (!m_pMonster)
+	if (!Super::canGimmickStart(fHp, fMaxHp))
 		return false;
-
-	float fHp = m_pMonster->getHp();
-	float fMaxHp = m_pMonster->getMaxHp();
 
 	if (m_fTriggerHp <= (fHp / fMaxHp) * 100.f)
 		return true;

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "C_MonsterBaseCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "C_MonsterAiController.h"
 #include "C_GimmickComponent.generated.h"
@@ -22,8 +21,6 @@ protected:
 	float m_fTriggerHp = 100.f;
 	float m_fGimmickTime = 100.f;
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<AC_MonsterBaseCharacter> m_pMonster;
-	UPROPERTY(BlueprintReadOnly)
 	UBlackboardComponent* m_pBBcom;
 
 
@@ -35,10 +32,6 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	virtual bool canGimmickStart();
-
-	virtual void excuteGimmick();
-
 	virtual bool endGimmick();
 
 	void updateGimmickBool();
@@ -47,5 +40,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual bool canGimmickStart(float fHp, float fMaxHp);
+
+	virtual void excuteGimmick();
 		
 };

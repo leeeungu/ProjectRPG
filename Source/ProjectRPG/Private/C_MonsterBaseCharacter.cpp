@@ -12,6 +12,7 @@
 #include "AIController.h"
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
+#include "../Public/Monster/C_GimmickComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
@@ -59,6 +60,11 @@ void AC_MonsterBaseCharacter::stopAi()
 			pBtComp->StopTree(EBTStopMode::Safe);
 		}
 	}
+}
+
+const TArray<UC_GimmickComponent*>& AC_MonsterBaseCharacter::getGimmickList() const
+{
+	return m_arrGimmickList;
 }
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
@@ -185,6 +191,7 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	sPattern.fNiagaraLife, sPattern.fNiagaraScale);
 
 	UE_LOG(C_MonsterBaseCharacte, Warning, TEXT("Spawn Niagara at Time: %f"), GetWorld()->GetTimeSeconds());
+
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
 	
@@ -227,10 +234,6 @@ void AC_MonsterBaseCharacter::BeginPlay()
 	{
 		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
-		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
-
-		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
-
 		if (m_pStaggerComp)
 		{
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
@@ -238,12 +241,19 @@ void AC_MonsterBaseCharacter::BeginPlay()
 			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
 		}
 
+		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
+
 		if (m_pCounterComp)
 		{
 			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
 
 			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
 		}
+
+		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
+
+		GetComponents<UC_GimmickComponent>(m_arrGimmickList);
+
 	}
 
 	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);

@@ -6,7 +6,7 @@
 
 
 
-bool UC_GimmickComponent::canGimmickStart()
+bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
 	if (!m_bGimmickPlaying)
 		return true;
@@ -22,8 +22,6 @@ UC_GimmickComponent::UC_GimmickComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
-
 	// ...
 }
 
@@ -35,7 +33,6 @@ void UC_GimmickComponent::BeginPlay()
 
 	// ...
 	
-	m_pBBcom = Cast<UBlackboardComponent>(m_pMonster->GetController());
 }
 
 void UC_GimmickComponent::excuteGimmick()

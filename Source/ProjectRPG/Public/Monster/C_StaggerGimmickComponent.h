@@ -9,14 +9,14 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTRPG_API UC_StaggerGimmickComponent : public UC_GimmickComponent
 {
 	GENERATED_BODY()
 
 
 protected:
-	virtual bool canGimmickStart() override;
+	virtual bool canGimmickStart(float fHp, float fMaxHp) override;
 
 	virtual void excuteGimmick() override;
 
