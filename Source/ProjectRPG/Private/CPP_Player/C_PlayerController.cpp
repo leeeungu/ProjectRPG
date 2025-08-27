@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CPP_Player/C_PlayerController.h"
@@ -10,6 +10,13 @@
 #include "UObject/ConstructorHelpers.h"
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/S_InputActionData.h"
+#include "ActorComponent/QuestManagerComponent.h"
+#include "C_GameWindowManager.h"
+#include "C_CurrencyComponent.h"
+#include "Item/Component/C_EquipComponent.h"
+#include "C_QuickSlotManagerComponent.h"
+#include "C_InventoryComponent.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(C_PlayerController, Log, All);
 
@@ -18,7 +25,7 @@ void AC_PlayerController::UpdateMouseHit()
     FHitResult Hit;
     CachedHitType = EMouseHitType::None;
 
-    // 1. ¿ÀºêÁ§Æ® Å¸ÀÔ ÇÇÅ·
+    // 1. ì˜¤ë¸Œì íŠ¸ íƒ€ì… í”¼í‚¹
     TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2));
 
@@ -29,7 +36,7 @@ void AC_PlayerController::UpdateMouseHit()
         return;
     }
 
-    // 2. Æ®·¹ÀÌ½º Ã¤³Î ÇÇÅ·
+    // 2. íŠ¸ë ˆì´ìŠ¤ ì±„ë„ í”¼í‚¹
     if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, Hit))
     {
         CachedMouseHit = Hit;
@@ -37,7 +44,7 @@ void AC_PlayerController::UpdateMouseHit()
         return;
     }
 
-    // HitÀÌ ¾øÀ» ¶§
+    // Hitì´ ì—†ì„ ë•Œ
     CachedMouseHit = FHitResult();
 }
 
@@ -57,7 +64,7 @@ void AC_PlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    // EnhancedInputComponent·Î Ä³½ºÆÃ
+    // EnhancedInputComponentë¡œ ìºìŠ¤íŒ…
     if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
     {
         if (RightClick)
@@ -79,7 +86,7 @@ void AC_PlayerController::SetupInputComponent()
             EnhancedInput->BindAction(R_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnR_ActionCanceld);
             EnhancedInput->BindAction(R_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnR_ActionCompleted);\
 
-            if (R_Key->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Key->Triggers[0].Get()))//Â÷Â¡ ½ºÅ³ °¡ÁßÄ¡ Å×½ºÆ®
+            if (R_Key->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Key->Triggers[0].Get()))//ì°¨ì§• ìŠ¤í‚¬ ê°€ì¤‘ì¹˜ í…ŒìŠ¤íŠ¸
                 UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(R_Key->Triggers[0].Get())->HoldTimeThreshold);
         }
         if (Number1_Key)
@@ -93,17 +100,17 @@ void AC_PlayerController::SetupInputComponent()
     }
 }
 
-//¸¶¿ì½º ¿À¸¥ÂÊÅ¬¸¯
+//ë§ˆìš°ìŠ¤ ì˜¤ë¥¸ìª½í´ë¦­
 void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
 {
     FHitResult CachedHit;
     EMouseHitType HitType;
-    //Å¸ÀÔÀÌ NoneÀÌ¸éfalse¸¦ ¸®ÅÏÇÔ Áï ¾Æ¹«°Íµµ ÇÇÅ·µÈ°ÍÀÌ¾øÀ½
-    //true¶ó´Â°ÍÀº CachedHit¿¡ ÁÂÇ¥°ªÀÌ ¼¼ÆÃµÇ°í, HITÅ¸ÀÔ¿¡ Å¸ÀÔÀÌ µé¾î¿È.
+    //íƒ€ì…ì´ Noneì´ë©´falseë¥¼ ë¦¬í„´í•¨ ì¦‰ ì•„ë¬´ê²ƒë„ í”¼í‚¹ëœê²ƒì´ì—†ìŒ
+    //trueë¼ëŠ”ê²ƒì€ CachedHitì— ì¢Œí‘œê°’ì´ ì„¸íŒ…ë˜ê³ , HITíƒ€ì…ì— íƒ€ì…ì´ ë“¤ì–´ì˜´.
     if (!GetCachedMouseHit(CachedHit, HitType)) return;
 
     AC_Player* player = Cast<AC_Player>(GetPawn());
-    if (!player || player->IsRotating()) return;//ÇÃ·¹ÀÌ¾î°¡ ·ÎÅ×ÀÌÆÃÁßÀÌ¸é ÀÌµ¿ºÒ°¡
+    if (!player || player->IsRotating()) return;//í”Œë ˆì´ì–´ê°€ ë¡œí…Œì´íŒ…ì¤‘ì´ë©´ ì´ë™ë¶ˆê°€
 
     /*if (HitType == EMouseHitType::Object)
     {
@@ -114,7 +121,7 @@ void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
         player->OnMoveToPosPlayer(CachedHit.ImpactPoint);
     }
 }
-//½ºÆäÀÌ½º¹Ù ÀÔ·Â
+//ìŠ¤í˜ì´ìŠ¤ë°” ì…ë ¥
 void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -127,7 +134,7 @@ void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-//Q½ºÅ³ ÀÔ·Â
+//QìŠ¤í‚¬ ì…ë ¥
 void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -140,7 +147,7 @@ void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-//R½ºÅ³(Â÷Â¡½ºÅ³)
+//RìŠ¤í‚¬(ì°¨ì§•ìŠ¤í‚¬)
 void AC_PlayerController::OnR_ActionStarted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -174,7 +181,7 @@ void AC_PlayerController::OnR_ActionCanceld(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));//½ÇÁ¦·Ğ canceldÁö¸¸ complete¿Í µ¿ÀÏÇÏ°ÔÃ³¸®
+    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));//ì‹¤ì œë¡  canceldì§€ë§Œ completeì™€ ë™ì¼í•˜ê²Œì²˜ë¦¬
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
@@ -193,12 +200,12 @@ void AC_PlayerController::OnR_ActionCompleted(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-//¾ÆÀÌÅÛ(Áï¹ß)->¹Ù·ÎÇÔ¼öÀÌº¥Æ®Ã³¸®
+//ì•„ì´í…œ(ì¦‰ë°œ)->ë°”ë¡œí•¨ìˆ˜ì´ë²¤íŠ¸ì²˜ë¦¬
 void AC_PlayerController::OnNumber1_Action(const FInputActionValue& Value)
 {
     //ITem useFunc();
 }
-//¾ÆÀÌÅÛ(¾Ö´Ï¸ŞÀÌ¼Ç)->ÀÎÇ²Å¥add exÈ¸¿À¸®¼ö·ùÅº
+//ì•„ì´í…œ(ì• ë‹ˆë©”ì´ì…˜)->ì¸í’‹íadd exíšŒì˜¤ë¦¬ìˆ˜ë¥˜íƒ„
 void AC_PlayerController::OnNumber2_Action(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
@@ -220,12 +227,12 @@ void AC_PlayerController::OnPossess(APawn* pawn)
     {
         if (InputMapping)
         {
-            Subsystem->AddMappingContext(InputMapping, 0);//¿ì¼±¼øÀ§0¸ÊÇÎ
+            Subsystem->AddMappingContext(InputMapping, 0);//ìš°ì„ ìˆœìœ„0ë§µí•‘
         }
     }
     if (pawn)
     {
-        //ÇÃ·¹ÀÌ¾îÀÇ ÀÎÇ²Å¥ÄÄÆ÷³ÍÆ® °¡Á®¿Í¼­ ¼¼ÆÃ
+        //í”Œë ˆì´ì–´ì˜ ì¸í’‹íì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì™€ì„œ ì„¸íŒ…
         InputQueueSystem = pawn->FindComponentByClass<UC_InputQueueComponent>();
     }
 }
@@ -240,10 +247,10 @@ bool AC_PlayerController::GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& O
     }
     return false;
 }
-//¾×¼Ç¸¶¿ì½º ¼¼ÆÃ
+//ì•¡ì…˜ë§ˆìš°ìŠ¤ ì„¸íŒ…
 AC_PlayerController::AC_PlayerController()
 {
-    bShowMouseCursor = true;//¸¶¿ì½ºÇ¥½Ã
+    bShowMouseCursor = true;//ë§ˆìš°ìŠ¤í‘œì‹œ
     static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
         TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
     );
@@ -251,7 +258,7 @@ AC_PlayerController::AC_PlayerController()
     {
         InputMapping = IMC.Object;
     }
-    //¸¶¿ì½ºÅ¬¸¯
+    //ë§ˆìš°ìŠ¤í´ë¦­
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
         TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
     );
@@ -259,7 +266,7 @@ AC_PlayerController::AC_PlayerController()
     {
         RightClick = IA_RightClick.Object;
     }
-    //½ºÆäÀÌ½º¹Ù(ÆĞ¸µ)
+    //ìŠ¤í˜ì´ìŠ¤ë°”(íŒ¨ë§)
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(
         TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar")
     );
@@ -267,7 +274,7 @@ AC_PlayerController::AC_PlayerController()
     {
         SpaceBar = IA_SpaceBar.Object;
     }
-    //½ºÅ³
+    //ìŠ¤í‚¬
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_QAction(
         TEXT("/Game/RPG_Player/Input/Actions/Q_Action.Q_Action")
     );
@@ -282,7 +289,7 @@ AC_PlayerController::AC_PlayerController()
     {
         R_Key = IA_RAction.Object;
     }
-    //¾ÆÀÌÅÛ
+    //ì•„ì´í…œ
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(
         TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action")
     );
@@ -297,5 +304,12 @@ AC_PlayerController::AC_PlayerController()
     {
         Number2_Key = IA_Number2Action.Object;
     }
+    
+    m_pInventoryComponent = CreateDefaultSubobject<UC_InventoryComponent>(TEXT("InventoryComponent"));
+    m_pCurrencyComponent = CreateDefaultSubobject<UC_CurrencyComponent>(TEXT("CurrencyComponent"));
+    m_pGameWindowManager = CreateDefaultSubobject<UC_GameWindowManager>(TEXT("GameWindowManager"));
+    m_pQuickSlotManagerComponent = CreateDefaultSubobject<UC_QuickSlotManagerComponent>(TEXT("QuickSlotManagerComponent"));
+    m_pQuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
+    m_pEquipComponent = CreateDefaultSubobject<UC_EquipComponent>(TEXT("EquipComponent"));
 
 }

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -11,6 +11,12 @@
 class UInputMappingContext;
 class UInputAction;
 class UC_InputQueueComponent;
+class UC_CurrencyComponent;
+class UC_GameWindowManager;
+class UC_QuickSlotManagerComponent;
+class UQuestManagerComponent;
+class UC_EquipComponent;
+class UC_InventoryComponent;
 /**
  * 
  */
@@ -55,6 +61,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number2_Key;
 
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "CurrencyComponent"), BlueprintGetter = getCurrencyComponent)
+	UC_CurrencyComponent* m_pCurrencyComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "WindowWidget", meta = (DisplayName = "WindowManager"), BlueprintGetter = getGameWindowManager)
+	UC_GameWindowManager* m_pGameWindowManager{};
+	UPROPERTY(VisibleAnywhere, Category = "QuickSlot", meta = (DisplayName = "QuickSlotManagerComponent"), BlueprintGetter = getQuickSlotManagerComponent)
+	UC_QuickSlotManagerComponent* m_pQuickSlotManagerComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "QuestManager", meta = (DisplayName = "QuestManagerComponent"), BlueprintGetter = getQuestManagerComponent)
+	UQuestManagerComponent* m_pQuestManagerComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "EquipComponent"), BlueprintGetter = getEquipComponent)
+	UC_EquipComponent* m_pEquipComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "InventoryComponent"), BlueprintGetter = getInventoryComponent)
+	UC_InventoryComponent* m_pInventoryComponent{};
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
@@ -68,8 +86,20 @@ public:
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;
-	// ƒ≥Ω√µ» ∏∂øÏΩ∫ Hit ∞·∞˙∏¶ π›»Ø
+	// Ï∫êÏãúÎêú ÎßàÏö∞Ïä§ Hit Í≤∞Í≥ºÎ•º Î∞òÌôò
 	UFUNCTION(BlueprintCallable, Category = "Mouse")
 	bool GetCachedMouseHit(FHitResult& OutHit, EMouseHitType& OutType) const;
 	
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UC_CurrencyComponent* getCurrencyComponent() const { return m_pCurrencyComponent; }
+	UFUNCTION(BlueprintPure, Category = "WindowWidget")
+	UC_GameWindowManager* getGameWindowManager() const { return m_pGameWindowManager; }
+	UFUNCTION(BlueprintPure, Category = "QuickSlot")
+	UC_QuickSlotManagerComponent* getQuickSlotManagerComponent() const { return m_pQuickSlotManagerComponent; }
+	UFUNCTION(BlueprintPure, Category = "QuestManager")
+	UQuestManagerComponent* getQuestManagerComponent() const { return m_pQuestManagerComponent; }
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UC_EquipComponent* getEquipComponent() const { return m_pEquipComponent; }
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UC_InventoryComponent* getInventoryComponent() const { return m_pInventoryComponent; }
 };
