@@ -91,16 +91,10 @@ void AC_Player::RunningSystemManager()
 			case EInputType::Period:
 				RunningState = ERunningSystemState::Busy;
 				bCanMove = false;
-				CalRotateData(CurrentInputData.TargetPoint);
-				m_skillCom->UsingSkill(CurrentInputData.ActionName);
-				Period();
+				CalRotateData(CurrentInputData.TargetPoint);//여기서 보간이먼저켜짐
+				IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+				m_skillCom->UsingSkill(CurrentInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
 				break;
-
-			case EInputType::Item:
-				// 즉발 아이템은 Busy/Charging 상태여도 사용 가능하도록 별도 처리
-				//UseItem(CurrentInputData);
-				break;
-
 			case EInputType::ChargeSkill:
 				RunningState = ERunningSystemState::Charging;
 				//StartChargeSkill(CurrentInputData);->차징시작함수(시간계산필요, 몽타주홀딩필요)
@@ -136,19 +130,12 @@ void AC_Player::RunningSystemManager()
 
 }
 
-void AC_Player::Period()
+void AC_Player::SetPeriodInfo()
 {
-	if(PeriodSettingTrigger)
-	UE_LOG(LogTemp, Warning, TEXT("Period trueeeeeeeeeeeeeeeee"));
-    //항상 보간이끝난다음에 움직여야됨 안그럼 계산꼬임
-	//RemainDist = PeriodDist;
-	// 캐릭터의 앞 방향을 기반으로 이동 방향 설정 (Z축 제거)
 	FVector Forward = GetActorForwardVector();
 	Forward.Z = 0.0f;
 	ParryDirection = Forward.GetSafeNormal();
 	IsPeriod = true;
-	
-	
 }
 
 AC_Player::AC_Player()
@@ -271,20 +258,8 @@ void AC_Player::Tick(float DeltaTime)
 	//패링
 	if (IsPeriod && !bRotate)//보간이끝나고 정면을 바라봤을떄 패링이 진행되도록
 	{
-		//// 프레임당 이동할 거리 계산
-		//float DeltaMove = 5000 * DeltaTime;
-		//float MoveStep = FMath::Min(DeltaMove, RemainDist);
-		//// 이동 벡터 계산
-		//FVector MoveVec = ParryDirection * MoveStep;
-		//// 현재 위치 + 이동 벡터 적용
-		//AddActorWorldOffset(MoveVec, true); // true = collision 고려
-		//RemainDist -= MoveStep;
-		//if (RemainDist <= 0.0f)
-		//{
-		//	IsPeriod = false;
-		//	RemainDist = 0.0f;
-		//	// 패링 끝 처리 (상태 전환,애니메이션 등)
-		//}
+		SetPeriodInfo();
+		
 		remainDist = 0.f;
 		if (PeriodDist < 0.2f)//도착
 		{
@@ -334,6 +309,62 @@ void AC_Player::ClearMoveState()
 {
 	pathList.Empty();
 	CalMoveData();
+}
+
+void AC_Player::Set4_WayDirection(const FVector& mousePoint)
+{
+	FVector ToMouse = mousePoint - GetActorLocation();
+	ToMouse.Z = 0;
+	ToMouse.Normalize();
+
+	FVector Forward = GetActorForwardVector();
+	Forward.Z = 0;
+	Forward.Normalize();
+
+	// DotProduct는 두 벡터 사이의 각도 관계를 알 수 있음
+	float Dot = FVector::DotProduct(Forward, ToMouse);
+	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
+
+	// CrossProduct는 왼쪽 / 오른쪽 판별용으로 사용
+	float CrossZ = FVector::CrossProduct(Forward, ToMouse).Z;
+
+	E4WayDirection Direction;
+
+	if (AngleDegrees <= 45.0f)
+	{
+		Direction = E4WayDirection::Foward;
+	}
+	else if (AngleDegrees > 135.0f)
+	{
+		Direction = E4WayDirection::Back;
+	}
+	else
+	{
+		// 90도 ±45도는 옆방향, CrossZ로 왼/오 구분
+		if (CrossZ > 0)
+		{
+			Direction = E4WayDirection::Left;
+		}
+		else
+		{
+			Direction = E4WayDirection::Right;
+		}
+	}
+
+	// 로그 출력 (테스트용)
+	FString DirString;
+	switch (Direction)
+	{
+	case E4WayDirection::Foward: DirString = TEXT("Forward"); break;
+	case E4WayDirection::Back:   DirString = TEXT("Back"); break;
+	case E4WayDirection::Left:   DirString = TEXT("Left"); break;
+	case E4WayDirection::Right:  DirString = TEXT("Right"); break;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("4-Way Direction: %s"), *DirString);
+
+	// 여기에 멤버 변수 세팅 또는 추가 로직
+	// Direction; // 디렉션을 저장하든 넘겨주든하면됨.
 }
 
 

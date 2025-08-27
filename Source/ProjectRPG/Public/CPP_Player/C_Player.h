@@ -15,8 +15,16 @@ UENUM()
 enum class ERunningSystemState : uint8
 {
 	Idle,       // 입력 대기
+	Down,       // 다운
 	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
 	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
+};
+enum class E4WayDirection : uint8
+{
+	Foward,
+	Back,
+	Left,
+	Right
 };
 /**
  * 
@@ -53,10 +61,8 @@ private:
 	//패링
 	FVector MousePointDir{};
 	bool IsPeriod = false;
-	float RemainDist = 0.f;
 	float PeriodDist = 300.f;
 	FVector ParryDirection;
-	bool PeriodSettingTrigger = false;
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
@@ -71,6 +77,7 @@ private:
 	void CalMoveData();
 	void RunningSystemManager();
 	void ClearMoveState();
+	void Set4_WayDirection(const FVector& mousePoint);
 
 public:
 	AC_Player();
@@ -90,7 +97,8 @@ public:
 
 
 	
-	void Period();
+	void SetPeriodInfo();
+	
 	
 
 	

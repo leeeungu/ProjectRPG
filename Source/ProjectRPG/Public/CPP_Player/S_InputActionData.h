@@ -39,5 +39,8 @@ public:
     EInputStateType InputStateType{};
     UPROPERTY(BlueprintReadWrite)
     FVector TargetPoint{};
+
+    UPROPERTY(BlueprintReadWrite)
+    float Timestamp = 0.f;
     
 };
