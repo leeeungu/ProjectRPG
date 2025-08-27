@@ -138,13 +138,17 @@ void AC_Player::RunningSystemManager()
 
 void AC_Player::Period()
 {
-	if (bRotate) return;//항상 보간이끝난다음에 움직여야됨 안그럼 계산꼬임
-	RemainDist = PeriodDist;
+	if(PeriodSettingTrigger)
+	UE_LOG(LogTemp, Warning, TEXT("Period trueeeeeeeeeeeeeeeee"));
+    //항상 보간이끝난다음에 움직여야됨 안그럼 계산꼬임
+	//RemainDist = PeriodDist;
 	// 캐릭터의 앞 방향을 기반으로 이동 방향 설정 (Z축 제거)
 	FVector Forward = GetActorForwardVector();
 	Forward.Z = 0.0f;
 	ParryDirection = Forward.GetSafeNormal();
 	IsPeriod = true;
+	
+	
 }
 
 AC_Player::AC_Player()
@@ -265,21 +269,35 @@ void AC_Player::Tick(float DeltaTime)
 		}
 	}
 	//패링
-	if (IsPeriod)//보간이끝나고 정면을 바라봤을떄 패링이 진행되도록
+	if (IsPeriod && !bRotate)//보간이끝나고 정면을 바라봤을떄 패링이 진행되도록
 	{
-		// 프레임당 이동할 거리 계산
-		float DeltaMove = 5000 * DeltaTime;
-		float MoveStep = FMath::Min(DeltaMove, RemainDist);
-		// 이동 벡터 계산
-		FVector MoveVec = ParryDirection * MoveStep;
-		// 현재 위치 + 이동 벡터 적용
-		AddActorWorldOffset(MoveVec, true); // true = collision 고려
-		RemainDist -= MoveStep;
-		if (RemainDist <= 0.0f)
+		//// 프레임당 이동할 거리 계산
+		//float DeltaMove = 5000 * DeltaTime;
+		//float MoveStep = FMath::Min(DeltaMove, RemainDist);
+		//// 이동 벡터 계산
+		//FVector MoveVec = ParryDirection * MoveStep;
+		//// 현재 위치 + 이동 벡터 적용
+		//AddActorWorldOffset(MoveVec, true); // true = collision 고려
+		//RemainDist -= MoveStep;
+		//if (RemainDist <= 0.0f)
+		//{
+		//	IsPeriod = false;
+		//	RemainDist = 0.0f;
+		//	// 패링 끝 처리 (상태 전환,애니메이션 등)
+		//}
+		remainDist = 0.f;
+		if (PeriodDist < 0.2f)//도착
 		{
+			PeriodDist = 300.f;
 			IsPeriod = false;
-			RemainDist = 0.0f;
-			// 패링 끝 처리 (상태 전환,애니메이션 등)
+		}
+		else
+		{
+			float speed = 50.f;
+			FVector MoveVec = ParryDirection * speed;
+			AddActorWorldOffset(MoveVec, true);
+			PeriodDist -= MoveVec.Length();
+			UE_LOG(LogTemp, Warning, TEXT("Period true"));
 		}
 	}
 	RunningSystemManager();

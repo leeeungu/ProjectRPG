@@ -54,8 +54,9 @@ private:
 	FVector MousePointDir{};
 	bool IsPeriod = false;
 	float RemainDist = 0.f;
-	float PeriodDist = 1200.f;
+	float PeriodDist = 300.f;
 	FVector ParryDirection;
+	bool PeriodSettingTrigger = false;
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
@@ -81,6 +82,12 @@ public:
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
 	void SetCanMove() { bCanMove = true; }//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화)
+
+	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
+	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//러닝스테이트 세팅
+	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
+	ERunningSystemState GetRunningSystemState() { return RunningState; }
+
 
 	
 	void Period();

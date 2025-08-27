@@ -7,6 +7,11 @@
 
 AC_RPGGameMode::AC_RPGGameMode()
 {
-	DefaultPawnClass = AC_Player::StaticClass();
+	//DefaultPawnClass = AC_Player::StaticClass();
+    static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/RPG_Player/BP_Player.BP_Player_C"));
+    if (PlayerPawnBPClass.Class != nullptr)
+    {
+        DefaultPawnClass = PlayerPawnBPClass.Class;
+    }
 	PlayerControllerClass = AC_PlayerController::StaticClass();
 }
