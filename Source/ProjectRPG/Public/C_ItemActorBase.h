@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Item/Interface/C_ItemToolTipInterface.h"
 #include "C_ItemActorBase.generated.h"
 
 UCLASS()
-class PROJECTRPG_API AC_ItemActorBase : public AActor
+class PROJECTRPG_API AC_ItemActorBase : public AActor, public IC_ItemToolTipInterface
 {
 	GENERATED_BODY()
 protected:
@@ -44,6 +45,11 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void setTargetActor(AActor* pTargetActor) { m_pTargetActor = pTargetActor; }
-protected:
 
+public:
+	// IC_ItemToolTipInterface을(를) 통해 상속됨
+	virtual FText getItemName_Implementation() const override;
+	virtual FText getItemDesc_Implementation() const override;
+
+protected:
 };

@@ -1,7 +1,6 @@
 ﻿#include "C_InventoryComponent.h"
-#include <map>
-#include <queue>
 #include <C_GameAlertSubsystem.h>
+#include "C_ItemActorBase.h"
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
@@ -259,6 +258,19 @@ void UC_InventoryComponent::setInventorySlotData(int nY, int nX, FS_InventorySlo
 		return;
 	int& sCount = m_mapItemCount.FindOrAdd(sData.nItemID);
 	sCount += sData.nItemCount;
+}
+
+bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
+{
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData)
+		return false;
+	AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+	if (pItem && pItem->useItemActor())
+	{
+		return removeItemAtSlot(nY, nX, nCount);
+	}
+	return false;
 }
 
 void UC_InventoryComponent::BeginPlay()
