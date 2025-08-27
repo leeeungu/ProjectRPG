@@ -68,7 +68,6 @@ private:
 	FQuat TargetRotationQuat;                 
 	float RotateInterpSpeed = 20.0f;     
 
-	//bool bRunningSystemOpen = true;//기본값 true 항시열려있음
 
 protected:
 	UFUNCTION()
@@ -84,11 +83,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void OnMoveToPosPlayer(FVector pos);//외부에서도 호출해서 pos값을넣어주면 해당위치로이동함.
-	//void SetMousePointDir(FVector pos);
 	FVector GetMousePointDir();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
-	void SetCanMove() { bCanMove = true; }//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화)
+	void SetCanMove() { bCanMove = true; }
+	//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화) 몽타주가끝나야지 호출됨
+	//중간에 몽타주가 선입력으로 끝까지 못가고 다른몽타주로 블랜딩되면 그냥 return시켜져서 해당함수호출이안됨.
 
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//러닝스테이트 세팅

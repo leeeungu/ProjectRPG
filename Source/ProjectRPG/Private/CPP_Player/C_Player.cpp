@@ -69,6 +69,25 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 //매인로직 매니저
 void AC_Player::RunningSystemManager()
 {
+	//우선순위키데이터(현제 : 패링)
+	//패링은 RunningState에 영향을받지않음 즉 쿨타임을 제대로 설정하지않으면 무한으로 사용가능 
+	FInputActionData PriorityInputData{};
+	if (m_inputQueue->GetLastInputData(PriorityInputData))//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
+	{
+		//1. 패링 입력 최우선 처리
+		if (PriorityInputData.InputType == EInputType::Period)
+		{
+			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
+			//InterruptAllActions();   //진행중인 모든몽타주 stop
+			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+			bCanMove = false;
+			CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
+			IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+			m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
+			m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
+			return; // 여기서 바로 종료 (다른 입력 무시)
+		}
+	}
 	if (RunningState == ERunningSystemState::Idle)
 	{
 		FInputActionData CurrentInputData{};//비어있는 초기값.
@@ -88,15 +107,11 @@ void AC_Player::RunningSystemManager()
 				CalRotateData(CurrentInputData.TargetPoint);
 				//ExecuteSkill(CurrentInputData); ->실행함수
 				break;
-			case EInputType::Period:
-				RunningState = ERunningSystemState::Busy;
-				bCanMove = false;
-				CalRotateData(CurrentInputData.TargetPoint);//여기서 보간이먼저켜짐
-				IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-				m_skillCom->UsingSkill(CurrentInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-				break;
 			case EInputType::ChargeSkill:
 				RunningState = ERunningSystemState::Charging;
+				bCanMove = false;
+				CalRotateData(CurrentInputData.TargetPoint);
+				m_skillCom->UsingSkill(CurrentInputData.ActionName);
 				//StartChargeSkill(CurrentInputData);->차징시작함수(시간계산필요, 몽타주홀딩필요)
 				break;
 
@@ -119,11 +134,12 @@ void AC_Player::RunningSystemManager()
 				break;
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
 				//ImpactChargeSkill(ChargeInput); // 이때 몽타주에서 다시 Idle상태로 바꿔줘야함.
+				m_skillCom->UsingSkill(ChargeInput.ActionName);
 				break;
 			}
 		}
 	}
-	else if (RunningState == ERunningSystemState::Busy)
+	else if (RunningState == ERunningSystemState::Busy || RunningState == ERunningSystemState::Down)
 	{
 		return;//일반 리턴으로 처리(만약에 스킬사용중이나 차징스킬사용중에 뭔가 입력을 받아야한다면 그냥 바로이벤트로 처리(큐에 add X)
 	}
@@ -292,13 +308,6 @@ void AC_Player::OnMoveToPosPlayer(FVector pos)
 	}
 	CalMoveData();
 }
-
-//void AC_Player::SetMousePointDir(FVector pos)
-//{
-//	pos.Z = 0.0f;
-//	MousePointDir = pos.GetSafeNormal();
-//	UE_LOG(LogTemp, Warning, TEXT("SettinfComplete"));
-//}
 
 FVector AC_Player::GetMousePointDir()
 {

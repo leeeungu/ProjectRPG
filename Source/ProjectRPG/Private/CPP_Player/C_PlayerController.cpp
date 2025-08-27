@@ -79,15 +79,15 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(Q_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnQ_Action);
         }
-        if (R_Key)
+        if (F_Key)
         {
-            EnhancedInput->BindAction(R_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnR_ActionStarted);
-            EnhancedInput->BindAction(R_Key, ETriggerEvent::Triggered, this, &AC_PlayerController::OnR_ActionOngoing);
-            EnhancedInput->BindAction(R_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnR_ActionCanceld);
-            EnhancedInput->BindAction(R_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnR_ActionCompleted);\
+            EnhancedInput->BindAction(F_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnF_ActionStarted);
+            EnhancedInput->BindAction(F_Key, ETriggerEvent::Triggered, this, &AC_PlayerController::OnF_ActionOngoing);
+            EnhancedInput->BindAction(F_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnF_ActionCanceld);
+            EnhancedInput->BindAction(F_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnF_ActionCompleted);\
 
-            if (R_Key->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(R_Key->Triggers[0].Get()))//차징 스킬 가중치 테스트
-                UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(R_Key->Triggers[0].Get())->HoldTimeThreshold);
+            if (F_Key->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(F_Key->Triggers[0].Get()))//차징 스킬 가중치 테스트
+                UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(F_Key->Triggers[0].Get())->HoldTimeThreshold);
         }
         if (Number1_Key)
         {
@@ -148,53 +148,53 @@ void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
     }
 }
 //R스킬(차징스킬)
-void AC_PlayerController::OnR_ActionStarted(const FInputActionValue& Value)
+void AC_PlayerController::OnF_ActionStarted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingSkill";
+    NewInputData.ActionName = "ChargingStartSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Started"));
+    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Started"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-void AC_PlayerController::OnR_ActionOngoing(const FInputActionValue& Value)
+void AC_PlayerController::OnF_ActionOngoing(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingSkill";
+    NewInputData.ActionName = "ChargingHoldingSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Held;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Ongoing"));
+    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Ongoing"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-void AC_PlayerController::OnR_ActionCanceld(const FInputActionValue& Value)
+void AC_PlayerController::OnF_ActionCanceld(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingSkill";
+    NewInputData.ActionName = "ChargingEndSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));//실제론 canceld지만 complete와 동일하게처리
+    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));//실제론 canceld지만 complete와 동일하게처리
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-void AC_PlayerController::OnR_ActionCompleted(const FInputActionValue& Value)
+void AC_PlayerController::OnF_ActionCompleted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingSkill";
+    NewInputData.ActionName = "ChargingEndSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] R Skill Triggered: Completed"));
+    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
@@ -282,12 +282,12 @@ AC_PlayerController::AC_PlayerController()
     {
         Q_Key = IA_QAction.Object;
     }
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RAction(
-        TEXT("/Game/RPG_Player/Input/Actions/R_Action.R_Action")
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(
+        TEXT("/Game/RPG_Player/Input/Actions/F_Action.F_Action")
     );
-    if (IA_RAction.Succeeded())
+    if (IA_FAction.Succeeded())
     {
-        R_Key = IA_RAction.Object;
+        F_Key = IA_FAction.Object;
     }
     //아이템
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(

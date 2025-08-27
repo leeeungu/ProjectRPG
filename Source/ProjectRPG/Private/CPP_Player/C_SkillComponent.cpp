@@ -7,6 +7,7 @@
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
 {
+	//Q스킬
 	PrimaryComponentTick.bCanEverTick = true;
 	FSkillData SkillNum01;
 	SkillNum01.SkillName = "S_01";
@@ -29,6 +30,19 @@ UC_SkillComponent::UC_SkillComponent()
 		Pering.SkillMontage = Peringobj.Object;
 	}
 	SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+
+	//F차징스킬(start)
+	FSkillData ChargingSkill_Start;
+	ChargingSkill_Start.SkillName = "ChargingStartSkill";
+	ChargingSkill_Start.Cooldown = 10.0f;
+	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Start.SpearSkill_08_Start"));
+	if (Chargingobj.Succeeded())
+	{
+		ChargingSkill_Start.SkillMontage = Chargingobj.Object;
+	}
+	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+
 }
 
 
@@ -54,6 +68,8 @@ void UC_SkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UC_SkillComponent::UsingSkill(FName skill_Key)
 {
+	UE_LOG(LogTemp, Warning, TEXT("UsingSkill called with %s, SkillMap.Num(): %d"),
+		*skill_Key.ToString(), SkillMap.Num());
 	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//스킬맵에 같은이름을가진게있다면 찿아서 Skill변수에 저장->이게 성공하면 true
 	{
 		//스킬은 존재하지만, `SkillMontage`가 설정되어 있지 않은 경우 실행 중단

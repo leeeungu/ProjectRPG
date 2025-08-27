@@ -55,7 +55,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Q_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* R_Key;
+	UInputAction* F_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number1_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -77,10 +77,10 @@ public:
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
 	void OnQ_Action(const FInputActionValue& Value);
-	void OnR_ActionStarted(const FInputActionValue& Value);
-	void OnR_ActionOngoing(const FInputActionValue& Value);
-	void OnR_ActionCanceld(const FInputActionValue& Value);
-	void OnR_ActionCompleted(const FInputActionValue& Value);
+	void OnF_ActionStarted(const FInputActionValue& Value);
+	void OnF_ActionOngoing(const FInputActionValue& Value);
+	void OnF_ActionCanceld(const FInputActionValue& Value);
+	void OnF_ActionCompleted(const FInputActionValue& Value);
 	void OnNumber1_Action(const FInputActionValue& Value);
 	void OnNumber2_Action(const FInputActionValue& Value);
 public:
