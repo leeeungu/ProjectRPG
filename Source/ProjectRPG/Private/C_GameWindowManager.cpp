@@ -8,7 +8,7 @@ UC_GameWindowManager::UC_GameWindowManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_Main.WBP_Main'
-	static ConstructorHelpers::FClassFinder< UC_MainWidget> WidgetClass(TEXT("/Game/UI/WBP_Main.WBP_Main"));
+	static ConstructorHelpers::FClassFinder< UC_MainWidget> WidgetClass(TEXT("/Game/UI/WBP_Main.WBP_Main_C"));
 	if (WidgetClass.Succeeded())
 	{
 		m_cMainWidget = WidgetClass.Class;
