@@ -10,6 +10,7 @@ class UC_InteractionComponent;
 class UCapsuleComponent;
 class ACharacter;
 class UArrowComponent;
+//enum class E_TrabelType : uint8;
 
 UCLASS(BlueprintType, Blueprintable)
 class PROJECTRPG_API AC_AnimationInteraction : public AActor
