@@ -6,6 +6,7 @@
 #include <Kismet/KismetMathLibrary.h>
 #include <NavigationSystem.h>
 #include <NavigationPath.h>
+#include "CPP_Player/C_Player.h"
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
@@ -58,22 +59,14 @@ void AC_AnimationInteraction::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
 
-	if (!m_arrLocations.IsValidIndex(nIndex) || !m_pDetector)
+	if (!m_pDetector || !m_pDetector)
 		return;
-
-	FVector Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
-	Dir.Z = 0.0f;
-	Dir.Normalize();
-	m_pDetector->AddMovementInput(Dir);
-	Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
-	Dir.Z = 0.0f;
-	if (Dir.Length() < 15.0f)
+	FVector Location = m_pDetector->GetActorLocation();
+	if (FVector::Dist2D(Location, m_TargetLocations) < 15.0f)
 	{
-		nIndex++;
-		if (!m_arrLocations.IsValidIndex(nIndex))
-		{
-			StartAnimation();
-		}
+		AC_Player* pPlayer = Cast<AC_Player>(m_pDetector);
+		pPlayer->OnMoveToPosPlayer(Location);
+		StartAnimation();
 	}
 }
 
@@ -94,18 +87,14 @@ void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 {
 	if (!pDetectedActor || m_eStartType == E_TrabelType::E_NONE || m_bPlay)
 		return;
-	m_pDetector = Cast<ACharacter>(pDetectedActor);
+	AC_Player* pPlayer = Cast<AC_Player>(pDetectedActor);
+	m_pDetector = pPlayer;
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
-	if (!m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
+	if (!pPlayer || !m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
 		return;
-
-	UNavigationPath* pPath = UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), m_pDetector->GetActorLocation(), m_pStartDirection->GetComponentLocation());
-	if (pPath && pPath->IsValid() && pPath->PathPoints.Num() > 1)
-	{
-		SetActorTickEnabled(true);
-		m_arrLocations = pPath->PathPoints;
-		nIndex = 0;
-	}
+	pPlayer->OnMoveToPosPlayer(m_pStartDirection->GetComponentLocation());
+	m_TargetLocations = m_pStartDirection->GetComponentLocation();
+	SetActorTickEnabled(true);
 }
 
 void AC_AnimationInteraction::StartAnimation()

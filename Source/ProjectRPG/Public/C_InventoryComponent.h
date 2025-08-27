@@ -135,6 +135,10 @@ public:
 	FS_InventorySlot* getInventorySlotData(int nY, int nX);
 	int getArrayIndex(int nY, int nX) const;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+
+	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent")
+	bool useItemAtSlot(int nY, int nX, int nCount);
 protected:
 	virtual void BeginPlay() override;
 
