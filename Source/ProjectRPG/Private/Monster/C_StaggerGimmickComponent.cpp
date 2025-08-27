@@ -10,17 +10,15 @@ bool UC_StaggerGimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	if (!Super::canGimmickStart(fHp, fMaxHp))
 		return false;
 
-	if (m_fTriggerHp <= (fHp / fMaxHp) * 100.f)
-		return true;
 
-	return false;
+	return true;
 }
 
 void UC_StaggerGimmickComponent::excuteGimmick()
 {
 	Super::excuteGimmick();
 
-	UE_LOG(C_StaggerGimmickComponent, Warning, TEXT("excute Gimmick!!!!!"));
+	UE_LOG(C_StaggerGimmickComponent, Error, TEXT("excute Gimmick!!!!!"));
 }
 
 UC_StaggerGimmickComponent::UC_StaggerGimmickComponent()

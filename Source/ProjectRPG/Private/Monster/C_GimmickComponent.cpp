@@ -4,12 +4,25 @@
 #include "Monster/C_GimmickComponent.h"
 
 
-
+DEFINE_LOG_CATEGORY_STATIC(C_GimmickGimmickComponent, Log, All);
 
 bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
-	if (!m_bGimmickPlaying)
+	if (m_bGimmickPlaying)
+		return false;
+
+	float fHpRatio = (fHp / fMaxHp) * 100.f;
+	
+	if (fHpRatio <= m_fTriggerHp)
+	{
+		UE_LOG(C_GimmickGimmickComponent, Error, TEXT("HP: [%s] %.1f / %.1f , Trigger: %.1f"),*this->GetName(), fHp, fMaxHp, m_fTriggerHp);
 		return true;
+	}
+		
+	/*
+	* 현재 기믹이 실행중이면 false 반환
+	* 몬스터의 hp 비율이 트리거hp보다 작거나 같으면 true를 반환
+	*/
 
 
 	return false;
@@ -38,7 +51,7 @@ void UC_GimmickComponent::BeginPlay()
 void UC_GimmickComponent::excuteGimmick()
 {
 	m_bGimmickPlaying = true;
-	updateGimmickBool();
+
 
 }
 
@@ -46,17 +59,8 @@ bool UC_GimmickComponent::endGimmick()
 {
 	m_bGimmickPlaying = false;
 
-	updateGimmickBool();
-
-
-	SetComponentTickEnabled(false);
 
 	return false;
-}
-
-void UC_GimmickComponent::updateGimmickBool()
-{
-	m_pBBcom->SetValueAsBool(AC_MonsterAiController::IsGimmickPlayingKey, m_bGimmickPlaying);
 }
 
 

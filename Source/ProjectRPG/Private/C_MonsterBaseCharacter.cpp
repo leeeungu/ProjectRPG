@@ -12,7 +12,7 @@
 #include "AIController.h"
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
-#include "../Public/Monster/C_GimmickComponent.h"
+#include "../Public/Monster/C_StaggerGimmickComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
@@ -60,11 +60,6 @@ void AC_MonsterBaseCharacter::stopAi()
 			pBtComp->StopTree(EBTStopMode::Safe);
 		}
 	}
-}
-
-const TArray<UC_GimmickComponent*>& AC_MonsterBaseCharacter::getGimmickList() const
-{
-	return m_arrGimmickList;
 }
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
@@ -173,7 +168,6 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	if (m_bIsAttacking)
 		return;
 
-
 	m_bIsAttacking = true;
 
 	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
@@ -202,6 +196,11 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 		&AC_MonsterBaseCharacter::onAttackEnd,fAnimDuration, false);
 
 	sPattern.LastUsedTime = GetWorld()->GetTimeSeconds();
+}
+
+void AC_MonsterBaseCharacter::playStaggerGimmick()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Start!!!!!!!!!!"));
 }
 
 float AC_MonsterBaseCharacter::getDistanceToTarget() const
@@ -234,6 +233,15 @@ void AC_MonsterBaseCharacter::BeginPlay()
 	{
 		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
+		m_pStaggerGimmickComp = FindComponentByClass<UC_StaggerGimmickComponent>();
+
+
+		if (m_pStaggerGimmickComp)
+		{
+			m_pStaggerGimmickComp->m_onStaggerGimmick.AddDynamic(this, &AC_MonsterBaseCharacter::playStaggerGimmick);
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Bind!!!!!!!!!!"));
+		}
+
 		if (m_pStaggerComp)
 		{
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
@@ -252,11 +260,10 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
 
-		GetComponents<UC_GimmickComponent>(m_arrGimmickList);
-
 	}
 
 	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
+
 }
 
 void AC_MonsterBaseCharacter::Destroyed()

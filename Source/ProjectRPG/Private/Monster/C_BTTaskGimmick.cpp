@@ -14,20 +14,10 @@ EBTNodeResult::Type UC_BTTaskGimmick::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	if (!pMonster)
 		return EBTNodeResult::Failed;
 
-	float fHp = pMonster->getHp();
-	float fMaxHp = pMonster->getMaxHp();
 
-	for (UC_GimmickComponent* pGimmick : pMonster->getGimmickList())
-	{
-		if (pGimmick && pGimmick->canGimmickStart(fHp, fMaxHp))
-		{
-			pGimmick->excuteGimmick();
+    float fHp = pMonster->getHp();
+    float fMaxHp = pMonster->getMaxHp();
 
-			return EBTNodeResult::Succeeded;
-		}
-	}
-
-	
 
 	return EBTNodeResult::Failed;
 }

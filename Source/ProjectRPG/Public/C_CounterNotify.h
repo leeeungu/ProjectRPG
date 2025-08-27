@@ -20,6 +20,6 @@ private:
 
 public:
 
-	virtual void Notify(USkeletalMeshComponent* skMeshCom, UAnimSequenceBase* Animation) override;
+	virtual void Notify(USkeletalMeshComponent* skMeshCom, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 	
 };

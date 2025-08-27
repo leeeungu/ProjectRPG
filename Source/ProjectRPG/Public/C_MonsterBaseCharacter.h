@@ -62,7 +62,7 @@ private:
 	UAnimMontage* m_pStaggerMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Gimmick")
-	class UC_GimmickComponent* m_pGimmickComp;
+	class UC_StaggerGimmickComponent* m_pStaggerGimmickComp;
 
 	UPROPERTY()
 	class UC_StaggerComponent* m_pStaggerComp;
@@ -72,7 +72,6 @@ private:
 
 	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
-
 
 	bool m_bIsAttacking = false;
 
@@ -85,8 +84,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Rank")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
-	UPROPERTY()
-	TArray<class UC_GimmickComponent*> m_arrGimmickList;
+	
 
 private:
 	float getDistanceToTarget() const;
@@ -109,8 +107,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
-	const TArray<UC_GimmickComponent*>& getGimmickList() const;
-
 	/*
 	* 전투 관련
 	*/
@@ -120,6 +116,9 @@ public:
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
 
 	void playPattern(int32 nPatternIndex);
+
+	UFUNCTION()
+	void playStaggerGimmick();
 
 	bool getIsAttacking() const;
 
