@@ -18,6 +18,17 @@ UC_SkillComponent::UC_SkillComponent()
 		SkillNum01.SkillMontage = skill1obj.Object;
 	}
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+	//패링
+	FSkillData Pering;
+	Pering.SkillName = "Period";
+	Pering.Cooldown = 5.0f;
+	Pering.AttackPowerMultiplier = 0.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
+	if (skill1obj.Succeeded())
+	{
+		Pering.SkillMontage = Peringobj.Object;
+	}
+	SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
 }
 
 

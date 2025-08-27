@@ -50,13 +50,16 @@ private:
 	//Path값
 	TArray<FVector> pathList{};
 	int curPathPos = 1;
-
+	//패링
 	FVector MousePointDir{};
 	bool IsPeriod = false;
+	float RemainDist = 0.f;
+	float PeriodDist = 1200.f;
+	FVector ParryDirection;
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
-	float RotateInterpSpeed = 10.0f;     
+	float RotateInterpSpeed = 20.0f;     
 
 	//bool bRunningSystemOpen = true;//기본값 true 항시열려있음
 
