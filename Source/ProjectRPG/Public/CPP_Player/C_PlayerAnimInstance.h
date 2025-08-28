@@ -7,6 +7,7 @@
 #include "C_PlayerAnimInstance.generated.h"
 DECLARE_MULTICAST_DELEGATE(FChangeRunningStateDelegate);
 DECLARE_MULTICAST_DELEGATE(FSetPlayerMovePointEnabled);//player의 bCanMove 활성화->MoveToPos사용가능상태로 변경
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChargingReadyChanged, bool);//플레이어의 bIsReady값 변경->Charging상태의 플레그를 변경시킴으로 로직동작
 
 /**
  * 
@@ -26,5 +27,6 @@ public:
 	void OnChangeRunningState();
 	FSetPlayerMovePointEnabled SetPlayerMovePointEnabled;
 	void OnEndMontage(UAnimMontage* Montage, bool bInterrupted);//end몽타주 바인딩용 함수(매개변수는 맞춰준것뿐)
+	FOnChargingReadyChanged ChargingReadyChanged;
 
 };

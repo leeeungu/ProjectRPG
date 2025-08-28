@@ -42,6 +42,7 @@ void UC_PlayerAnimInstance::OnChangeRunningState()
 
 void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupted)
 {
+    //UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s"), *Montage->GetName());
     if (bInterrupted)
     {
         // 강제 중단된 경우 → 이동 가능 상태 풀지 않음
@@ -49,6 +50,15 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
         return;//리턴을 때리면서 브로드캐스트 실행하지않음으로 여전히 이동불가상태로 남아있게됨.
         //선입력시스템으로 애니메이션이 전부끝나지않고 다른애니메이션이 호출되도 이로직으로 넘어오게됨.
         //*일단 패링은 스킬중간에쓰면 Interrupted로 처리가되는데 어차피 패링로직에 bCanMove 다시 false로 설정되서 추가 이동은 못하게됨.
+        //패링으로 강제종료되도 어차피 패링애니메이션이 끝나면 idle로 돌아감
+        //*그럼 몬스터공격을맞아서 넘어지게되면? 
+    }
+    if (Montage && Montage->GetName().Contains("SpearSkill_08_Start"))
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging Ready!"));
+        // 플레이어 참조 통해서 플래그 ON
+        ChargingReadyChanged.Broadcast(true);
+        return;
     }
     SetPlayerMovePointEnabled.Broadcast();
 }

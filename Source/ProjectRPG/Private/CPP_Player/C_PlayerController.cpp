@@ -171,33 +171,33 @@ void AC_PlayerController::OnF_ActionOngoing(const FInputActionValue& Value)
     UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Ongoing"));
     if (InputQueueSystem)
     {
-        InputQueueSystem->PushInput(NewInputData);
+        InputQueueSystem->PushInput_Charging(NewInputData);
     }
 }
 void AC_PlayerController::OnF_ActionCanceld(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingEndSkill";
+    NewInputData.ActionName = "ChargingEndCancelSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));//실제론 canceld지만 complete와 동일하게처리
+    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Cancel"));//실제론 canceld지만 complete와 동일하게처리
     if (InputQueueSystem)
     {
-        InputQueueSystem->PushInput(NewInputData);
+        InputQueueSystem->PushInput_Charging(NewInputData);
     }
 }
 void AC_PlayerController::OnF_ActionCompleted(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "ChargingEndSkill";
+    NewInputData.ActionName = "ChargingEndCompleteSkill";
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
     UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));
     if (InputQueueSystem)
     {
-        InputQueueSystem->PushInput(NewInputData);
+        InputQueueSystem->PushInput_Charging(NewInputData);
     }
 }
 //아이템(즉발)->바로함수이벤트처리

@@ -13,6 +13,11 @@
 #include "CPP_Player/S_InputActionData.h"
 
 
+void AC_Player::HandleChargingReady(bool bIsReady)
+{
+	bChargingReady = bIsReady;
+}
+
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
@@ -80,6 +85,7 @@ void AC_Player::RunningSystemManager()
 			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
 			//InterruptAllActions();   //진행중인 모든몽타주 stop
 			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+			bHoldSkillPlayed = false;
 			bCanMove = false;
 			CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
 			IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
@@ -111,6 +117,7 @@ void AC_Player::RunningSystemManager()
 				RunningState = ERunningSystemState::Charging;
 				bCanMove = false;
 				CalRotateData(CurrentInputData.TargetPoint);
+				m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
 				m_skillCom->UsingSkill(CurrentInputData.ActionName);
 				//StartChargeSkill(CurrentInputData);->차징시작함수(시간계산필요, 몽타주홀딩필요)
 				break;
@@ -122,19 +129,32 @@ void AC_Player::RunningSystemManager()
 	}
 	else if (RunningState == ERunningSystemState::Charging)//이미idle에서 차징스타트로 상태변경되서넘어옴
 	{
+		if (!bChargingReady)
+		{
+			// 스타트 몽타주 끝나기 전에는 아무 입력도 처리하지 않음
+			return;
+		}
 		// 차징 스킬 입력만 허용 -> 나머지 무시
 		FInputActionData ChargeInput{};
-		if (m_inputQueue->GetLastInputData(ChargeInput))//계속 해당차징스킬데이터입력이들어올것임(인덱스번호든, Trigged이든)
+		if (m_inputQueue->GetLastChargingInputData(ChargeInput))//계속 해당차징스킬데이터입력이들어올것임(인덱스번호든, Trigged이든)
 		{
 			//같은 인풋타입은 charing이지만 이미 누른순간 스타트는 idle상태에서 인식하고 넘어왔기에 이제 남은건 (Held,Canceld,Completed)
 			switch (ChargeInput.InputStateType)
 			{
 			case EInputStateType::Held:
-				//UpdateChargeSkill(ChargeInput); // Triggered 단계 처리,누르고있는중
+				if (!bHoldSkillPlayed)
+				{
+					m_skillCom->UsingSkill(ChargeInput.ActionName);
+					bHoldSkillPlayed = true; // 이후에는 무시
+				}
 				break;
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
 				//ImpactChargeSkill(ChargeInput); // 이때 몽타주에서 다시 Idle상태로 바꿔줘야함.
 				m_skillCom->UsingSkill(ChargeInput.ActionName);
+				UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging End!"));
+				bHoldSkillPlayed = false;
+				bChargingReady = false; // 플래그 초기화
+				m_inputQueue->ClearChargingQueueList();//중간에 홀딩때 패링같은걸써서 큐클리어못하면? 
 				break;
 			}
 		}
@@ -200,8 +220,10 @@ void AC_Player::BeginPlay()
 			// 여기서 델리게이트 바인딩
 			myAnimInstance->ChangeRunningState.RemoveAll(this);//안전장치(예를들어 캐릭터가 죽고 다시살아날떄.
 			myAnimInstance->SetPlayerMovePointEnabled.RemoveAll(this);
+			myAnimInstance->ChargingReadyChanged.RemoveAll(this);
 			myAnimInstance->ChangeRunningState.AddUObject(this, &AC_Player::HandleChangeRunningState);
 			myAnimInstance->SetPlayerMovePointEnabled.AddUObject(this, &AC_Player::SetCanMove);
+			myAnimInstance->ChargingReadyChanged.AddUObject(this, &AC_Player::HandleChargingReady);
 			//이제 노티파이발생시 애님인스턴스에서 브로드캐스트로 플레이어에게 전달
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
 		}
@@ -212,6 +234,37 @@ void AC_Player::BeginPlay()
 void AC_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FString StateName;
+
+	switch (RunningState)
+	{
+	case ERunningSystemState::Idle:
+		StateName = TEXT("Idle");
+		break;
+	case ERunningSystemState::Busy:
+		StateName = TEXT("Busy");
+		break;
+	case ERunningSystemState::Charging:
+		StateName = TEXT("Charging");
+		break;
+	case ERunningSystemState::Down:
+		StateName = TEXT("Down");
+		break;
+	default:
+		StateName = TEXT("Unknown");
+		break;
+	}
+
+	// 화면 좌측 상단에 텍스트 출력 (Key: -1 은 항상 새로 출력됨)
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			0.f,                     // Duration: 0초면 매 프레임 다시 출력
+			FColor::Green,
+			FString::Printf(TEXT("[Player State] RunningState: %s"), *StateName)
+		);
+	}
 
 	//if (isBattle)
 	//{

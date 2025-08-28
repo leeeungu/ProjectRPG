@@ -14,6 +14,7 @@ UC_InputQueueComponent::UC_InputQueueComponent() : UActorComponent{}
 	//PrimaryComponentTick.bStartWithTickEnabled = false;
 	//SetComponentTickEnabled(false);
 	InputQueue.Reserve(MaxQueueSize);
+	ChargingQueue.Reserve(MaxQueueSize);
 	// ...
 }
 
@@ -28,9 +29,20 @@ void UC_InputQueueComponent::PushInput(const FInputActionData& NewInput)
 	FInputActionData TimedInput = NewInput;
 	TimedInput.Timestamp = GetWorld()->GetTimeSeconds();
 	InputQueue.Add(TimedInput);
-	UE_LOG(LogTemp, Warning, TEXT("Pushed input at time: %f"), GetWorld()->GetTimeSeconds());
 	SetComponentTickEnabled(true);
 	//InputQueue.Add(NewInput);
+}
+
+void UC_InputQueueComponent::PushInput_Charging(const FInputActionData& NewInput)
+{
+	if (NewInput.InputType == EInputType::None) return;
+	if (InputQueue.Num() >= MaxQueueSize)
+	{
+		InputQueue.RemoveAt(0);
+	}
+	ChargingQueue.Add(NewInput);
+	SetComponentTickEnabled(true);
+
 }
 
 bool UC_InputQueueComponent::GetLastInputData(FInputActionData& OutInput) const
@@ -43,9 +55,24 @@ bool UC_InputQueueComponent::GetLastInputData(FInputActionData& OutInput) const
 	return false;
 }
 
+bool UC_InputQueueComponent::GetLastChargingInputData(FInputActionData& OutInput) const
+{
+	if (ChargingQueue.Num() > 0)
+	{
+		OutInput = ChargingQueue.Last();
+		return true;
+	}
+	return false;
+}
+
 void UC_InputQueueComponent::ClearQueueList()
 {
 	InputQueue.Empty();
+}
+
+void UC_InputQueueComponent::ClearChargingQueueList()
+{
+	ChargingQueue.Empty();
 }
 
 

@@ -68,6 +68,11 @@ private:
 	FQuat TargetRotationQuat;                 
 	float RotateInterpSpeed = 20.0f;     
 
+	//Â÷Â¡½ºÅ³
+	bool bHoldSkillPlayed = false;
+	bool bChargingReady = false;
+public:
+	void HandleChargingReady(bool bIsReady);
 
 protected:
 	UFUNCTION()
