@@ -13,6 +13,8 @@
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
 #include "../Public/Monster/C_StaggerGimmickComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Public/Monster/C_GimmickStartPos.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
@@ -27,6 +29,48 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 void AC_MonsterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+void AC_MonsterBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (m_eMonsterRank >= E_MonsterRank::Named)
+	{
+		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
+
+		m_pStaggerGimmickComp = FindComponentByClass<UC_StaggerGimmickComponent>();
+
+
+		if (m_pStaggerGimmickComp)
+		{
+			m_pStaggerGimmickComp->m_onStaggerGimmickStart.AddDynamic(this, &AC_MonsterBaseCharacter::playStaggerGimmick);
+			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.AddDynamic(this, &AC_MonsterBaseCharacter::endStaggerGimmick);
+
+		}
+
+		if (m_pStaggerComp)
+		{
+			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
+
+			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
+		}
+
+		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
+
+		if (m_pCounterComp)
+		{
+			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
+
+			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
+		}
+
+		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
+
+	}
+
+	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 
 }
 
@@ -198,10 +242,6 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	sPattern.LastUsedTime = GetWorld()->GetTimeSeconds();
 }
 
-void AC_MonsterBaseCharacter::playStaggerGimmick()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Start!!!!!!!!!!"));
-}
 
 float AC_MonsterBaseCharacter::getDistanceToTarget() const
 {
@@ -225,46 +265,84 @@ void AC_MonsterBaseCharacter::onAttackEnd()
 	m_bIsAttacking = false;
 }
 
-void AC_MonsterBaseCharacter::BeginPlay()
+void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted)
 {
-	Super::BeginPlay();
+	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
 
-	if (m_eMonsterRank >= E_MonsterRank::Named)
+	moveToGimmick();
+}
+
+FVector AC_MonsterBaseCharacter::getGimmickPos()
+{
+	TArray<AActor*> arrFound{};
+	FVector vGimmickPos{};
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+
+	if (arrFound.Num() > 0)
 	{
-		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
+		AActor* pFoundActor = arrFound[0];
+		FVector vFoundPos = pFoundActor->GetActorLocation();
+		vGimmickPos = vFoundPos;
+	}
 
-		m_pStaggerGimmickComp = FindComponentByClass<UC_StaggerGimmickComponent>();
+	return vGimmickPos;
+}
 
+void AC_MonsterBaseCharacter::moveToGimmick()
+{
+	SetActorLocation(getGimmickPos());
+	SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
+	stopAi();
+}
+
+void AC_MonsterBaseCharacter::startGimmick()
+{
+	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
+
+	if (pAnim->IsAnyMontagePlaying())
+	{
+		pAnim->OnMontageEnded.AddDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("AnyMontagePlaying!!!!!!!!!!"));
+	}
+	else
+	{
+		moveToGimmick();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Start!!!!!!!!!!"));
+	}
+
+}
+
+void AC_MonsterBaseCharacter::playStaggerGimmick()
+{
+	startGimmick();
+
+	if (m_pStaggerComp)
+	{
+		float fKeepStagger = m_pStaggerComp->getCurrentStaggerPoint();
+		
 
 		if (m_pStaggerGimmickComp)
 		{
-			m_pStaggerGimmickComp->m_onStaggerGimmick.AddDynamic(this, &AC_MonsterBaseCharacter::playStaggerGimmick);
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Bind!!!!!!!!!!"));
+			float fGoalStagger = m_pStaggerGimmickComp->getGoalStagger();
+
+			m_pStaggerComp->setStaggerPoint(fGoalStagger);
 		}
-
-		if (m_pStaggerComp)
-		{
-			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
-
-			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
-		}
-
-		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
-
-		if (m_pCounterComp)
-		{
-			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
-
-			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
-		}
-
-		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
 
 	}
-
-	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
-
+	
 }
+
+
+void AC_MonsterBaseCharacter::endStaggerGimmick()
+{
+	if (m_pStaggerComp)
+	{
+		
+	}
+}
+
+
 
 void AC_MonsterBaseCharacter::Destroyed()
 {

@@ -17,6 +17,7 @@ private:
 
 protected:
 	bool m_bGimmickPlaying = false;
+	bool m_bSuccessGimmick = false;
 	float m_fTriggerHp = 0.f;
 	float m_fGimmickTime = 0.f;
 

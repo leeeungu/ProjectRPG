@@ -5,6 +5,11 @@
 
 DEFINE_LOG_CATEGORY_STATIC(C_StaggerGimmickComponent, Log, All);
 
+float UC_StaggerGimmickComponent::getGoalStagger() const
+{
+	return m_fGoalStagger;
+}
+
 bool UC_StaggerGimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
 	if (!Super::canGimmickStart(fHp, fMaxHp))
@@ -19,6 +24,18 @@ void UC_StaggerGimmickComponent::excuteGimmick()
 	Super::excuteGimmick();
 
 	UE_LOG(C_StaggerGimmickComponent, Error, TEXT("excute Gimmick!!!!!"));
+}
+
+bool UC_StaggerGimmickComponent::endGimmick()
+{
+	Super::endGimmick();
+
+	if (m_fGoalStagger >= 1.f)
+		m_bSuccessGimmick = false;
+	else
+		m_bSuccessGimmick = true;
+
+	return m_bSuccessGimmick;
 }
 
 UC_StaggerGimmickComponent::UC_StaggerGimmickComponent()

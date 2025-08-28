@@ -57,6 +57,8 @@ public:
 	void setStaggerPoint(float fStagger);
 	void setBreakDuration(float fDuration);
 
+	float getCurrentStaggerPoint() const;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

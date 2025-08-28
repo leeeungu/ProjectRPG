@@ -46,6 +46,11 @@ void UC_StaggerComponent::setBreakDuration(float fDuration)
 	m_fBrokenDuration = fDuration;
 }
 
+float UC_StaggerComponent::getCurrentStaggerPoint() const
+{
+	return m_fCurrentStagger;
+}
+
 void UC_StaggerComponent::recover()
 {
 	m_bIsBroken = false;

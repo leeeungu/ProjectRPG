@@ -75,6 +75,7 @@ private:
 
 	bool m_bIsAttacking = false;
 
+
 	FTimerHandle m_timeHandle;
 
 protected:
@@ -107,6 +108,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
+	UFUNCTION()
+	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);
+
 	/*
 	* 전투 관련
 	*/
@@ -116,9 +120,6 @@ public:
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
 
 	void playPattern(int32 nPatternIndex);
-
-	UFUNCTION()
-	void playStaggerGimmick();
 
 	bool getIsAttacking() const;
 
@@ -156,4 +157,24 @@ public:
 	void onDead();
 
 	virtual void Destroyed() override;
+
+	/*
+	*  기믹 관련
+	*/
+	FVector getGimmickPos();
+
+	void moveToGimmick();
+
+	void startGimmick();
+
+	UFUNCTION()
+	void playStaggerGimmick();
+
+
+	UFUNCTION()
+	void endStaggerGimmick();
+
+	
+
+	
 };
