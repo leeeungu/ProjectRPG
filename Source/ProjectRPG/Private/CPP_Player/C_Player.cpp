@@ -129,11 +129,11 @@ void AC_Player::RunningSystemManager()
 	}
 	else if (RunningState == ERunningSystemState::Charging)//이미idle에서 차징스타트로 상태변경되서넘어옴
 	{
-		if (!bChargingReady)
-		{
-			// 스타트 몽타주 끝나기 전에는 아무 입력도 처리하지 않음
-			return;
-		}
+		//if (!bChargingReady)
+		//{
+		//	// 스타트 몽타주 끝나기 전에는 아무 입력도 처리하지 않음
+		//	return;
+		//}
 		// 차징 스킬 입력만 허용 -> 나머지 무시
 		FInputActionData ChargeInput{};
 		if (m_inputQueue->GetLastChargingInputData(ChargeInput))//계속 해당차징스킬데이터입력이들어올것임(인덱스번호든, Trigged이든)
@@ -142,19 +142,24 @@ void AC_Player::RunningSystemManager()
 			switch (ChargeInput.InputStateType)
 			{
 			case EInputStateType::Held:
-				if (!bHoldSkillPlayed)
-				{
-					m_skillCom->UsingSkill(ChargeInput.ActionName);
-					bHoldSkillPlayed = true; // 이후에는 무시
-				}
+				//if (!bHoldSkillPlayed)
+				//{
+				//	m_skillCom->UsingSkill(ChargeInput.ActionName);
+				//	bHoldSkillPlayed = true; // 이후에는 무시
+				//}
+				//홀딩은 이미 애님인스턴스에서 루프중임
 				break;
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
-				//ImpactChargeSkill(ChargeInput); // 이때 몽타주에서 다시 Idle상태로 바꿔줘야함.
-				m_skillCom->UsingSkill(ChargeInput.ActionName);
-				UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging End!"));
-				bHoldSkillPlayed = false;
-				bChargingReady = false; // 플래그 초기화
-				m_inputQueue->ClearChargingQueueList();//중간에 홀딩때 패링같은걸써서 큐클리어못하면? 
+				//m_skillCom->UsingSkill(ChargeInput.ActionName);
+				//UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging End!"));
+				//bHoldSkillPlayed = false;
+				//bChargingReady = false; // 플래그 초기화
+				//m_inputQueue->ClearChargingQueueList();//중간에 홀딩때 패링같은걸써서 큐클리어못하면? 
+				m_inputQueue->ClearChargingQueueList();
+				if (m_skillCom)
+				{
+					m_skillCom->RequestJumpToSection(FName("Released"));
+				}
 				break;
 			}
 		}

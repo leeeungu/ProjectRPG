@@ -3,6 +3,8 @@
 
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_SkillData.h"
+#include "CPP_Player/C_PlayerAnimInstance.h"
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
@@ -36,7 +38,7 @@ UC_SkillComponent::UC_SkillComponent()
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 10.0f;
 	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Start.SpearSkill_08_Start"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Pull.SpearSkill_08_Pull"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
@@ -79,10 +81,25 @@ UC_SkillComponent::UC_SkillComponent()
 }
 
 
+void UC_SkillComponent::RequestJumpToSection(FName SectionName)
+{
+	if (CachedAnimInstance)
+	{
+		CachedAnimInstance->OnRequestJumpSection.Broadcast(SectionName);
+	}
+}
+
 // Called when the game starts
 void UC_SkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if (ACharacter* OwnerChar = Cast<ACharacter>(GetOwner()))
+	{
+		if (UC_PlayerAnimInstance* AnimInst = Cast<UC_PlayerAnimInstance>(OwnerChar->GetMesh()->GetAnimInstance()))
+		{
+			CachedAnimInstance = AnimInst;
+		}
+	}
 
 	// ...
 	
@@ -97,6 +114,19 @@ void UC_SkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UC_SkillComponent::InitializeComponent()
+{
+	/*Super::InitializeComponent();
+
+	if (ACharacter* OwnerChar = Cast<ACharacter>(GetOwner()))
+	{
+		if (UC_PlayerAnimInstance* AnimInst = Cast<UC_PlayerAnimInstance>(OwnerChar->GetMesh()->GetAnimInstance()))
+		{
+			CachedAnimInstance = AnimInst;
+		}
+	}*/
 }
 
 void UC_SkillComponent::UsingSkill(FName skill_Key)

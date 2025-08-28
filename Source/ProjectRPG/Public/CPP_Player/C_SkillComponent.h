@@ -24,6 +24,11 @@ public:
 	UC_SkillComponent();
 	UPROPERTY(BlueprintAssignable, Category = "Skill")
 	FOnSkillMontageRequested OnSkillMontageRequested;
+	//스킬컴포넌트에서 애님인스턴스 참조용 포인터
+	UPROPERTY()
+    class UC_PlayerAnimInstance* CachedAnimInstance;
+	UFUNCTION()
+	void RequestJumpToSection(FName SectionName);
 
 protected:
 	// Called when the game starts
@@ -32,6 +37,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void InitializeComponent() override;
 	void UsingSkill(FName skill_Key);
 
 		
