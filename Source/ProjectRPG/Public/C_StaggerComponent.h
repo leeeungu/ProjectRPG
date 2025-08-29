@@ -54,10 +54,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
 	bool isBroken();
 
+	void setMaxStaggerPoint(float fStagger);
 	void setStaggerPoint(float fStagger);
 	void setBreakDuration(float fDuration);
 
+	float getMaxStaggerPoint() const;
 	float getCurrentStaggerPoint() const;
+	float getCurrentBreakPoint() const;
 
 public:	
 	// Called every frame

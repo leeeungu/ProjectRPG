@@ -31,7 +31,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	virtual bool endGimmick();
+	virtual void endGimmick();
 
 public:	
 	// Called every frame
@@ -41,5 +41,9 @@ public:
 	virtual bool canGimmickStart(float fHp, float fMaxHp);
 
 	virtual void excuteGimmick();
+
+	float getGimmickTime() const;
+
+	bool IsPlayingGimmick();
 		
 };

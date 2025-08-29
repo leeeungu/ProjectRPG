@@ -61,6 +61,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Niagara")
+	UNiagaraSystem* m_pDangerPlace;
+
 	UPROPERTY(EditAnywhere, Category = "Gimmick")
 	class UC_StaggerGimmickComponent* m_pStaggerGimmickComp;
 
@@ -74,7 +77,11 @@ private:
 	class UC_CounterComponent* m_pCounterComp;
 
 	bool m_bIsAttacking = false;
+	bool m_bIsGimmickReady = false;
 
+	float m_fKeepMaxStagger = 0.0f;
+	float m_fKeepStagger = 0.0f;
+	float m_fKeepBreak = 0.0f;
 
 	FTimerHandle m_timeHandle;
 

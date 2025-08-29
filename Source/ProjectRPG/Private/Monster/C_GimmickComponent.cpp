@@ -55,12 +55,20 @@ void UC_GimmickComponent::excuteGimmick()
 
 }
 
-bool UC_GimmickComponent::endGimmick()
+float UC_GimmickComponent::getGimmickTime() const
+{
+	return m_fGimmickTime;
+}
+
+bool UC_GimmickComponent::IsPlayingGimmick()
+{
+	return m_bGimmickPlaying;
+}
+
+void UC_GimmickComponent::endGimmick()
 {
 	m_bGimmickPlaying = false;
 
-
-	return false;
 }
 
 

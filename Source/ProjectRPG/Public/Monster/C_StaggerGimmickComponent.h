@@ -19,6 +19,7 @@ class PROJECTRPG_API UC_StaggerGimmickComponent : public UC_GimmickComponent
 
 private:
 	float m_fGoalStagger = 200.f;
+	float m_fBrokenDuration = 5.f;
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
@@ -27,6 +28,7 @@ public:
 	FOnStaggerGimmickEnd m_onStaggerGimmickEnd;
 
 	float getGoalStagger() const;
+	float getBrokenDuration() const;
 
 
 protected:
@@ -34,7 +36,7 @@ protected:
 
 	virtual void excuteGimmick() override;
 
-	virtual bool endGimmick() override; 
+	virtual void endGimmick() override; 
 
 public:
 	UC_StaggerGimmickComponent();

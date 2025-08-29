@@ -125,6 +125,14 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+
+	if (m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
+	{
+		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
+		
+	}
+	
+	
 }
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
@@ -294,6 +302,7 @@ void AC_MonsterBaseCharacter::moveToGimmick()
 	SetActorLocation(getGimmickPos());
 	SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
 	stopAi();
+	m_bIsGimmickReady = true;
 }
 
 void AC_MonsterBaseCharacter::startGimmick()
@@ -317,19 +326,51 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 {
 	startGimmick();
 
+
+	/*
+	* 기믹 전용 무력화 수치와 그로기 시간을 지정
+	*/
+
 	if (m_pStaggerComp)
 	{
-		float fKeepStagger = m_pStaggerComp->getCurrentStaggerPoint();
-		
+		m_fKeepMaxStagger = m_pStaggerComp->getMaxStaggerPoint();
+		m_fKeepStagger = m_pStaggerComp->getCurrentStaggerPoint();
+		m_fKeepBreak = m_pStaggerComp->getCurrentBreakPoint();
 
 		if (m_pStaggerGimmickComp)
 		{
 			float fGoalStagger = m_pStaggerGimmickComp->getGoalStagger();
+			float fGoalBreak = m_pStaggerGimmickComp->getBrokenDuration();
 
-			m_pStaggerComp->setStaggerPoint(fGoalStagger);
+			m_pStaggerComp->setMaxStaggerPoint(fGoalStagger);
+			m_pStaggerComp->setBreakDuration(fGoalBreak);
 		}
 
 	}
+	UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_fKeepMaxStagger);
+	UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_fKeepStagger);
+
+	/*
+	* 무력화를 방해시킬 공격
+	*/
+
+	FVector vFowardOffset = GetActorForwardVector() * 500.f;
+	FVector vRightOffset = GetActorRightVector() * 500.f;
+	FVector vDecalLocation = vFowardOffset + GetActorLocation();
+	FVector vDecalLocation2 = vRightOffset + GetActorLocation();
+	vDecalLocation.Z = 0.1f;
+	vDecalLocation2.Z = 0.1f;
+
+	if (m_bIsGimmickReady)
+	{
+		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation,
+			FRotator(-90.f, 0.f, 0.f), 3.f, 1000.f);
+
+		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation2,
+			FRotator(-90.f, 0.f, 0.f), 3.f, 800.f);
+	}
+	
+
 	
 }
 
@@ -338,8 +379,25 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 {
 	if (m_pStaggerComp)
 	{
+		m_pStaggerComp->setMaxStaggerPoint(m_fKeepMaxStagger);
+		m_pStaggerComp->setStaggerPoint(m_fKeepStagger);
+		m_pStaggerComp->setBreakDuration(m_fKeepBreak);
+
+		m_fKeepMaxStagger = 0.0f;
+		m_fKeepStagger = 0.0f;
+		m_fKeepBreak = 0.0f;
+
+
+		UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_pStaggerComp->getMaxStaggerPoint());
+		UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_pStaggerComp->getCurrentStaggerPoint());
 		
 	}
+
+	/*
+	* 기믹 실패 처리
+	* 광역 높은 데미지 등
+	* 처리 후 AI 재가동 시키기
+	*/
 }
 
 
