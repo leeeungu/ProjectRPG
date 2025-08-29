@@ -11,19 +11,18 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_InputActionData.h"
+#include "CPP_Player/I_PlayerToAnimInstance.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 
-void AC_Player::HandleChargingReady(bool bIsReady)
-{
-	bChargingReady = bIsReady;
-}
+
 
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
+	
 }
 
 void AC_Player::CalMoveData()
@@ -74,7 +73,7 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	bRotate = true;
 }
 
-//매인로직 매니저
+//매인로직 매니저(지금 처음에 데이터를 그냥받는바람에 무제한입력이됨)
 void AC_Player::RunningSystemManager()
 {
 	//우선순위키데이터(현제 : 패링)
@@ -88,8 +87,11 @@ void AC_Player::RunningSystemManager()
 			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
 			//InterruptAllActions();   //진행중인 모든몽타주 stop
 			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
-			bHoldSkillPlayed = false;
 			bCanMove = false;
+			if (IsAttackMode)
+			{
+				AttackMode();
+			}
 			CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
 			IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
 			m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
@@ -107,6 +109,11 @@ void AC_Player::RunningSystemManager()
 			{
 			case EInputType::Skill:
 				RunningState = ERunningSystemState::Busy;
+				AttackMode();//스킬쓰면 어택킹모드진입
+				if (myAnimInterface)
+				{
+					myAnimInterface->SetAttackMode(true);
+				}
 				bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
 				CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
 				m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
@@ -118,6 +125,7 @@ void AC_Player::RunningSystemManager()
 				break;
 			case EInputType::ChargeSkill:
 				RunningState = ERunningSystemState::Charging;
+				AttackMode();//스킬쓰면 어택킹모드진입
 				bCanMove = false;
 				CalRotateData(CurrentInputData.TargetPoint);
 				m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
@@ -132,12 +140,6 @@ void AC_Player::RunningSystemManager()
 	}
 	else if (RunningState == ERunningSystemState::Charging)//이미idle에서 차징스타트로 상태변경되서넘어옴
 	{
-		//if (!bChargingReady)
-		//{
-		//	// 스타트 몽타주 끝나기 전에는 아무 입력도 처리하지 않음
-		//	return;
-		//}
-		// 차징 스킬 입력만 허용 -> 나머지 무시
 		FInputActionData ChargeInput{};
 		if (m_inputQueue->GetLastChargingInputData(ChargeInput))//계속 해당차징스킬데이터입력이들어올것임(인덱스번호든, Trigged이든)
 		{
@@ -145,24 +147,11 @@ void AC_Player::RunningSystemManager()
 			switch (ChargeInput.InputStateType)
 			{
 			case EInputStateType::Held:
-				//if (!bHoldSkillPlayed)
-				//{
-				//	m_skillCom->UsingSkill(ChargeInput.ActionName);
-				//	bHoldSkillPlayed = true; // 이후에는 무시
-				//}
 				//홀딩은 이미 애님인스턴스에서 루프중임
 				break;
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
-				//m_skillCom->UsingSkill(ChargeInput.ActionName);
-				//UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging End!"));
-				//bHoldSkillPlayed = false;
-				//bChargingReady = false; // 플래그 초기화
-				//m_inputQueue->ClearChargingQueueList();//중간에 홀딩때 패링같은걸써서 큐클리어못하면? 
 				m_inputQueue->ClearChargingQueueList();
-				if (m_skillCom)
-				{
-					m_skillCom->RequestJumpToSection(FName("Released"));
-				}
+				m_skillCom->RequestJumpToSection(FName("Released"));
 				break;
 			}
 		}
@@ -256,23 +245,28 @@ void AC_Player::BeginPlay()
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
 		if (myAnimInstance)
 		{
+			//myAnimInterface에 플레이어의 애님인스턴스의 인터페이스 참조세팅
+			myAnimInterface.SetObject(myAnimInstance);                 
+			myAnimInterface.SetInterface(Cast<II_PlayerToAnimInstance>(myAnimInstance));
 			// 여기서 델리게이트 바인딩
 			myAnimInstance->ChangeRunningState.RemoveAll(this);//안전장치(예를들어 캐릭터가 죽고 다시살아날떄.
 			myAnimInstance->SetPlayerMovePointEnabled.RemoveAll(this);
-			myAnimInstance->ChargingReadyChanged.RemoveAll(this);
+
 			myAnimInstance->ChangeRunningState.AddUObject(this, &AC_Player::HandleChangeRunningState);
 			myAnimInstance->SetPlayerMovePointEnabled.AddUObject(this, &AC_Player::SetCanMove);
-			myAnimInstance->ChargingReadyChanged.AddUObject(this, &AC_Player::HandleChargingReady);
+
 			//이제 노티파이발생시 애님인스턴스에서 브로드캐스트로 플레이어에게 전달
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
 		}
 	}
+	
 
 }
 
 void AC_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	PlayerStateCheking(DeltaTime);
 	FString StateName;
 
 	switch (RunningState)
@@ -466,6 +460,38 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 
 	// 여기에 멤버 변수 세팅 또는 추가 로직
 	// Direction; // 디렉션을 저장하든 넘겨주든하면됨.
+}
+void AC_Player::AttackMode()
+{
+	if (IsAttackMode)
+	{
+		IsAttackMode = false;
+		AttackingModeTime = 0.f;
+		IsAttackMode = true;
+	}
+	else if (!IsAttackMode)
+	{
+		IsAttackMode = true;
+	}
+	
+}
+void AC_Player::PlayerStateCheking(float DeltaTime)
+{
+	if (!IsAttackMode) return;//아이들모드면 체킹할필요없음
+	AttackingModeTime += DeltaTime;
+	UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
+	if (AttackingModeTime > 5.f)
+	{
+		IsAttackMode = false;//다시 아이들모드로 되돌림.
+		AttackingModeTime = 0.f;
+		if (myAnimInterface)
+		{
+			myAnimInterface->SetActiveValue(true);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
+		return;
+	}
+
 }
 
 

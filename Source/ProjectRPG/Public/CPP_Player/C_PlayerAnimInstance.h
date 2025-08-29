@@ -23,7 +23,9 @@ private:
 	UAnimMontage* CurrentActiveMontage{};
 protected:
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsAttack{};
+	bool m_bIsAttack = false;
+	UPROPERTY(BlueprintReadOnly)
+	bool m_ActiveValue = false;
 public:
 	virtual void NativeInitializeAnimation() override;
 	UPROPERTY(BlueprintReadOnly)
@@ -43,6 +45,8 @@ public:
 	void HandleJumpSection(FName SectionName);
 
 	//인터페이스
-	void SetAttackMode_Implementation(bool b);
+	virtual void SetAttackMode(bool b) override;
+	virtual void SetActiveValue(bool b) override;
+	
 
 };

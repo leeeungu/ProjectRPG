@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
 #include "Interface/C_CameraInterface.h"
+#include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
 
 
@@ -47,6 +48,9 @@ private:
 	UC_InputQueueComponent* m_inputQueue{};
 	UPROPERTY(VisibleAnywhere)
 	UC_SkillComponent* m_skillCom{};
+
+	UPROPERTY()
+	TScriptInterface<II_PlayerToAnimInstance> myAnimInterface;
 	
 	UPROPERTY(VisibleAnywhere, Category = "PlayerInfoCaptureComponent", meta = (DisplayName = "PlayerInfoCaptureComponent"), BlueprintGetter = getPlayerInfoCaptureComponent)
 	USceneCaptureComponent2D* m_pPlayerInfoCaptureComponent{};
@@ -54,6 +58,7 @@ private:
 	UC_InteractionDetectorComponent* m_pInteractionDetectComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
 	UC_TravelManagerComponent* m_pTravelComponent{};
+
 
 	//플레이어 상태
 	UPROPERTY()
@@ -84,7 +89,7 @@ private:
 	bool bHoldSkillPlayed = false;
 	bool bChargingReady = false;
 public:
-	void HandleChargingReady(bool bIsReady);
+	
 
 protected:
 	UFUNCTION()
@@ -94,6 +99,12 @@ private:
 	void RunningSystemManager();
 	void ClearMoveState();
 	void Set4_WayDirection(const FVector& mousePoint);
+
+	//플레이어 상태(idle? attck?)
+	bool IsAttackMode = false;
+	float AttackingModeTime = 0.f;
+	void AttackMode();
+	void PlayerStateCheking(float DeltaTime);
 
 public:
 	AC_Player();

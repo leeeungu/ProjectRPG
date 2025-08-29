@@ -16,11 +16,12 @@ class UI_PlayerToAnimInstance : public UInterface
 /**
  * 
  */
-class II_PlayerToAnimInstance
+class PROJECTRPG_API II_PlayerToAnimInstance
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetAttackMode(bool b);
+	virtual void SetAttackMode(bool b) {}
+	virtual void SetActiveValue(bool b) {}
+	
 
 };

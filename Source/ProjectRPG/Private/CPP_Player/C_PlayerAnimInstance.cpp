@@ -81,9 +81,23 @@ void UC_PlayerAnimInstance::HandleJumpSection(FName SectionName)
     }
 }
 
-void UC_PlayerAnimInstance::SetAttackMode_Implementation(bool b)
+void UC_PlayerAnimInstance::SetAttackMode(bool b)
 {
-    bIsAttack = b;
+    UE_LOG(LogTemp, Warning, TEXT("AttakcingMode_Start"));
+    m_bIsAttack = b;
+}
+
+void UC_PlayerAnimInstance::SetActiveValue(bool b)
+{
+    if (m_bIsAttack)
+    {
+        m_bIsAttack = false;
+        m_ActiveValue = b;
+    }
+    if (!m_bIsAttack)
+    {
+        m_bIsAttack = true;
+    }
 }
 
 
