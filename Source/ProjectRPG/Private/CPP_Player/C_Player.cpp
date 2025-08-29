@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CPP_Player/C_Player.h"
@@ -11,7 +11,10 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_InputActionData.h"
-
+#include "Components/SceneCaptureComponent2D.h"
+#include "C_InteractionDetectorComponent.h"
+#include "C_TravelManagerComponent.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 void AC_Player::HandleChargingReady(bool bIsReady)
 {
@@ -25,10 +28,10 @@ void AC_Player::HandleChangeRunningState()
 
 void AC_Player::CalMoveData()
 {
-	if (curPathPos >= pathList.Num())//¾Æ¹«°ÍµµÂïÈ÷Áö¾ÊÀ¸¸é ¸®½ºÆ®ÀÇ ¿ø¼Ò°³¼ö´Â 1°³ÀÓ(ÇöÀçÀ§Ä¡)// 
+	if (curPathPos >= pathList.Num())//ì•„ë¬´ê²ƒë„ì°íˆì§€ì•Šìœ¼ë©´ ë¦¬ìŠ¤íŠ¸ì˜ ì›ì†Œê°œìˆ˜ëŠ” 1ê°œì„(í˜„ì¬ìœ„ì¹˜)// 
 	{
 		Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
-		//°¡¾ßÇÒ°÷ÀÌ¾ø´Âµ¥ È¤½Ã remainDist,remainAngleÀÌ ³²¾ÆÀÖ´Ù¸é ÃÊ±âÈ­
+		//ê°€ì•¼í• ê³³ì´ì—†ëŠ”ë° í˜¹ì‹œ remainDist,remainAngleì´ ë‚¨ì•„ìˆë‹¤ë©´ ì´ˆê¸°í™”
 		if (remainDist > 0.f || remainAngle > 0.f)
 		{
 			remainDist = 0.f;
@@ -36,8 +39,8 @@ void AC_Player::CalMoveData()
 		}
 		return;
 	}
-	FVector pos = pathList[curPathPos++];//(curPathPos´Â Á¦ÀÏ¸ÕÀú°¡¾ßÇÒ°÷, ++´Â ±×´ÙÀ½pathÆ÷ÀÎÆ®ÀÓ = ´ÙÀ½À§Ä¡Á¤º¸¸¦ ´ãÀ½
-	pos.Z = GetActorLocation().Z;//ZÃà ¸ÂÃã(¾È¸ÂÃß¸é Ä³¸¯ÅÍÀÇ default ZÀÎ 0.5ÁöÁ¡ºÎÅÍ °è»êÀÌ µé¾î°¡°ÔµÊ)
+	FVector pos = pathList[curPathPos++];//(curPathPosëŠ” ì œì¼ë¨¼ì €ê°€ì•¼í• ê³³, ++ëŠ” ê·¸ë‹¤ìŒpathí¬ì¸íŠ¸ì„ = ë‹¤ìŒìœ„ì¹˜ì •ë³´ë¥¼ ë‹´ìŒ
+	pos.Z = GetActorLocation().Z;//Zì¶• ë§ì¶¤(ì•ˆë§ì¶”ë©´ ìºë¦­í„°ì˜ default Zì¸ 0.5ì§€ì ë¶€í„° ê³„ì‚°ì´ ë“¤ì–´ê°€ê²Œë¨)
 	moveDir = pos - GetActorLocation();
 	remainDist = moveDir.Length();
 
@@ -49,17 +52,17 @@ void AC_Player::CalMoveData()
 
 	moveDir.Normalize();
 
-	remainAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(GetActorForwardVector(), moveDir))); //È¸Àü°¢µµ
-	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;//È¸Àü¹æÇâ
+	remainAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(GetActorForwardVector(), moveDir))); //íšŒì „ê°ë„
+	rotDir = FVector::DotProduct(GetActorRightVector(), moveDir) > 0.f ? 1.f : -1.f;//íšŒì „ë°©í–¥
 	Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = true;
 	
 }
 
 void AC_Player::CalRotateData(const FVector& TargetPoint)
 {
-	// ÇöÀç À§Ä¡ ¡æ ¸ñÇ¥ ¹æÇâ
+	// í˜„ì¬ ìœ„ì¹˜ â†’ ëª©í‘œ ë°©í–¥
 	FVector Direction = TargetPoint - GetActorLocation();
-	Direction.Z = 0.0f; // Pitch ¹«½Ã
+	Direction.Z = 0.0f; // Pitch ë¬´ì‹œ
 	Direction.Normalize();
 
 	float TargetYaw = Direction.Rotation().Yaw;
@@ -67,59 +70,59 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentYaw, TargetYaw);
 	float FinalYaw = CurrentYaw + DeltaYaw;
 	TargetRotationQuat = FRotator(0.f, FinalYaw, 0.f).Quaternion();
-	// Æ½¿¡¼­ È¸Àü º¸°£À» ÄÑ±â À§ÇÑ ÇÃ·¡±×
+	// í‹±ì—ì„œ íšŒì „ ë³´ê°„ì„ ì¼œê¸° ìœ„í•œ í”Œë˜ê·¸
 	bRotate = true;
 }
 
-//¸ÅÀÎ·ÎÁ÷ ¸Å´ÏÀú
+//ë§¤ì¸ë¡œì§ ë§¤ë‹ˆì €
 void AC_Player::RunningSystemManager()
 {
-	//¿ì¼±¼øÀ§Å°µ¥ÀÌÅÍ(ÇöÁ¦ : ÆĞ¸µ)
-	//ÆĞ¸µÀº RunningState¿¡ ¿µÇâÀ»¹ŞÁö¾ÊÀ½ Áï ÄğÅ¸ÀÓÀ» Á¦´ë·Î ¼³Á¤ÇÏÁö¾ÊÀ¸¸é ¹«ÇÑÀ¸·Î »ç¿ë°¡´É 
+	//ìš°ì„ ìˆœìœ„í‚¤ë°ì´í„°(í˜„ì œ : íŒ¨ë§)
+	//íŒ¨ë§ì€ RunningStateì— ì˜í–¥ì„ë°›ì§€ì•ŠìŒ ì¦‰ ì¿¨íƒ€ì„ì„ ì œëŒ€ë¡œ ì„¤ì •í•˜ì§€ì•Šìœ¼ë©´ ë¬´í•œìœ¼ë¡œ ì‚¬ìš©ê°€ëŠ¥ 
 	FInputActionData PriorityInputData{};
-	if (m_inputQueue->GetLastInputData(PriorityInputData))//ÀÌºÎºĞ¿¡¼­ idle¸ŞÀÎ·¯´×½Ã½ºÅÛÀ¸·Î ³Ñ¾î°¡±âÀü¿¡ ÇÑ¹ø °Ë»çÇÏ´Â ·ÎÁ÷
+	if (m_inputQueue->GetLastInputData(PriorityInputData))//ì´ë¶€ë¶„ì—ì„œ idleë©”ì¸ëŸ¬ë‹ì‹œìŠ¤í…œìœ¼ë¡œ ë„˜ì–´ê°€ê¸°ì „ì— í•œë²ˆ ê²€ì‚¬í•˜ëŠ” ë¡œì§
 	{
-		//1. ÆĞ¸µ ÀÔ·Â ÃÖ¿ì¼± Ã³¸®
+		//1. íŒ¨ë§ ì…ë ¥ ìµœìš°ì„  ì²˜ë¦¬
 		if (PriorityInputData.InputType == EInputType::Period)
 		{
-			// ÇöÀç ¾î¶² »óÅÂÀÌµç ½ºÅ³/¾ÆÀÌÅÛ/Â÷Â¡ °­Á¦ Áß´Ü
-			//InterruptAllActions();   //ÁøÇàÁßÀÎ ¸ğµç¸ùÅ¸ÁÖ stop
-			RunningState = ERunningSystemState::Busy;//ÀÌ ºĞ±â¹®À» ³Ñ¾î¼­¸é ¹Ù·Î busy»óÅÂÀÌ¹Ç·Î return¹İÈ¯
+			// í˜„ì¬ ì–´ë–¤ ìƒíƒœì´ë“  ìŠ¤í‚¬/ì•„ì´í…œ/ì°¨ì§• ê°•ì œ ì¤‘ë‹¨
+			//InterruptAllActions();   //ì§„í–‰ì¤‘ì¸ ëª¨ë“ ëª½íƒ€ì£¼ stop
+			RunningState = ERunningSystemState::Busy;//ì´ ë¶„ê¸°ë¬¸ì„ ë„˜ì–´ì„œë©´ ë°”ë¡œ busyìƒíƒœì´ë¯€ë¡œ returnë°˜í™˜
 			bHoldSkillPlayed = false;
 			bCanMove = false;
-			CalRotateData(PriorityInputData.TargetPoint);//¿©±â¼­ º¸°£ÀÌ¸ÕÀúÄÑÁü
-			IsPeriod = true;//±×´ÙÀ½ ÆĞ¸µÀÌÄÑÁü Áï º¸°£ÀÌ¸ÕÀúÄÑÁö¸é¼­ true·Î¹Ù²î´Ï ÆĞ¸µÂÊ¿¡¼­ º¸°£ÀÌ false°¡µÇ±âÀü±îÁø ÁøÇàÇÒ¼ö¾øÀ½.
-			m_skillCom->UsingSkill(PriorityInputData.ActionName);//ÀÌµ¿·ÎÁ÷Àº ÇÃ·¹ÀÌ¾îÂÊÀÌ¶ó ÀÌÇÔ¼ö´Â ´ÜÁö ¸ùÅ¸ÁÖ½ÇÇà°ú ÄğÅ¸ÀÓ°ü¸®¸¸ÀÖÀ½.
-			m_inputQueue->ClearQueueList(); // ÆĞ¸µ Ã³¸® ÈÄ Å¥ ÃÊ±âÈ­
-			return; // ¿©±â¼­ ¹Ù·Î Á¾·á (´Ù¸¥ ÀÔ·Â ¹«½Ã)
+			CalRotateData(PriorityInputData.TargetPoint);//ì—¬ê¸°ì„œ ë³´ê°„ì´ë¨¼ì €ì¼œì§
+			IsPeriod = true;//ê·¸ë‹¤ìŒ íŒ¨ë§ì´ì¼œì§ ì¦‰ ë³´ê°„ì´ë¨¼ì €ì¼œì§€ë©´ì„œ trueë¡œë°”ë€Œë‹ˆ íŒ¨ë§ìª½ì—ì„œ ë³´ê°„ì´ falseê°€ë˜ê¸°ì „ê¹Œì§„ ì§„í–‰í• ìˆ˜ì—†ìŒ.
+			m_skillCom->UsingSkill(PriorityInputData.ActionName);//ì´ë™ë¡œì§ì€ í”Œë ˆì´ì–´ìª½ì´ë¼ ì´í•¨ìˆ˜ëŠ” ë‹¨ì§€ ëª½íƒ€ì£¼ì‹¤í–‰ê³¼ ì¿¨íƒ€ì„ê´€ë¦¬ë§ŒìˆìŒ.
+			m_inputQueue->ClearQueueList(); // íŒ¨ë§ ì²˜ë¦¬ í›„ í ì´ˆê¸°í™”
+			return; // ì—¬ê¸°ì„œ ë°”ë¡œ ì¢…ë£Œ (ë‹¤ë¥¸ ì…ë ¥ ë¬´ì‹œ)
 		}
 	}
 	if (RunningState == ERunningSystemState::Idle)
 	{
-		FInputActionData CurrentInputData{};//ºñ¾îÀÖ´Â ÃÊ±â°ª.
-		if (m_inputQueue->GetLastInputData(CurrentInputData))//ÀÎÇ²¿¡ ¹º°¡ µé¾î¿Â´Ù¸é
+		FInputActionData CurrentInputData{};//ë¹„ì–´ìˆëŠ” ì´ˆê¸°ê°’.
+		if (m_inputQueue->GetLastInputData(CurrentInputData))//ì¸í’‹ì— ë­”ê°€ ë“¤ì–´ì˜¨ë‹¤ë©´
 		{
-			m_inputQueue->ClearQueueList();//±×³É ¸¶Áö¸·ÀÎµ¦½º¸¦ °¡Á®¿Â°Å±â¶§¹®¿¡ ³¡³ª°í ´Ù½Ã Å¥¿¡¼­ °¡Á®¿È ±×·¸±â‹š¹®¿¡ °¡Á®¿À°í³ª¼­ ¸®½ºÆ®¸¦ºñ¿öÁà¾ß ³¡³ª°í ÀÚµ¿À¸·Î °¡Á®¿ÀÁö¾ÊÀ½.
+			m_inputQueue->ClearQueueList();//ê·¸ëƒ¥ ë§ˆì§€ë§‰ì¸ë±ìŠ¤ë¥¼ ê°€ì ¸ì˜¨ê±°ê¸°ë•Œë¬¸ì— ëë‚˜ê³  ë‹¤ì‹œ íì—ì„œ ê°€ì ¸ì˜´ ê·¸ë ‡ê¸°ë–„ë¬¸ì— ê°€ì ¸ì˜¤ê³ ë‚˜ì„œ ë¦¬ìŠ¤íŠ¸ë¥¼ë¹„ì›Œì¤˜ì•¼ ëë‚˜ê³  ìë™ìœ¼ë¡œ ê°€ì ¸ì˜¤ì§€ì•ŠìŒ.
 			switch (CurrentInputData.InputType)
 			{
 			case EInputType::Skill:
 				RunningState = ERunningSystemState::Busy;
-				bCanMove = false;//¿òÁ÷ÀÓ Á¦¾î(¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ³¡³¯¶§ ´Ù½Ã Æ®·ç·Î ¹Ù²ãÁÖ´Â ÇÔ¼öÈ£Ãâ)
-				CalRotateData(CurrentInputData.TargetPoint);//º¸°£ÇÔ¼ö->Æ½º¸°£
-				m_skillCom->UsingSkill(CurrentInputData.ActionName);//ÄÁÆ®·Ñ·¯¿¡¼­ ¸¸µé¾îÁø name°ú ±¸Á¶Ã¼¾È ½ºÅ³nameÀÌ °°¾Æ¾ßÇÔ.
+				bCanMove = false;//ì›€ì§ì„ ì œì–´(ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚ ë•Œ ë‹¤ì‹œ íŠ¸ë£¨ë¡œ ë°”ê¿”ì£¼ëŠ” í•¨ìˆ˜í˜¸ì¶œ)
+				CalRotateData(CurrentInputData.TargetPoint);//ë³´ê°„í•¨ìˆ˜->í‹±ë³´ê°„
+				m_skillCom->UsingSkill(CurrentInputData.ActionName);//ì»¨íŠ¸ë¡¤ëŸ¬ì—ì„œ ë§Œë“¤ì–´ì§„ nameê³¼ êµ¬ì¡°ì²´ì•ˆ ìŠ¤í‚¬nameì´ ê°™ì•„ì•¼í•¨.
 				break;
 			case EInputType::AnimItem:
 				RunningState = ERunningSystemState::Busy;
 				CalRotateData(CurrentInputData.TargetPoint);
-				//ExecuteSkill(CurrentInputData); ->½ÇÇàÇÔ¼ö
+				//ExecuteSkill(CurrentInputData); ->ì‹¤í–‰í•¨ìˆ˜
 				break;
 			case EInputType::ChargeSkill:
 				RunningState = ERunningSystemState::Charging;
 				bCanMove = false;
 				CalRotateData(CurrentInputData.TargetPoint);
-				m_inputQueue->ClearChargingQueueList();//È¤½Ã ÀÌÀü¿¡¾²°í ¾ÆÁ÷¾Èºñ¿öÁ®ÀÖÀ»¼öÀÖÀ¸´Ï
+				m_inputQueue->ClearChargingQueueList();//í˜¹ì‹œ ì´ì „ì—ì“°ê³  ì•„ì§ì•ˆë¹„ì›Œì ¸ìˆì„ìˆ˜ìˆìœ¼ë‹ˆ
 				m_skillCom->UsingSkill(CurrentInputData.ActionName);
-				//StartChargeSkill(CurrentInputData);->Â÷Â¡½ÃÀÛÇÔ¼ö(½Ã°£°è»êÇÊ¿ä, ¸ùÅ¸ÁÖÈ¦µùÇÊ¿ä)
+				//StartChargeSkill(CurrentInputData);->ì°¨ì§•ì‹œì‘í•¨ìˆ˜(ì‹œê°„ê³„ì‚°í•„ìš”, ëª½íƒ€ì£¼í™€ë”©í•„ìš”)
 				break;
 
 			default:
@@ -127,34 +130,34 @@ void AC_Player::RunningSystemManager()
 			}
 		}
 	}
-	else if (RunningState == ERunningSystemState::Charging)//ÀÌ¹Ìidle¿¡¼­ Â÷Â¡½ºÅ¸Æ®·Î »óÅÂº¯°æµÇ¼­³Ñ¾î¿È
+	else if (RunningState == ERunningSystemState::Charging)//ì´ë¯¸idleì—ì„œ ì°¨ì§•ìŠ¤íƒ€íŠ¸ë¡œ ìƒíƒœë³€ê²½ë˜ì„œë„˜ì–´ì˜´
 	{
 		//if (!bChargingReady)
 		//{
-		//	// ½ºÅ¸Æ® ¸ùÅ¸ÁÖ ³¡³ª±â Àü¿¡´Â ¾Æ¹« ÀÔ·Âµµ Ã³¸®ÇÏÁö ¾ÊÀ½
+		//	// ìŠ¤íƒ€íŠ¸ ëª½íƒ€ì£¼ ëë‚˜ê¸° ì „ì—ëŠ” ì•„ë¬´ ì…ë ¥ë„ ì²˜ë¦¬í•˜ì§€ ì•ŠìŒ
 		//	return;
 		//}
-		// Â÷Â¡ ½ºÅ³ ÀÔ·Â¸¸ Çã¿ë -> ³ª¸ÓÁö ¹«½Ã
+		// ì°¨ì§• ìŠ¤í‚¬ ì…ë ¥ë§Œ í—ˆìš© -> ë‚˜ë¨¸ì§€ ë¬´ì‹œ
 		FInputActionData ChargeInput{};
-		if (m_inputQueue->GetLastChargingInputData(ChargeInput))//°è¼Ó ÇØ´çÂ÷Â¡½ºÅ³µ¥ÀÌÅÍÀÔ·ÂÀÌµé¾î¿Ã°ÍÀÓ(ÀÎµ¦½º¹øÈ£µç, TriggedÀÌµç)
+		if (m_inputQueue->GetLastChargingInputData(ChargeInput))//ê³„ì† í•´ë‹¹ì°¨ì§•ìŠ¤í‚¬ë°ì´í„°ì…ë ¥ì´ë“¤ì–´ì˜¬ê²ƒì„(ì¸ë±ìŠ¤ë²ˆí˜¸ë“ , Triggedì´ë“ )
 		{
-			//°°Àº ÀÎÇ²Å¸ÀÔÀº charingÀÌÁö¸¸ ÀÌ¹Ì ´©¸¥¼ø°£ ½ºÅ¸Æ®´Â idle»óÅÂ¿¡¼­ ÀÎ½ÄÇÏ°í ³Ñ¾î¿Ô±â¿¡ ÀÌÁ¦ ³²Àº°Ç (Held,Canceld,Completed)
+			//ê°™ì€ ì¸í’‹íƒ€ì…ì€ charingì´ì§€ë§Œ ì´ë¯¸ ëˆ„ë¥¸ìˆœê°„ ìŠ¤íƒ€íŠ¸ëŠ” idleìƒíƒœì—ì„œ ì¸ì‹í•˜ê³  ë„˜ì–´ì™”ê¸°ì— ì´ì œ ë‚¨ì€ê±´ (Held,Canceld,Completed)
 			switch (ChargeInput.InputStateType)
 			{
 			case EInputStateType::Held:
 				//if (!bHoldSkillPlayed)
 				//{
 				//	m_skillCom->UsingSkill(ChargeInput.ActionName);
-				//	bHoldSkillPlayed = true; // ÀÌÈÄ¿¡´Â ¹«½Ã
+				//	bHoldSkillPlayed = true; // ì´í›„ì—ëŠ” ë¬´ì‹œ
 				//}
-				//È¦µùÀº ÀÌ¹Ì ¾Ö´ÔÀÎ½ºÅÏ½º¿¡¼­ ·çÇÁÁßÀÓ
+				//í™€ë”©ì€ ì´ë¯¸ ì• ë‹˜ì¸ìŠ¤í„´ìŠ¤ì—ì„œ ë£¨í”„ì¤‘ì„
 				break;
-			case EInputStateType::Released://Äµ½½°ú ¿Ï·áÀÏ¶§ ¸ğµÎ Released°¡ ¼¼ÆÃµÊ
+			case EInputStateType::Released://ìº”ìŠ¬ê³¼ ì™„ë£Œì¼ë•Œ ëª¨ë‘ Releasedê°€ ì„¸íŒ…ë¨
 				//m_skillCom->UsingSkill(ChargeInput.ActionName);
-				//UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished ¡æ Charging End!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished â†’ Charging End!"));
 				//bHoldSkillPlayed = false;
-				//bChargingReady = false; // ÇÃ·¡±× ÃÊ±âÈ­
-				//m_inputQueue->ClearChargingQueueList();//Áß°£¿¡ È¦µù¶§ ÆĞ¸µ°°Àº°É½á¼­ Å¥Å¬¸®¾î¸øÇÏ¸é? 
+				//bChargingReady = false; // í”Œë˜ê·¸ ì´ˆê¸°í™”
+				//m_inputQueue->ClearChargingQueueList();//ì¤‘ê°„ì— í™€ë”©ë•Œ íŒ¨ë§ê°™ì€ê±¸ì¨ì„œ íí´ë¦¬ì–´ëª»í•˜ë©´? 
 				m_inputQueue->ClearChargingQueueList();
 				if (m_skillCom)
 				{
@@ -166,9 +169,22 @@ void AC_Player::RunningSystemManager()
 	}
 	else if (RunningState == ERunningSystemState::Busy || RunningState == ERunningSystemState::Down)
 	{
-		return;//ÀÏ¹İ ¸®ÅÏÀ¸·Î Ã³¸®(¸¸¾à¿¡ ½ºÅ³»ç¿ëÁßÀÌ³ª Â÷Â¡½ºÅ³»ç¿ëÁß¿¡ ¹º°¡ ÀÔ·ÂÀ» ¹Ş¾Æ¾ßÇÑ´Ù¸é ±×³É ¹Ù·ÎÀÌº¥Æ®·Î Ã³¸®(Å¥¿¡ add X)
+		return;//ì¼ë°˜ ë¦¬í„´ìœ¼ë¡œ ì²˜ë¦¬(ë§Œì•½ì— ìŠ¤í‚¬ì‚¬ìš©ì¤‘ì´ë‚˜ ì°¨ì§•ìŠ¤í‚¬ì‚¬ìš©ì¤‘ì— ë­”ê°€ ì…ë ¥ì„ ë°›ì•„ì•¼í•œë‹¤ë©´ ê·¸ëƒ¥ ë°”ë¡œì´ë²¤íŠ¸ë¡œ ì²˜ë¦¬(íì— add X)
 	}
 
+}
+
+UCameraComponent* AC_Player::getCamera_Implementation()
+{
+	return m_camCom;
+}
+
+void AC_Player::Reset_Implementation(UCameraComponent* Camera)
+{
+	if (m_camCom)
+		m_camCom->AttachToComponent(m_springCom,FAttachmentTransformRules::KeepRelativeTransform);
+	else if (Camera)
+		Camera->AttachToComponent(m_springCom,FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 void AC_Player::SetPeriodInfo()
@@ -202,7 +218,7 @@ AC_Player::AC_Player()
 	m_springCom->SetupAttachment(RootComponent);
 	m_springCom->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
 	//m_springCom->SetRelativeLocation(FVector(-400.f, 0.f, 600.f));
-	m_springCom->bDoCollisionTest = false; // Èçµé¸² ¹æÁö
+	m_springCom->bDoCollisionTest = false; // í”ë“¤ë¦¼ ë°©ì§€
 	m_springCom->bEnableCameraLag = false;
 	m_springCom->bEnableCameraRotationLag = false;
 	m_springCom->SetUsingAbsoluteRotation(true);
@@ -211,26 +227,44 @@ AC_Player::AC_Player()
 	m_camCom = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	m_camCom->SetupAttachment(m_springCom);
 	m_camCom->bUsePawnControlRotation = false;
+	{
+		m_pPlayerInfoCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PlayerInfoCaptureComponent"));
+		m_pInteractionDetectComponent = CreateDefaultSubobject<UC_InteractionDetectorComponent>(TEXT("InteractionDetectComponent"));
+		m_pTravelComponent = CreateDefaultSubobject<UC_TravelManagerComponent>(TEXT("TravelComponent"));
+		m_pPlayerInfoCaptureComponent->SetupAttachment(GetRootComponent());
+		m_pPlayerInfoCaptureComponent->SetRelativeLocation(FVector{ 180,0,20 });
+		m_pPlayerInfoCaptureComponent->SetRelativeRotation(FRotator{ -4,180,0 });
+		m_pPlayerInfoCaptureComponent->FOVAngle = 75.0f;
+		//Script/Engine.TextureRenderTarget2D'/Game/UI/PlayerInfo/Texture/T_PlayerInfo.T_PlayerInfo'
+		static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RenderTarget(TEXT("/Game/UI/PlayerInfo/Texture/T_PlayerInfo.T_PlayerInfo"));
+		if (RenderTarget.Succeeded())
+		{
+			m_pPlayerInfoCaptureComponent->TextureTarget = RenderTarget.Object;
+		}
+		m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
+	}
 }
 
 void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
+	m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
 
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
 		if (myAnimInstance)
 		{
-			// ¿©±â¼­ µ¨¸®°ÔÀÌÆ® ¹ÙÀÎµù
-			myAnimInstance->ChangeRunningState.RemoveAll(this);//¾ÈÀüÀåÄ¡(¿¹¸¦µé¾î Ä³¸¯ÅÍ°¡ Á×°í ´Ù½Ã»ì¾Æ³¯‹š.
+			// ì—¬ê¸°ì„œ ë¸ë¦¬ê²Œì´íŠ¸ ë°”ì¸ë”©
+			myAnimInstance->ChangeRunningState.RemoveAll(this);//ì•ˆì „ì¥ì¹˜(ì˜ˆë¥¼ë“¤ì–´ ìºë¦­í„°ê°€ ì£½ê³  ë‹¤ì‹œì‚´ì•„ë‚ ë–„.
 			myAnimInstance->SetPlayerMovePointEnabled.RemoveAll(this);
 			myAnimInstance->ChargingReadyChanged.RemoveAll(this);
 			myAnimInstance->ChangeRunningState.AddUObject(this, &AC_Player::HandleChangeRunningState);
 			myAnimInstance->SetPlayerMovePointEnabled.AddUObject(this, &AC_Player::SetCanMove);
 			myAnimInstance->ChargingReadyChanged.AddUObject(this, &AC_Player::HandleChargingReady);
-			//ÀÌÁ¦ ³ëÆ¼ÆÄÀÌ¹ß»ı½Ã ¾Ö´ÔÀÎ½ºÅÏ½º¿¡¼­ ºê·ÎµåÄ³½ºÆ®·Î ÇÃ·¹ÀÌ¾î¿¡°Ô Àü´Ş
-			//ÇÃ·¹ÀÌ¾î´Â ¹ÙÀÎµùµÈ 'HandleChangeRunningState' ½ÇÇÛ
+			//ì´ì œ ë…¸í‹°íŒŒì´ë°œìƒì‹œ ì• ë‹˜ì¸ìŠ¤í„´ìŠ¤ì—ì„œ ë¸Œë¡œë“œìºìŠ¤íŠ¸ë¡œ í”Œë ˆì´ì–´ì—ê²Œ ì „ë‹¬
+			//í”Œë ˆì´ì–´ëŠ” ë°”ì¸ë”©ëœ 'HandleChangeRunningState' ì‹¤í•¼
 		}
 	}
 
@@ -260,12 +294,12 @@ void AC_Player::Tick(float DeltaTime)
 		break;
 	}
 
-	// È­¸é ÁÂÃø »ó´Ü¿¡ ÅØ½ºÆ® Ãâ·Â (Key: -1 Àº Ç×»ó »õ·Î Ãâ·ÂµÊ)
+	// í™”ë©´ ì¢Œì¸¡ ìƒë‹¨ì— í…ìŠ¤íŠ¸ ì¶œë ¥ (Key: -1 ì€ í•­ìƒ ìƒˆë¡œ ì¶œë ¥ë¨)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
 			-1,
-			0.f,                     // Duration: 0ÃÊ¸é ¸Å ÇÁ·¹ÀÓ ´Ù½Ã Ãâ·Â
+			0.f,                     // Duration: 0ì´ˆë©´ ë§¤ í”„ë ˆì„ ë‹¤ì‹œ ì¶œë ¥
 			FColor::Green,
 			FString::Printf(TEXT("[Player State] RunningState: %s"), *StateName)
 		);
@@ -273,14 +307,14 @@ void AC_Player::Tick(float DeltaTime)
 
 	//if (isBattle)
 	//{
-	//	//ºí·çÇÁ¸°Æ®Å¬·¡½º°¡ »ó¼Ó¹ŞÀº ÀÎÅÍÆäÀÌ½º´Â Çüº¯È¯ ºÒ°¡´É ÇÏ´Ù.
+	//	//ë¸”ë£¨í”„ë¦°íŠ¸í´ë˜ìŠ¤ê°€ ìƒì†ë°›ì€ ì¸í„°í˜ì´ìŠ¤ëŠ” í˜•ë³€í™˜ ë¶ˆê°€ëŠ¥ í•˜ë‹¤.
 	//	//IBattleTarget* t = Cast<IBattleTarget>(attackTarget); 
 	//	if (attackTarget->GetClass()->ImplementsInterface(UBattleTarget::StaticClass()))
 	//	{
 	//		FVector pos = IBattleTarget::Execute_GetLocation(attackTarget);
 	//		OnMoveToPos(pos);
 	//	}
-	//}->¾ÆÁ÷ ÀÎÅÍÆäÀÌ½º¹× ¸ó½ºÅÍÅë½Å ¾ÈµÊ.
+	//}->ì•„ì§ ì¸í„°í˜ì´ìŠ¤ë° ëª¬ìŠ¤í„°í†µì‹  ì•ˆë¨.
 
 	//moveDir.Normalize();
 	//AddActorWorldOffset(moveDir.GetSafeNormal() * 200.0f * DeltaTime);
@@ -309,7 +343,7 @@ void AC_Player::Tick(float DeltaTime)
 		AddActorWorldRotation(FRotator(0.f, delta * rotDir, 0.f));
 		remainAngle -= delta;
 	}
-	//¸¶¿ì½ºÆ÷ÀÎÅÍÀ§Ä¡·Î º¸°£È¸Àü(º¸Åë ½ºÅ³¾µ¶§³ª ÇØ´çÀ§Ä¡·Î ¸öÀ»µ¹¸®´ÂÀÛ¾÷ÇÒ‹š¸¸ ¿­¸²/
+	//ë§ˆìš°ìŠ¤í¬ì¸í„°ìœ„ì¹˜ë¡œ ë³´ê°„íšŒì „(ë³´í†µ ìŠ¤í‚¬ì“¸ë•Œë‚˜ í•´ë‹¹ìœ„ì¹˜ë¡œ ëª¸ì„ëŒë¦¬ëŠ”ì‘ì—…í• ë–„ë§Œ ì—´ë¦¼/
 	if (bRotate)
 	{
 		ClearMoveState();
@@ -329,13 +363,13 @@ void AC_Player::Tick(float DeltaTime)
 			SetActorRotation(TargetRotationQuat);
 		}
 	}
-	//ÆĞ¸µ
-	if (IsPeriod && !bRotate)//º¸°£ÀÌ³¡³ª°í Á¤¸éÀ» ¹Ù¶óºÃÀ»‹š ÆĞ¸µÀÌ ÁøÇàµÇµµ·Ï
+	//íŒ¨ë§
+	if (IsPeriod && !bRotate)//ë³´ê°„ì´ëë‚˜ê³  ì •ë©´ì„ ë°”ë¼ë´¤ì„ë–„ íŒ¨ë§ì´ ì§„í–‰ë˜ë„ë¡
 	{
 		SetPeriodInfo();
 		
 		remainDist = 0.f;
-		if (PeriodDist < 0.2f)//µµÂø
+		if (PeriodDist < 0.2f)//ë„ì°©
 		{
 			PeriodDist = 300.f;
 			IsPeriod = false;
@@ -355,14 +389,14 @@ void AC_Player::Tick(float DeltaTime)
 
 void AC_Player::OnMoveToPosPlayer(FVector pos)
 {
-	if (!bCanMove) return;//idle½ºÅ×ÀÌÆ®°¡ ¾Æ´Ï¸é ¸®ÅÏ½ÃÅ´(¸¶¿ì½ºÆ÷ÀÎÅÍ·Î ÂïÈ÷Áö¸¸ ½ÇÁ¦ÀÌµ¿ÀºµÇÁö¾Êµµ·Ï)
-	//±æÃ£±â ÆĞ½º ±¸ÇÏ±â
+	if (!bCanMove) return;//idleìŠ¤í…Œì´íŠ¸ê°€ ì•„ë‹ˆë©´ ë¦¬í„´ì‹œí‚´(ë§ˆìš°ìŠ¤í¬ì¸í„°ë¡œ ì°íˆì§€ë§Œ ì‹¤ì œì´ë™ì€ë˜ì§€ì•Šë„ë¡)
+	//ê¸¸ì°¾ê¸° íŒ¨ìŠ¤ êµ¬í•˜ê¸°
 	UNavigationPath* Path =
 		UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), pos);
-	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//³×ºê¸Ş½Ãº¼·ı¿¡ ÂïÇû°í, À¯È¿ÇÏ°í, ÆĞ½ºÆ÷ÀÎÆ®°¡ 2°³ÀÌ»óÀÎ°æ¿ì
+	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//ë„¤ë¸Œë©”ì‹œë³¼ë¥¨ì— ì°í˜”ê³ , ìœ íš¨í•˜ê³ , íŒ¨ìŠ¤í¬ì¸íŠ¸ê°€ 2ê°œì´ìƒì¸ê²½ìš°
 	{
-		pathList = Path->PathPoints;//¸®½ºÆ®¿¡ Æ÷ÀÎÆÃµÈ pathÁ¤º¸¸¦ ´ãÀ½(Àå¾Ö¹°ÀÌ¾ø´Ù¸é ¸®½ºÆ®¿¡ 2°³°¡´ã±è->[ÇöÀçÀ§Ä¡][ÂïÀºÀ§Ä¡]
-		curPathPos = 1;//if¹®À» ³Ñ°å´Ù¸é ÀÏ´Ü ÀÌµ¿ÇØ¾ßÇÏ±â‹š¹®¿¡ curPathPos¸¦ 1·Î ¼³Á¤
+		pathList = Path->PathPoints;//ë¦¬ìŠ¤íŠ¸ì— í¬ì¸íŒ…ëœ pathì •ë³´ë¥¼ ë‹´ìŒ(ì¥ì• ë¬¼ì´ì—†ë‹¤ë©´ ë¦¬ìŠ¤íŠ¸ì— 2ê°œê°€ë‹´ê¹€->[í˜„ì¬ìœ„ì¹˜][ì°ì€ìœ„ì¹˜]
+		curPathPos = 1;//ifë¬¸ì„ ë„˜ê²¼ë‹¤ë©´ ì¼ë‹¨ ì´ë™í•´ì•¼í•˜ê¸°ë–„ë¬¸ì— curPathPosë¥¼ 1ë¡œ ì„¤ì •
 	}
 	CalMoveData();
 }
@@ -388,11 +422,11 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	Forward.Z = 0;
 	Forward.Normalize();
 
-	// DotProduct´Â µÎ º¤ÅÍ »çÀÌÀÇ °¢µµ °ü°è¸¦ ¾Ë ¼ö ÀÖÀ½
+	// DotProductëŠ” ë‘ ë²¡í„° ì‚¬ì´ì˜ ê°ë„ ê´€ê³„ë¥¼ ì•Œ ìˆ˜ ìˆìŒ
 	float Dot = FVector::DotProduct(Forward, ToMouse);
 	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
 
-	// CrossProduct´Â ¿ŞÂÊ / ¿À¸¥ÂÊ ÆÇº°¿ëÀ¸·Î »ç¿ë
+	// CrossProductëŠ” ì™¼ìª½ / ì˜¤ë¥¸ìª½ íŒë³„ìš©ìœ¼ë¡œ ì‚¬ìš©
 	float CrossZ = FVector::CrossProduct(Forward, ToMouse).Z;
 
 	E4WayDirection Direction;
@@ -407,7 +441,7 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	}
 	else
 	{
-		// 90µµ ¡¾45µµ´Â ¿·¹æÇâ, CrossZ·Î ¿Ş/¿À ±¸ºĞ
+		// 90ë„ Â±45ë„ëŠ” ì˜†ë°©í–¥, CrossZë¡œ ì™¼/ì˜¤ êµ¬ë¶„
 		if (CrossZ > 0)
 		{
 			Direction = E4WayDirection::Left;
@@ -418,7 +452,7 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 		}
 	}
 
-	// ·Î±× Ãâ·Â (Å×½ºÆ®¿ë)
+	// ë¡œê·¸ ì¶œë ¥ (í…ŒìŠ¤íŠ¸ìš©)
 	FString DirString;
 	switch (Direction)
 	{
@@ -430,8 +464,8 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 
 	UE_LOG(LogTemp, Warning, TEXT("4-Way Direction: %s"), *DirString);
 
-	// ¿©±â¿¡ ¸â¹ö º¯¼ö ¼¼ÆÃ ¶Ç´Â Ãß°¡ ·ÎÁ÷
-	// Direction; // µğ·º¼ÇÀ» ÀúÀåÇÏµç ³Ñ°ÜÁÖµçÇÏ¸éµÊ.
+	// ì—¬ê¸°ì— ë©¤ë²„ ë³€ìˆ˜ ì„¸íŒ… ë˜ëŠ” ì¶”ê°€ ë¡œì§
+	// Direction; // ë””ë ‰ì…˜ì„ ì €ì¥í•˜ë“  ë„˜ê²¨ì£¼ë“ í•˜ë©´ë¨.
 }
 
 

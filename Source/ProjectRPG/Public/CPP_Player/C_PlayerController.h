@@ -39,6 +39,18 @@ private:
 	EMouseHitType CachedHitType = EMouseHitType::None;
 	void UpdateMouseHit();
 
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "CurrencyComponent"), BlueprintGetter = getCurrencyComponent)
+	UC_CurrencyComponent* m_pCurrencyComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "WindowWidget", meta = (DisplayName = "WindowManager"), BlueprintGetter = getGameWindowManager)
+	UC_GameWindowManager* m_pGameWindowManager{};
+	UPROPERTY(VisibleAnywhere, Category = "QuickSlot", meta = (DisplayName = "QuickSlotManagerComponent"), BlueprintGetter = getQuickSlotManagerComponent)
+	UC_QuickSlotManagerComponent* m_pQuickSlotManagerComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "QuestManager", meta = (DisplayName = "QuestManagerComponent"), BlueprintGetter = getQuestManagerComponent)
+	UQuestManagerComponent* m_pQuestManagerComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "EquipComponent"), BlueprintGetter = getEquipComponent)
+	UC_EquipComponent* m_pEquipComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "InventoryComponent"), BlueprintGetter = getInventoryComponent)
+	UC_InventoryComponent* m_pInventoryComponent{};
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -61,18 +73,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number2_Key;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "CurrencyComponent"), BlueprintGetter = getCurrencyComponent)
-	UC_CurrencyComponent* m_pCurrencyComponent{};
-	UPROPERTY(VisibleAnywhere, Category = "WindowWidget", meta = (DisplayName = "WindowManager"), BlueprintGetter = getGameWindowManager)
-	UC_GameWindowManager* m_pGameWindowManager{};
-	UPROPERTY(VisibleAnywhere, Category = "QuickSlot", meta = (DisplayName = "QuickSlotManagerComponent"), BlueprintGetter = getQuickSlotManagerComponent)
-	UC_QuickSlotManagerComponent* m_pQuickSlotManagerComponent{};
-	UPROPERTY(VisibleAnywhere, Category = "QuestManager", meta = (DisplayName = "QuestManagerComponent"), BlueprintGetter = getQuestManagerComponent)
-	UQuestManagerComponent* m_pQuestManagerComponent{};
-	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "EquipComponent"), BlueprintGetter = getEquipComponent)
-	UC_EquipComponent* m_pEquipComponent{};
-	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "InventoryComponent"), BlueprintGetter = getInventoryComponent)
-	UC_InventoryComponent* m_pInventoryComponent{};
+	
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);

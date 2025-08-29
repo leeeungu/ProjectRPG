@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "C_BaseCharacter.h"
+#include "Interface/C_CameraInterface.h"
 #include "C_Player.generated.h"
 
 
@@ -11,13 +12,17 @@ class USpringArmComponent;
 class UCameraComponent;
 class UC_InputQueueComponent;
 class UC_SkillComponent;
+class USceneCaptureComponent2D;
+class UC_InteractionDetectorComponent;
+class UC_TravelManagerComponent;
+
 UENUM()
 enum class ERunningSystemState : uint8
 {
-	Idle,       // ÀÔ·Â ´ë±â
-	Down,       // ´Ù¿î
-	Busy,       // ÀÏ¹İ ½ºÅ³/¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà Áß (Â÷´Ü)
-	Charging    // Â÷Â¡ ½ºÅ³ ÁøÇà Áß (Â÷Â¡ ÀÔ·Â¸¸ Çã¿ë)
+	Idle,       // ì…ë ¥ ëŒ€ê¸°
+	Down,       // ë‹¤ìš´
+	Busy,       // ì¼ë°˜ ìŠ¤í‚¬/ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ ì¤‘ (ì°¨ë‹¨)
+	Charging    // ì°¨ì§• ìŠ¤í‚¬ ì§„í–‰ ì¤‘ (ì°¨ì§• ì…ë ¥ë§Œ í—ˆìš©)
 };
 enum class E4WayDirection : uint8
 {
@@ -30,7 +35,7 @@ enum class E4WayDirection : uint8
  * 
  */
 UCLASS()
-class PROJECTRPG_API AC_Player : public AC_BaseCharacter
+class PROJECTRPG_API AC_Player : public AC_BaseCharacter, public IC_CameraInterface
 {
 	GENERATED_BODY()
 private:
@@ -42,33 +47,40 @@ private:
 	UC_InputQueueComponent* m_inputQueue{};
 	UPROPERTY(VisibleAnywhere)
 	UC_SkillComponent* m_skillCom{};
+	
+	UPROPERTY(VisibleAnywhere, Category = "PlayerInfoCaptureComponent", meta = (DisplayName = "PlayerInfoCaptureComponent"), BlueprintGetter = getPlayerInfoCaptureComponent)
+	USceneCaptureComponent2D* m_pPlayerInfoCaptureComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "InteractionDetectComponent", meta = (DisplayName = "InteractionDetectComponent"), BlueprintGetter = getInteractionDetectComponent)
+	UC_InteractionDetectorComponent* m_pInteractionDetectComponent{};
+	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
+	UC_TravelManagerComponent* m_pTravelComponent{};
 
-	//ÇÃ·¹ÀÌ¾î »óÅÂ
+	//í”Œë ˆì´ì–´ ìƒíƒœ
 	UPROPERTY()
 	ERunningSystemState RunningState = ERunningSystemState::Idle;
 
-	//ÀÌµ¿ ¹× È¸Àü
+	//ì´ë™ ë° íšŒì „
 	float moveSpeed = 500.0f;
 	FVector moveDir{};
 	float remainDist{};
 	float stopDist = 0.1f;
 	float rotDir{};
 	float remainAngle{};
-	bool bCanMove = true;//¸¶¿ì½ºÆ÷ÀÎÅÍ ÀÌµ¿°¡´É? 
-	//Path°ª
+	bool bCanMove = true;//ë§ˆìš°ìŠ¤í¬ì¸í„° ì´ë™ê°€ëŠ¥? 
+	//Pathê°’
 	TArray<FVector> pathList{};
 	int curPathPos = 1;
-	//ÆĞ¸µ
+	//íŒ¨ë§
 	FVector MousePointDir{};
 	bool IsPeriod = false;
 	float PeriodDist = 300.f;
 	FVector ParryDirection;
-	//·ÎÅ×ÀÌÆ® º¸°£
-	bool bRotate = false; //true½Ã Æ½ÀÇ º¸°£ÇÔ¼ö ½ÇÇà(º¸°£ÇÏ°íÀÚÇÏ´Â Æ÷ÀÎÆÃÀ§Ä¡ ÇÊ¿ä)          
+	//ë¡œí…Œì´íŠ¸ ë³´ê°„
+	bool bRotate = false; //trueì‹œ í‹±ì˜ ë³´ê°„í•¨ìˆ˜ ì‹¤í–‰(ë³´ê°„í•˜ê³ ìí•˜ëŠ” í¬ì¸íŒ…ìœ„ì¹˜ í•„ìš”)          
 	FQuat TargetRotationQuat;                 
 	float RotateInterpSpeed = 20.0f;     
 
-	//Â÷Â¡½ºÅ³
+	//ì°¨ì§•ìŠ¤í‚¬
 	bool bHoldSkillPlayed = false;
 	bool bChargingReady = false;
 public:
@@ -87,24 +99,30 @@ public:
 	AC_Player();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void OnMoveToPosPlayer(FVector pos);//¿ÜºÎ¿¡¼­µµ È£ÃâÇØ¼­ pos°ªÀ»³Ö¾îÁÖ¸é ÇØ´çÀ§Ä¡·ÎÀÌµ¿ÇÔ.
+	UFUNCTION(BlueprintCallable)
+	void OnMoveToPosPlayer(FVector pos);//ì™¸ë¶€ì—ì„œë„ í˜¸ì¶œí•´ì„œ posê°’ì„ë„£ì–´ì£¼ë©´ í•´ë‹¹ìœ„ì¹˜ë¡œì´ë™í•¨.
 	FVector GetMousePointDir();
 	void CalRotateData(const FVector& TargetPoint);
-	bool IsRotating() const { return bRotate; }//·ÎÅ×ÀÌÆÃ ¿©ºÎÈ®ÀÎ(¿ÜºÎÈ®ÀÎ¿ë)
+	bool IsRotating() const { return bRotate; }//ë¡œí…Œì´íŒ… ì—¬ë¶€í™•ì¸(ì™¸ë¶€í™•ì¸ìš©)
 	void SetCanMove() { bCanMove = true; }
-	//ÇÃ·¹ÀÌ¾î canmove°ª Æ®·ç·Î ¹Ù²ãÁÜ(moveToOnPos È°¼ºÈ­) ¸ùÅ¸ÁÖ°¡³¡³ª¾ßÁö È£ÃâµÊ
-	//Áß°£¿¡ ¸ùÅ¸ÁÖ°¡ ¼±ÀÔ·ÂÀ¸·Î ³¡±îÁö ¸ø°¡°í ´Ù¸¥¸ùÅ¸ÁÖ·Î ºí·£µùµÇ¸é ±×³É return½ÃÄÑÁ®¼­ ÇØ´çÇÔ¼öÈ£ÃâÀÌ¾ÈµÊ.
+	//í”Œë ˆì´ì–´ canmoveê°’ íŠ¸ë£¨ë¡œ ë°”ê¿”ì¤Œ(moveToOnPos í™œì„±í™”) ëª½íƒ€ì£¼ê°€ëë‚˜ì•¼ì§€ í˜¸ì¶œë¨
+	//ì¤‘ê°„ì— ëª½íƒ€ì£¼ê°€ ì„ ì…ë ¥ìœ¼ë¡œ ëê¹Œì§€ ëª»ê°€ê³  ë‹¤ë¥¸ëª½íƒ€ì£¼ë¡œ ë¸”ëœë”©ë˜ë©´ ê·¸ëƒ¥ returnì‹œì¼œì ¸ì„œ í•´ë‹¹í•¨ìˆ˜í˜¸ì¶œì´ì•ˆë¨.
 
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
-	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//·¯´×½ºÅ×ÀÌÆ® ¼¼ÆÃ
+	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//ëŸ¬ë‹ìŠ¤í…Œì´íŠ¸ ì„¸íŒ…
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	ERunningSystemState GetRunningSystemState() { return RunningState; }
 
 
+	virtual UCameraComponent* getCamera_Implementation() override;
+	virtual void Reset_Implementation(UCameraComponent* Camera) override;
 	
 	void SetPeriodInfo();
-	
-	
 
-	
+	UFUNCTION(BlueprintPure, Category = "PlayerInfoCaptureComponent")
+	USceneCaptureComponent2D*  getPlayerInfoCaptureComponent() { return m_pPlayerInfoCaptureComponent; }
+	UFUNCTION(BlueprintPure, Category = "InteractionDetectComponent")
+	UC_InteractionDetectorComponent* getInteractionDetectComponent() { return m_pInteractionDetectComponent; }
+	UFUNCTION(BlueprintPure, Category = "TravelComponent")
+	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
 };
