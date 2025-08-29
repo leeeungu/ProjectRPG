@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "I_PlayerToAnimInstance.h"
 #include "C_PlayerAnimInstance.generated.h"
 DECLARE_MULTICAST_DELEGATE(FChangeRunningStateDelegate);
 DECLARE_MULTICAST_DELEGATE(FSetPlayerMovePointEnabled);//player의 bCanMove 활성화->MoveToPos사용가능상태로 변경
@@ -14,12 +15,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestJumpSection, FName, Sectio
  * 
  */
 UCLASS()
-class PROJECTRPG_API UC_PlayerAnimInstance : public UAnimInstance
+class PROJECTRPG_API UC_PlayerAnimInstance : public UAnimInstance ,public II_PlayerToAnimInstance
 {
 	
 	GENERATED_BODY()
 private:
 	UAnimMontage* CurrentActiveMontage{};
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsAttack{};
 public:
 	virtual void NativeInitializeAnimation() override;
 	UPROPERTY(BlueprintReadOnly)
@@ -37,5 +41,8 @@ public:
 	FOnRequestJumpSection OnRequestJumpSection;
 	UFUNCTION()
 	void HandleJumpSection(FName SectionName);
+
+	//인터페이스
+	void SetAttackMode_Implementation(bool b);
 
 };

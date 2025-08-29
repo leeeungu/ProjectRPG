@@ -6,13 +6,13 @@
 
 void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
 {
-    UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
+    //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
     if (MontageToPlay)
     {
         StopAllMontages(0.1f);
         Montage_Play(MontageToPlay);
         CurrentActiveMontage = MontageToPlay;//몽타주 백업용
-        UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
+        //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
         // 엔진 이벤트 델리게이트: 몽타주 끝났을 때 OnEndMontage 호출(블루프린트의 Completed 노드와 같은뜻임)
         // 
         // 차징 스킬이라면 Start 섹션부터 재생
@@ -66,9 +66,8 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     }
     if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))//변경
     {
-        //UE_LOG(LogTemp, Warning, TEXT("Start Montage Finished → Charging Ready!"));
-        // 플레이어 참조 통해서 플래그 ON
-        ChargingReadyChanged.Broadcast(true);
+        UE_LOG(LogTemp, Warning, TEXT("charging end?? "));
+        SetPlayerMovePointEnabled.Broadcast();
         return;
     }
     SetPlayerMovePointEnabled.Broadcast();
@@ -80,6 +79,11 @@ void UC_PlayerAnimInstance::HandleJumpSection(FName SectionName)
     {
         Montage_JumpToSection(SectionName, CurrentActiveMontage);
     }
+}
+
+void UC_PlayerAnimInstance::SetAttackMode_Implementation(bool b)
+{
+    bIsAttack = b;
 }
 
 

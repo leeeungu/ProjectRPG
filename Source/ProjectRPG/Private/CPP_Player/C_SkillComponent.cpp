@@ -118,15 +118,7 @@ void UC_SkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UC_SkillComponent::InitializeComponent()
 {
-	/*Super::InitializeComponent();
-
-	if (ACharacter* OwnerChar = Cast<ACharacter>(GetOwner()))
-	{
-		if (UC_PlayerAnimInstance* AnimInst = Cast<UC_PlayerAnimInstance>(OwnerChar->GetMesh()->GetAnimInstance()))
-		{
-			CachedAnimInstance = AnimInst;
-		}
-	}*/
+	
 }
 
 void UC_SkillComponent::UsingSkill(FName skill_Key)
