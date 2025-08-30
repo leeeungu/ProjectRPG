@@ -19,6 +19,7 @@ class PROJECTRPG_API UC_SkillComponent : public UActorComponent
 private:
 	UPROPERTY()
 	TMap<FName, FSkillData> SkillMap;
+	TMap<FName, float> SkillCooldownEndTime;
 public:	
 	// Sets default values for this component's properties
 	UC_SkillComponent();
@@ -39,6 +40,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void InitializeComponent() override;
 	void UsingSkill(FName skill_Key);
+
+	bool IsCooldownReady(FName SkillName) const;
+	void StartCooldown(FName SkillName);
+	float GetRemainingCooldown(FName SkillName) const;
 
 		
 };

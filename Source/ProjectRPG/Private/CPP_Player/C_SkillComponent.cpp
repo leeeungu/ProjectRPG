@@ -77,7 +77,6 @@ UC_SkillComponent::UC_SkillComponent()
 		ChargingSkill_Complete.SkillMontage = Chargingobj_CP.Object;
 	}
 	SkillMap.Add(ChargingSkill_Complete.SkillName, ChargingSkill_Complete);
-
 }
 
 
@@ -134,5 +133,37 @@ void UC_SkillComponent::UsingSkill(FName skill_Key)
 		}
 		OnSkillMontageRequested.Broadcast(Skill->SkillMontage);//몽타주실행파트
 	}
+}
+
+bool UC_SkillComponent::IsCooldownReady(FName SkillName) const
+{
+	//Skill쿨타임 맵에 해당 스킬데이터가없으면 아직 눌리지않았으니 ture로 리턴
+	if (!SkillCooldownEndTime.Contains(SkillName)) return true;
+	return GetWorld()->GetTimeSeconds() >= SkillCooldownEndTime[SkillName];
+	//현제시간 >= endTime = false면 엔드타임이 더크므로 아직 쿨타임안지남
+	//현제시간 >= endTime = true면 엔드타임보다 현제시간이 지났으므로 쿨타임끝남
+}
+
+void UC_SkillComponent::StartCooldown(FName SkillName)
+{
+	if (!SkillMap.Contains(SkillName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skill [%s] not found in SkillDataMap"), *SkillName.ToString());
+		return;
+	}
+	// 스킬 데이터에서 쿨타임 값 가져오기
+	float CooldownDuration = SkillMap[SkillName].Cooldown;
+	// 쿨타임 종료 시간 계산 후 TMap에 기록
+	float EndTime = GetWorld()->GetTimeSeconds() + CooldownDuration;
+	SkillCooldownEndTime.Add(SkillName, EndTime);
+
+	// UI 동기화를 위한 브로드캐스트
+	//OnCooldownStarted.Broadcast(SkillName, CooldownDuration);
+}
+
+float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const
+{
+	if (!SkillCooldownEndTime.Contains(SkillName)) return 0.0f;//쿨타임리턴(눌린적이없으면)
+	return FMath::Max(SkillCooldownEndTime[SkillName] - GetWorld()->GetTimeSeconds(), 0.0f);//남은쿨타임 리턴
 }
 

@@ -11,7 +11,6 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_InputActionData.h"
-#include "CPP_Player/I_PlayerToAnimInstance.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
@@ -78,26 +77,45 @@ void AC_Player::RunningSystemManager()
 {
 	//우선순위키데이터(현제 : 패링)
 	//패링은 RunningState에 영향을받지않음 즉 쿨타임을 제대로 설정하지않으면 무한으로 사용가능 
+	//FInputActionData PriorityInputData{};
+	//if (m_inputQueue->GetLastInputData(PriorityInputData))//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
+	//{
+	//	//1. 패링 입력 최우선 처리
+	//	if (PriorityInputData.InputType == EInputType::Period)
+	//	{
+	//		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
+	//		//InterruptAllActions();   //진행중인 모든몽타주 stop
+	//		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+	//		bCanMove = false;
+	//		if (IsAttackMode)
+	//		{
+	//			AttackMode();
+	//		}
+	//		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
+	//		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+	//		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
+	//		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
+	//		return; // 여기서 바로 종료 (다른 입력 무시)
+	//	}
+	//}
 	FInputActionData PriorityInputData{};
-	if (m_inputQueue->GetLastInputData(PriorityInputData))//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
+	if (!m_inputQueue->GetLastInputData(PriorityInputData) && !m_inputQueue->GetLastChargingInputData(PriorityInputData)) return;//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
+	//1. 패링 입력 최우선 처리
+	if (PriorityInputData.InputType == EInputType::Period)
 	{
-		//1. 패링 입력 최우선 처리
-		if (PriorityInputData.InputType == EInputType::Period)
+		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
+		//InterruptAllActions();   //진행중인 모든몽타주 stop
+		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+		bCanMove = false;
+		if (IsAttackMode)
 		{
-			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
-			//InterruptAllActions();   //진행중인 모든몽타주 stop
-			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
-			bCanMove = false;
-			if (IsAttackMode)
-			{
-				AttackMode();
-			}
-			CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
-			IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-			m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-			m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
-			return; // 여기서 바로 종료 (다른 입력 무시)
+			AttackMode();
 		}
+		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
+		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
+		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
+		return; // 여기서 바로 종료 (다른 입력 무시)
 	}
 	if (RunningState == ERunningSystemState::Idle)
 	{
@@ -108,15 +126,27 @@ void AC_Player::RunningSystemManager()
 			switch (CurrentInputData.InputType)
 			{
 			case EInputType::Skill:
-				RunningState = ERunningSystemState::Busy;
-				AttackMode();//스킬쓰면 어택킹모드진입
-				if (myAnimInterface)
+				if (m_skillCom->IsCooldownReady(CurrentInputData.ActionName))
 				{
-					myAnimInterface->SetAttackMode(true);
+					RunningState = ERunningSystemState::Busy;
+					AttackMode();//스킬쓰면 어택킹모드진입
+					if (myAnimInterface)
+					{
+						myAnimInterface->SetAttackMode(true);
+					}
+					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
+					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
+					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
+					//쿨타임 시작
+					m_skillCom->StartCooldown(CurrentInputData.ActionName);
 				}
-				bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
-				CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
-				m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
+				else
+				{
+					// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
+					float remainTime = m_skillCom->GetRemainingCooldown(CurrentInputData.ActionName);
+					UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+					return;
+				}
 				break;
 			case EInputType::AnimItem:
 				RunningState = ERunningSystemState::Busy;
@@ -124,13 +154,28 @@ void AC_Player::RunningSystemManager()
 				//ExecuteSkill(CurrentInputData); ->실행함수
 				break;
 			case EInputType::ChargeSkill:
-				RunningState = ERunningSystemState::Charging;
-				AttackMode();//스킬쓰면 어택킹모드진입
-				bCanMove = false;
-				CalRotateData(CurrentInputData.TargetPoint);
-				m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
-				m_skillCom->UsingSkill(CurrentInputData.ActionName);
-				//StartChargeSkill(CurrentInputData);->차징시작함수(시간계산필요, 몽타주홀딩필요)
+				if (m_skillCom->IsCooldownReady(CurrentInputData.ActionName))
+				{
+					RunningState = ERunningSystemState::Charging;
+					AttackMode();//스킬쓰면 어택킹모드진입
+					if (myAnimInterface)
+					{
+						myAnimInterface->SetAttackMode(true);
+					}
+					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
+					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
+					m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
+					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
+					//쿨타임 시작
+					m_skillCom->StartCooldown(CurrentInputData.ActionName);
+				}
+				else
+				{
+					// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
+					float remainTime = m_skillCom->GetRemainingCooldown(CurrentInputData.ActionName);
+					UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+					return;
+				}
 				break;
 
 			default:
@@ -150,6 +195,7 @@ void AC_Player::RunningSystemManager()
 				//홀딩은 이미 애님인스턴스에서 루프중임
 				break;
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
+				RunningState = ERunningSystemState::Busy;
 				m_inputQueue->ClearChargingQueueList();
 				m_skillCom->RequestJumpToSection(FName("Released"));
 				break;
@@ -479,7 +525,7 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 {
 	if (!IsAttackMode) return;//아이들모드면 체킹할필요없음
 	AttackingModeTime += DeltaTime;
-	UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
+	//UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
 	if (AttackingModeTime > 5.f)
 	{
 		IsAttackMode = false;//다시 아이들모드로 되돌림.
@@ -488,6 +534,7 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 		{
 			myAnimInterface->SetActiveValue(true);
 		}
+		myAnimInterface->SetAttackMode(false);
 		UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
 		return;
 	}

@@ -90,7 +90,6 @@ void UC_InputQueueComponent::BeginPlay()
 void UC_InputQueueComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UE_LOG(LogTemp, Warning, TEXT("Tick True"));
 	const float CurrentTime = GetWorld()->GetTimeSeconds();
 	const float ExpireTime = 0.3f;
 	// 앞에서부터 오래된 입력 삭제
@@ -108,7 +107,6 @@ void UC_InputQueueComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// 큐가 비었으면 틱 꺼버림
 	if (InputQueue.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Tick false"));
 		SetComponentTickEnabled(false);
 	}
 	
