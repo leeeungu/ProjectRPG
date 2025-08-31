@@ -10,6 +10,7 @@ class UC_InteractionComponent;
 class UCapsuleComponent;
 class ACharacter;
 class UArrowComponent;
+//enum class E_TrabelType : uint8;
 
 UCLASS(BlueprintType, Blueprintable)
 class PROJECTRPG_API AC_AnimationInteraction : public AActor
@@ -37,8 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	bool m_bRotateRoll{};
 
-	TArray<FVector> m_arrLocations{};
-	int nIndex{};
+	FVector m_TargetLocations{};
 private:
 	ACharacter* m_pDetector{};
 	UC_TravelManagerComponent* m_pTravelManagerComponent{};

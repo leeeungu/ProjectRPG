@@ -24,7 +24,7 @@ void UC_SphereAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 		if (GetWorld())
 			DrawDebugSphere(GetWorld(), m_sPosition, m_fRadius, 0, FColor::Purple, false, 1.0f);
 	}
-#elif
-	UC_AttackRayCasting::attackSphereTrace(MeshComp->GetOwner(), m_sPosition, m_strSocketName, m_fRadius, m_fDamage, m_bDrawDebug);
 #endif
+	if (MeshComp)
+		UC_AttackRayCasting::attackSphereTrace(MeshComp->GetOwner(), m_sPosition, m_strSocketName, m_fRadius, m_fDamage, m_bDrawDebug);
 }

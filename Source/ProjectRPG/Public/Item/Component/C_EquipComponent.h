@@ -2,19 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Item/C_ItemData.h"
 #include "C_EquipComponent.generated.h"
 
-class AC_ItemActorBase;
+class AC_EquipItem;
 class AC_BaseCharacter;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipEvent, int32, EquipID, int32, EquipIndex);
-
-UENUM(BlueprintType)
-enum class E_EquipEffectType : uint8
-{
-	E_Weapon,
-	E_Armor,
-};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEquipEvent, AC_EquipItem*, pEquipActor);
+UDELEGATE()
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnEquipTypeEvent, bool, IsEquip, AC_EquipItem*, pEquipActor);
 
 USTRUCT(BlueprintType)
 struct FS_EquipData
@@ -27,6 +23,17 @@ public:
 	int32 nEquipIndex{};
 };
 
+USTRUCT()
+struct FS_EquipEventBinding
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	FOnEquipTypeEvent Delegate{};
+};
+
+
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_EquipComponent : public UActorComponent
 {
@@ -37,9 +44,11 @@ public:
 
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "EquipComponent")
 	FOnEquipEvent m_onUnRegister{};
+
+	TArray< FS_EquipEventBinding> m_arrEquipEvent[(uint8)E_EquipEffectType::E_EquipTypeMax];
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "EquipComponent")
-	TMap< int32, int32> m_mapEquipData{};
+	TMap<E_EquipEffectType, AC_EquipItem*> m_setEquipData{};
 private:
 	UPROPERTY()
 	AC_BaseCharacter* pPlayer{};
@@ -48,24 +57,23 @@ public:
 	UC_EquipComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void registerEquip(AC_ItemActorBase* pItemBase);
+	void bindEquipTypeDelegate(E_EquipEffectType EquipType, FOnEquipTypeEvent Delegate);
 
 	UFUNCTION(BlueprintCallable)
-	void registerEquip_Text(int32 nEquipID, int32 EquipIndex);
+	void registerEquip(AC_EquipItem* pItemBase);
+
+	//UFUNCTION(BlueprintCallable)
+	//void registerEquip_Test(int32 nEquipID, int32 EquipIndex, float fValue);
 
 	UFUNCTION(BlueprintCallable)
-	void unRegisterEquip(int32 nEquipID);
+	void unRegisterEquip(AC_EquipItem* pItemBase);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	void effectEuip(int32 EquipID, int32 EquipIndex);
-	void unEffectEuip(int32 EquipID, int32 EquipIndex);
+	void effectEuip(AC_EquipItem* pItemBase);
+	void unEffectEuip(AC_EquipItem* pItemBase);
 
-	void effectWeapon(float Value);
-	void effectArmor(float Value);
-
-	void unEffectWeapon(float Value);
-	void unEffectArmor(float Value);
+	void braodCastEquip(E_EquipEffectType EquipType, bool IsEquip = true);
 };

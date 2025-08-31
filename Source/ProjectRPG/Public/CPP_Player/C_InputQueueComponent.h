@@ -18,15 +18,22 @@ private:
 	UPROPERTY()
 	TArray<FInputActionData> InputQueue;
 	static const int32 MaxQueueSize = 3;
+	TArray<FInputActionData> ChargingQueue;
 public:	
 	// Sets default values for this component's properties
 	UC_InputQueueComponent();
 	UFUNCTION(BlueprintCallable)
 	void PushInput(const FInputActionData& NewInput);
 	UFUNCTION(BlueprintCallable)
+	void PushInput_Charging(const FInputActionData& NewInput);
+	UFUNCTION(BlueprintCallable)
 	bool GetLastInputData(FInputActionData& OutInput) const;
 	UFUNCTION(BlueprintCallable)
+	bool GetLastChargingInputData(FInputActionData& OutInput) const;
+	UFUNCTION(BlueprintCallable)
 	void ClearQueueList();
+	UFUNCTION(BlueprintCallable)
+	void ClearChargingQueueList();
 
 protected:
 	// Called when the game starts

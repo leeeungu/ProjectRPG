@@ -24,12 +24,12 @@ bool AC_ItemActorBase::useItemActor()
 
 bool AC_ItemActorBase::findActor_Implementation(AActor*& pTargetActor)
 {
-	return false;
+	return true;
 }
 
 bool AC_ItemActorBase::itemEffect_Implementation()
 {
-	return false;
+	return true;
 }
 
 bool AC_ItemActorBase::useFail_Implementation()
@@ -39,7 +39,7 @@ bool AC_ItemActorBase::useFail_Implementation()
 
 bool AC_ItemActorBase::checkItemUseable_Implementation()
 {
-	return false;
+	return true;
 }
 
 bool AC_ItemActorBase::useSuccess_Implementation()
