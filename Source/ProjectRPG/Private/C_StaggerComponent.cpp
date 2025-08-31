@@ -36,14 +36,34 @@ bool UC_StaggerComponent::isBroken()
 	return m_bIsBroken;
 }
 
-void UC_StaggerComponent::setStaggerPoint(float fStagger)
+void UC_StaggerComponent::setMaxStaggerPoint(float fStagger)
 {
 	m_fMaxStagger = fStagger;
+}
+
+void UC_StaggerComponent::setStaggerPoint(float fStagger)
+{
+	m_fCurrentStagger = fStagger;
 }
 
 void UC_StaggerComponent::setBreakDuration(float fDuration)
 {
 	m_fBrokenDuration = fDuration;
+}
+
+float UC_StaggerComponent::getMaxStaggerPoint() const
+{
+	return m_fMaxStagger;
+}
+
+float UC_StaggerComponent::getCurrentStaggerPoint() const
+{
+	return m_fCurrentStagger;
+}
+
+float UC_StaggerComponent::getCurrentBreakPoint() const
+{
+	return m_fBrokenDuration;
 }
 
 void UC_StaggerComponent::recover()

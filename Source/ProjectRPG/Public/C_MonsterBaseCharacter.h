@@ -61,6 +61,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Niagara")
+	UNiagaraSystem* m_pDangerPlace;
+
+	UPROPERTY(EditAnywhere, Category = "Gimmick")
+	class UC_StaggerGimmickComponent* m_pStaggerGimmickComp;
+
 	UPROPERTY()
 	class UC_StaggerComponent* m_pStaggerComp;
 
@@ -70,17 +76,23 @@ private:
 	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
 
-
 	bool m_bIsAttacking = false;
+	bool m_bIsGimmickReady = false;
+
+	float m_fKeepMaxStagger = 0.0f;
+	float m_fKeepStagger = 0.0f;
+	float m_fKeepBreak = 0.0f;
 
 	FTimerHandle m_timeHandle;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Pattern")
 	TArray<FS_PatternData> m_arrPatternList;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Rank")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
+
+	
 
 private:
 	float getDistanceToTarget() const;
@@ -100,34 +112,39 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void stopAi();
+
+	UFUNCTION()
+	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);
+
+	/*
+	* 전투 관련
+	*/
+
 	TArray<int32> filterAvailablePatterns();
 
 	int32 selectPatternByWeight(const TArray<int32>& arrCandidates);
 
 	void playPattern(int32 nPatternIndex);
 
-	void playStaggerMontage();
-
 	bool getIsAttacking() const;
-
-
-	UFUNCTION(BlueprintCallable)
-	virtual void takeStaggerEvent(float fStagger);
-
-	UFUNCTION(BlueprintCallable)
-	void stopAi();
 
 
 	/*
 	* 무력화 관련
 	*/
 
+	void playStaggerMontage();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void takeStaggerEvent(float fStagger);
+
 	UFUNCTION()
 	void onStaggerBroken();
 
 	UFUNCTION()
 	void onStaggerRecover();
-
 
 	/*
 	* 카운터 관련
@@ -139,9 +156,32 @@ public:
 	UFUNCTION()
 	void onCounterFailed();
 
+	/*
+	* 죽음 소멸 관련 
+	*/
 
 	UFUNCTION(BlueprintCallable)
 	void onDead();
 
 	virtual void Destroyed() override;
+
+	/*
+	*  기믹 관련
+	*/
+	FVector getGimmickPos();
+
+	void moveToGimmick();
+
+	void startGimmick();
+
+	UFUNCTION()
+	void playStaggerGimmick();
+
+
+	UFUNCTION()
+	void endStaggerGimmick();
+
+	
+
+	
 };
