@@ -5,12 +5,16 @@
 #include "C_StaggerComponent.h"
 #include "C_PhaseComponent.h"
 #include "C_CounterComponent.h"
+#include "Monster/C_GimmickComponent.h"
 #include "C_MonsterAiController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
 #include "AIController.h"
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
+#include "../Public/Monster/C_StaggerGimmickComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Public/Monster/C_GimmickStartPos.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
@@ -25,6 +29,48 @@ AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
 void AC_MonsterBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+void AC_MonsterBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (m_eMonsterRank >= E_MonsterRank::Named)
+	{
+		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
+
+		m_pStaggerGimmickComp = FindComponentByClass<UC_StaggerGimmickComponent>();
+
+
+		if (m_pStaggerGimmickComp)
+		{
+			m_pStaggerGimmickComp->m_onStaggerGimmickStart.AddDynamic(this, &AC_MonsterBaseCharacter::playStaggerGimmick);
+			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.AddDynamic(this, &AC_MonsterBaseCharacter::endStaggerGimmick);
+
+		}
+
+		if (m_pStaggerComp)
+		{
+			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
+
+			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
+		}
+
+		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
+
+		if (m_pCounterComp)
+		{
+			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
+
+			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
+		}
+
+		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
+
+	}
+
+	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 
 }
 
@@ -79,6 +125,14 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+
+	if (m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
+	{
+		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
+		
+	}
+	
+	
 }
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
@@ -166,8 +220,8 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	if (m_bIsAttacking)
 		return;
 
-
 	m_bIsAttacking = true;
+
 	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
 		return;
 
@@ -183,6 +237,7 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	sPattern.fNiagaraLife, sPattern.fNiagaraScale);
 
 	UE_LOG(C_MonsterBaseCharacte, Warning, TEXT("Spawn Niagara at Time: %f"), GetWorld()->GetTimeSeconds());
+
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
 	
@@ -194,6 +249,7 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 
 	sPattern.LastUsedTime = GetWorld()->GetTimeSeconds();
 }
+
 
 float AC_MonsterBaseCharacter::getDistanceToTarget() const
 {
@@ -217,35 +273,134 @@ void AC_MonsterBaseCharacter::onAttackEnd()
 	m_bIsAttacking = false;
 }
 
-void AC_MonsterBaseCharacter::BeginPlay()
+void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted)
 {
-	Super::BeginPlay();
+	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
 
-	if (m_eMonsterRank >= E_MonsterRank::Named)
+	moveToGimmick();
+}
+
+FVector AC_MonsterBaseCharacter::getGimmickPos()
+{
+	TArray<AActor*> arrFound{};
+	FVector vGimmickPos{};
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+
+	if (arrFound.Num() > 0)
 	{
-		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
-
-		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
-
-		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
-
-		if (m_pStaggerComp)
-		{
-			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
-
-			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
-		}
-
-		if (m_pCounterComp)
-		{
-			m_pCounterComp->m_onCounterSuccess.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterSuccess);
-
-			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
-		}
+		AActor* pFoundActor = arrFound[0];
+		FVector vFoundPos = pFoundActor->GetActorLocation();
+		vGimmickPos = vFoundPos;
 	}
 
-	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
+	return vGimmickPos;
 }
+
+void AC_MonsterBaseCharacter::moveToGimmick()
+{
+	SetActorLocation(getGimmickPos());
+	SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
+	stopAi();
+	m_bIsGimmickReady = true;
+}
+
+void AC_MonsterBaseCharacter::startGimmick()
+{
+	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
+
+	if (pAnim->IsAnyMontagePlaying())
+	{
+		pAnim->OnMontageEnded.AddDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("AnyMontagePlaying!!!!!!!!!!"));
+	}
+	else
+	{
+		moveToGimmick();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Start!!!!!!!!!!"));
+	}
+
+}
+
+void AC_MonsterBaseCharacter::playStaggerGimmick()
+{
+	startGimmick();
+
+
+	/*
+	* 기믹 전용 무력화 수치와 그로기 시간을 지정
+	*/
+
+	if (m_pStaggerComp)
+	{
+		m_fKeepMaxStagger = m_pStaggerComp->getMaxStaggerPoint();
+		m_fKeepStagger = m_pStaggerComp->getCurrentStaggerPoint();
+		m_fKeepBreak = m_pStaggerComp->getCurrentBreakPoint();
+
+		if (m_pStaggerGimmickComp)
+		{
+			float fGoalStagger = m_pStaggerGimmickComp->getGoalStagger();
+			float fGoalBreak = m_pStaggerGimmickComp->getBrokenDuration();
+
+			m_pStaggerComp->setMaxStaggerPoint(fGoalStagger);
+			m_pStaggerComp->setBreakDuration(fGoalBreak);
+		}
+
+	}
+	UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_fKeepMaxStagger);
+	UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_fKeepStagger);
+
+	/*
+	* 무력화를 방해시킬 공격
+	*/
+
+	FVector vFowardOffset = GetActorForwardVector() * 500.f;
+	FVector vRightOffset = GetActorRightVector() * 500.f;
+	FVector vDecalLocation = vFowardOffset + GetActorLocation();
+	FVector vDecalLocation2 = vRightOffset + GetActorLocation();
+	vDecalLocation.Z = 0.1f;
+	vDecalLocation2.Z = 0.1f;
+
+	if (m_bIsGimmickReady)
+	{
+		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation,
+			FRotator(-90.f, 0.f, 0.f), 3.f, 1000.f);
+
+		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation2,
+			FRotator(-90.f, 0.f, 0.f), 3.f, 800.f);
+	}
+	
+
+	
+}
+
+
+void AC_MonsterBaseCharacter::endStaggerGimmick()
+{
+	if (m_pStaggerComp)
+	{
+		m_pStaggerComp->setMaxStaggerPoint(m_fKeepMaxStagger);
+		m_pStaggerComp->setStaggerPoint(m_fKeepStagger);
+		m_pStaggerComp->setBreakDuration(m_fKeepBreak);
+
+		m_fKeepMaxStagger = 0.0f;
+		m_fKeepStagger = 0.0f;
+		m_fKeepBreak = 0.0f;
+
+
+		UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_pStaggerComp->getMaxStaggerPoint());
+		UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_pStaggerComp->getCurrentStaggerPoint());
+		
+	}
+
+	/*
+	* 기믹 실패 처리
+	* 광역 높은 데미지 등
+	* 처리 후 AI 재가동 시키기
+	*/
+}
+
+
 
 void AC_MonsterBaseCharacter::Destroyed()
 {

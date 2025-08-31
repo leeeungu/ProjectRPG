@@ -95,7 +95,7 @@ public:
 	static int getUnValidItemID_CPP() { return -1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	int getCurrencyGoldItemID() const { return 0; }
+	int getCurrencyGoldItemID() const { return 1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;

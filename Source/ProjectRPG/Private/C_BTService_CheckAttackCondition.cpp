@@ -28,8 +28,11 @@ void UC_BTService_CheckAttackCondition::TickNode(UBehaviorTreeComponent& OwnerCo
 
 	bool bIsAttacking = !pMonster->getIsAttacking();
 
+
 	bool bCanAttack = bPatternCheck && bIsAttacking;
 
+
 	OwnerComp.GetBlackboardComponent()->SetValueAsBool(AC_MonsterAiController::CanAttackKey, bCanAttack);
+
 
 }

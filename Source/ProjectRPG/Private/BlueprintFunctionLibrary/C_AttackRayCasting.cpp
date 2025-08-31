@@ -18,7 +18,17 @@ bool UC_AttackRayCasting::attackSphereTrace(AActor* pSelf, FVector sPositionfloa
 	}
 	AC_BaseCharacter* Character = Cast<AC_BaseCharacter>(pSelf);
 	FVector Position = sPositionfloat;
-	Position += Character->GetMesh()->GetSocketByName(SocketName)->GetSocketLocation(Character->GetMesh());
+	if (Character->GetMesh()->GetSocketByName(SocketName))
+		Position += Character->GetMesh()->GetSocketByName(SocketName)->GetSocketLocation(Character->GetMesh());
+	else
+	{
+		if (SocketName == NAME_None)
+			SocketName = "root";
+		int32 BoneIndex = Character->GetMesh()->GetBoneIndex(SocketName);
+		if(BoneIndex == INDEX_NONE)
+			SocketName = "root";
+		Position += Character->GetMesh()->GetBoneLocation(SocketName);
+	}
 
 
 	TArray<FHitResult> OutHits{};
@@ -27,6 +37,7 @@ bool UC_AttackRayCasting::attackSphereTrace(AActor* pSelf, FVector sPositionfloa
 	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params{};
 	Params.AddIgnoredActor(pSelf);
+	UE_LOG(AttackBFL, Error, TEXT("UC_AttackRayCasting::attackSphereTrace : AC_BaseCharacter"));
 
 	pSelf->GetWorld()->SweepMultiByObjectType(OutHits, Position, Position, FQuat::Identity, ObjectQueryParams
 		, CollisionShape, Params);

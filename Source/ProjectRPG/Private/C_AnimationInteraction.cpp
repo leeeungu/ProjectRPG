@@ -6,6 +6,7 @@
 #include <Kismet/KismetMathLibrary.h>
 #include <NavigationSystem.h>
 #include <NavigationPath.h>
+#include "CPP_Player/C_Player.h"
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
@@ -58,22 +59,14 @@ void AC_AnimationInteraction::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
 
-	if (!m_arrLocations.IsValidIndex(nIndex) || !m_pDetector)
+	if (!m_pDetector )
 		return;
-
-	FVector Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
-	Dir.Z = 0.0f;
-	Dir.Normalize();
-	m_pDetector->AddMovementInput(Dir);
-	Dir = m_arrLocations[nIndex] - m_pDetector->GetActorLocation();
-	Dir.Z = 0.0f;
-	if (Dir.Length() < 15.0f)
+	FVector Location = m_pDetector->GetActorLocation();
+	if (FVector::Dist2D(Location, m_TargetLocations) < 15.0f)
 	{
-		nIndex++;
-		if (!m_arrLocations.IsValidIndex(nIndex))
-		{
-			StartAnimation();
-		}
+		AC_Player* pPlayer = Cast<AC_Player>(m_pDetector);
+		pPlayer->OnMoveToPosPlayer(Location);
+		StartAnimation();
 	}
 }
 
@@ -94,24 +87,22 @@ void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 {
 	if (!pDetectedActor || m_eStartType == E_TrabelType::E_NONE || m_bPlay)
 		return;
-	m_pDetector = Cast<ACharacter>(pDetectedActor);
+	AC_Player* pPlayer = Cast<AC_Player>(pDetectedActor);
+	m_pDetector = pPlayer;
 	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
-	if (!m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
+	if (!pPlayer || !m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
 		return;
-
-	UNavigationPath* pPath = UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), m_pDetector->GetActorLocation(), m_pStartDirection->GetComponentLocation());
-	if (pPath && pPath->IsValid() && pPath->PathPoints.Num() > 1)
-	{
-		SetActorTickEnabled(true);
-		m_arrLocations = pPath->PathPoints;
-		nIndex = 0;
-	}
+	m_TargetLocations = GetActorLocation();
+	pPlayer->OnMoveToPosPlayer(m_TargetLocations);
+	SetActorTickEnabled(true);
 }
 
 void AC_AnimationInteraction::StartAnimation()
 {
-	if (!m_pDetector)
+	AC_Player* pPlayer = Cast<AC_Player>(m_pDetector);
+	if (!m_pDetector || !pPlayer)
 		return;
+	pPlayer->OnMoveToPosPlayer(GetActorLocation());
 	SetActorTickEnabled(false); 
 	m_pDetector->SetActorTickEnabled(false);
 	m_pDetector->SetActorRotation(m_pStartDirection->GetComponentRotation());
@@ -122,11 +113,14 @@ void AC_AnimationInteraction::StartAnimation()
 
 void AC_AnimationInteraction::beginEndCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!m_pDetector || m_pDetector != Cast<ACharacter>(OtherActor) || m_eEndType == E_TrabelType::E_NONE || !m_pTravelManagerComponent || !m_bPlay)
+	if (m_eEndType == E_TrabelType::E_NONE || !m_pTravelManagerComponent || !m_bPlay)
+		return;
+	AC_Player* pPlayer = Cast<AC_Player>(m_pDetector);
+	if (!m_pDetector || !pPlayer)
 		return;
 	m_pTravelManagerComponent->setTravelType(m_eEndType);
-	m_pDetector = nullptr;
 	m_pTravelManagerComponent = nullptr;
+	m_pDetector = nullptr;
 	m_bPlay = false;
 }
 
@@ -138,6 +132,7 @@ void AC_AnimationInteraction::beginOverlap(UPrimitiveComponent* OverlappedCompon
 void AC_AnimationInteraction::endOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	m_pInteractionWidget->SetVisibility(false);
+	SetActorTickEnabled(false);
 }
 
 void AC_AnimationInteraction::rotateToTarget()
@@ -154,3 +149,4 @@ void AC_AnimationInteraction::rotateToTarget()
 		m_pStartDirection->SetWorldRotation(Rot);
 	}
 }
+

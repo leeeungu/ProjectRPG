@@ -30,7 +30,7 @@ struct FInputActionData
 	GENERATED_BODY()
 public:
     UPROPERTY(BlueprintReadWrite)
-    int32 ActionIndex{};
+    FName ActionName;
 
     UPROPERTY(BlueprintReadWrite)
     EInputType InputType{};
@@ -39,5 +39,8 @@ public:
     EInputStateType InputStateType{};
     UPROPERTY(BlueprintReadWrite)
     FVector TargetPoint{};
+
+    UPROPERTY(BlueprintReadWrite)
+    float Timestamp = 0.f;
     
 };

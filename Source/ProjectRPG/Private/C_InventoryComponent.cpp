@@ -1,11 +1,16 @@
 ﻿#include "C_InventoryComponent.h"
-#include <map>
-#include <queue>
 #include <C_GameAlertSubsystem.h>
+#include "C_ItemActorBase.h"
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	if (m_nInventorySize <= 0)
+	{
+		m_nInventoryHeight = 10;
+		m_nInventoryWidth = 10;
+		m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+	}
 }
 
 int UC_InventoryComponent::getItemID(int nY, int nX) 
@@ -254,18 +259,34 @@ void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface
 
 void UC_InventoryComponent::setInventorySlotData(int nY, int nX, FS_InventorySlotData& sData)
 {
-	m_arrInventory[getArrayIndex(nY, nX)].sData = sData;
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	if (!pSlotData)
+		return;
+	pSlotData->sData = sData;
 	if (sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
 		return;
 	int& sCount = m_mapItemCount.FindOrAdd(sData.nItemID);
 	sCount += sData.nItemCount;
 }
 
+bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
+{
+	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
+	if (pSlotData == &m_sDummyItemData)
+		return false;
+	AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+	if (pItem && pItem->useItemActor())
+	{
+		return removeItemAtSlot(nY, nX, nCount);
+	}
+	return false;
+}
+
 void UC_InventoryComponent::BeginPlay()
 {
-	UActorComponent::BeginPlay();
 	if (m_nInventorySize > 0)
 		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
+	UActorComponent::BeginPlay();
 
 	if (!GetWorld())
 		return;
@@ -298,7 +319,7 @@ bool UC_InventoryComponent::isBound(int nY, int nX)  const
 
 FS_InventorySlot* UC_InventoryComponent::getInventorySlotData(int nY, int nX)
 {
-	if (nY < 0 || nY >= m_nInventoryHeight || nX < 0 || nX >= m_nInventoryWidth)
+	if (nY < 0 || nY >= m_nInventoryHeight || nX < 0 || nX >= m_nInventoryWidth || !m_arrInventory.IsValidIndex(getArrayIndex(nY, nX)))
 		return &m_sDummyItemData;
 	return &m_arrInventory[getArrayIndex(nY, nX)];
 }

@@ -4,6 +4,7 @@
 SBS  국비 지원반에서 Unreal Engine을 사용하여 개발한 팀 프로젝트입니다.
 
 노션 주소 : https://www.notion.so/team/cda73d52-19f9-4710-9c3e-7d271f8c28a7/join
+노션 주소2 : https://www.notion.so/259debf7d548805886e8d2ee6ba54f18?v=259debf7d5488066b7f2000c83384d4f
 
 ## 📂 Project Structure
 ```text

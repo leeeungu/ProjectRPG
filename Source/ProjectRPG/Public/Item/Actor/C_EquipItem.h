@@ -2,29 +2,61 @@
 
 #include "CoreMinimal.h"
 #include "C_ItemActorBase.h"
+#include "Item/C_ItemData.h"
 #include "C_EquipItem.generated.h"
 
 class AC_BaseCharacter;
 
-
+USTRUCT(BlueprintType)
+struct FS_EquipItemData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EquipItemData")
+	int32  nLevel{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EquipItemData")
+	float fValue{};
+}; 
 
 UCLASS()
 class PROJECTRPG_API AC_EquipItem : public AC_ItemActorBase
 {
 	GENERATED_BODY()
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Data")
+	UDataTable* m_pEquipItemDataTable{};
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	int32 m_nEquipID{};
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int32 m_nEquipIndex{};
+	int32 m_nEquipLevel{};
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float m_fEquipValue{};
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	E_EquipEffectType m_eEquipType;
 public:
 	AC_EquipItem();
 
 	int32 getEquipID() const { return m_nEquipID; }
-	int32 getEquipIndex() const { return m_nEquipIndex; }
+	int32 getEquipLevel() const { return m_nEquipLevel; }
+	void setEquipLevel(int32 Level) { m_nEquipLevel = Level; }
+	float getEquipValue() const { return m_fEquipValue; }
+	E_EquipEffectType getEquipType() const { return m_eEquipType; }
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void effectEquip(AC_BaseCharacter* pCharacter);
+
+	virtual void effectEquip_Implementation(AC_BaseCharacter* pCharacter) {}
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void unEffectEquip(AC_BaseCharacter* pCharacter);
+	virtual void unEffectEquip_Implementation(AC_BaseCharacter* pCharacter) {}
+public:
+
+	// IC_ItemToolTipInterface을(를) 통해 상속됨
+	virtual FText getItemDesc_Implementation() const override;
+
 protected:
 	virtual bool findActor_Implementation(AActor*& pTargetActor) override;
 	virtual bool itemEffect_Implementation() override;

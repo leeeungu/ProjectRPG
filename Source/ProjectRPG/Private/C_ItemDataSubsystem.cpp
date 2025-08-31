@@ -105,7 +105,9 @@ void UC_ItemDataSubsystem::loadInventroyData(UC_InventoryComponent* pInventory)
     {
         for (int j = 0; j < nWidth; j++)
         {
-            pInventory->setInventorySlotData(i, j, m_arrInventory[pInventory->getArrayIndex(i, j)]);
+            int nIndex = pInventory->getArrayIndex(i, j);
+            if (m_arrInventory.IsValidIndex(nIndex))
+            pInventory->setInventorySlotData(i, j, m_arrInventory[nIndex]);
         }
     }
 }
@@ -123,7 +125,9 @@ void UC_ItemDataSubsystem::saveInventroyData(UC_InventoryComponent* pInventory)
     {
         for (int j = 0; j < nWidth; j++)
         {
-            pInventory->getInventorySlotData(i, j, m_arrInventory[pInventory->getArrayIndex(i,j)]);
+            int nIndex = pInventory->getArrayIndex(i, j);
+            if (m_arrInventory.IsValidIndex(nIndex))
+                pInventory->getInventorySlotData(i, j, m_arrInventory[nIndex]);
         }
     }
 }
