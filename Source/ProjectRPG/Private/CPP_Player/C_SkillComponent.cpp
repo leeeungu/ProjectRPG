@@ -16,22 +16,41 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum01.Cooldown = 5.0f;
 	SkillNum01.AttackPowerMultiplier = 200.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
-	if (skill1obj.Succeeded())
+	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
+	/*if (skill1obj.Succeeded())
 	{
 		SkillNum01.SkillMontage = skill1obj.Object;
-	}
+	}*/
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
 	//패링
 	FSkillData Pering;
 	Pering.SkillName = "Period";
 	Pering.Cooldown = 5.0f;
-	Pering.AttackPowerMultiplier = 10.f;
+	Pering.AttackPowerMultiplier = 0.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
 	if (skill1obj.Succeeded())
 	{
 		Pering.SkillMontage = Peringobj.Object;
 	}
 	SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+	//다운패링
+	FSkillData DownPering;
+	DownPering.SkillName = "DownPeriod";
+	DownPering.Cooldown = 5.0f;
+	DownPering.AttackPowerMultiplier = 0.f;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryDefault(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryF(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_F_Montage.SpearPeriod_D_F_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryB(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_B_Montage.SpearPeriod_D_B_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryL(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_L_Montage.SpearPeriod_D_L_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryR(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_R_Montage.SpearPeriod_D_R_Montage"));
+	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Default, DownParryDefault.Object);
+	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Forward, DownParryF.Object);
+	if (DownParryB.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Back, DownParryB.Object);
+	if (DownParryL.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Left, DownParryL.Object);
+	if (DownParryR.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Right, DownParryR.Object);
+
+	SkillMap.Add(DownPering.SkillName, DownPering);
 
 	//F차징스킬(start)
 	FSkillData ChargingSkill_Start;
@@ -120,18 +139,37 @@ void UC_SkillComponent::InitializeComponent()
 	
 }
 
-void UC_SkillComponent::UsingSkill(FName skill_Key)
+void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 {
 	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//스킬맵에 같은이름을가진게있다면 찿아서 Skill변수에 저장->이게 성공하면 true
 	{
+		UAnimMontage* MontageToPlay = nullptr;//실행할몽타주 백업용
+		// 4방향 전용 스킬이라면
+		if (Skill->DirectionMontages.Num() > 0)//Skill이 방향을 가지고있는 데이터라면?
+		{
+			UE_LOG(LogTemp, Warning, TEXT("4wayMontage"));
+			if (UAnimMontage*const* FoundMontage = Skill->DirectionMontages.Find(Direction))
+			{
+				MontageToPlay = *FoundMontage;
+			}
+			else if (UAnimMontage* const* DefaultMontage = Skill->DirectionMontages.Find(E4WayDirection::Default))
+			{
+				MontageToPlay = *DefaultMontage;
+			}
+		}
+		else
+		{
+			// 기존 스킬 (방향 없는)
+			MontageToPlay = Skill->SkillMontage;
+		}
 		//스킬은 존재하지만, `SkillMontage`가 설정되어 있지 않은 경우 실행 중단
 		//즉, **애니메이션이 설정되지 않은 스킬은 실행하지 않음**
-		if (!Skill->SkillMontage)
+		if (!MontageToPlay)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("NoMontage"));
 			return;
 		}
-		OnSkillMontageRequested.Broadcast(Skill->SkillMontage);//몽타주실행파트
+		OnSkillMontageRequested.Broadcast(MontageToPlay);//몽타주실행파트
 	}
 }
 

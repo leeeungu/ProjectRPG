@@ -11,7 +11,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillMontageRequested, class UAni
 
 struct FSkillData;
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_SkillComponent : public UActorComponent
 {
@@ -39,7 +38,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void InitializeComponent() override;
-	void UsingSkill(FName skill_Key);
+	void UsingSkill(FName skill_Key, E4WayDirection Direction = E4WayDirection::Default);
 
 	bool IsCooldownReady(FName SkillName) const;
 	void StartCooldown(FName SkillName);

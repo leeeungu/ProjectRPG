@@ -8,6 +8,16 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class E4WayDirection : uint8
+{
+    Forward,
+    Back,
+    Left,
+    Right,
+    Default
+};
+
 USTRUCT(BlueprintType)
 struct FSkillData
 {
@@ -20,6 +30,10 @@ public:
     // 사용할 애님 몽타주
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     UAnimMontage* SkillMontage = nullptr;
+
+    // 사용할 애님 몽타주(방향 있음)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TMap<E4WayDirection, UAnimMontage*> DirectionMontages;
 
     // 공격력 퍼센트 (100 = 100%)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")

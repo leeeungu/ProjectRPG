@@ -8,6 +8,8 @@
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
 
+struct FSkillData;
+enum class E4WayDirection : uint8;
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -25,7 +27,7 @@ enum class ERunningSystemState : uint8
 	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
 	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
 };
-enum class E4WayDirection : uint8
+enum class E4WayDirectionPlayer : uint8
 {
 	Foward,
 	Back,
@@ -98,7 +100,8 @@ private:
 	void CalMoveData();
 	void RunningSystemManager();
 	void ClearMoveState();
-	void Set4_WayDirection(const FVector& mousePoint);
+
+	E4WayDirection Set4_WayDirection(const FVector& mousePoint);
 
 	//플레이어 상태(idle? attck?)
 	bool IsAttackMode = false;

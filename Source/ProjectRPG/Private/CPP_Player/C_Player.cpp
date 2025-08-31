@@ -11,6 +11,7 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_InputActionData.h"
+#include "CPP_Player/S_SkillData.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
@@ -77,45 +78,34 @@ void AC_Player::RunningSystemManager()
 {
 	//우선순위키데이터(현제 : 패링)
 	//패링은 RunningState에 영향을받지않음 즉 쿨타임을 제대로 설정하지않으면 무한으로 사용가능 
-	//FInputActionData PriorityInputData{};
-	//if (m_inputQueue->GetLastInputData(PriorityInputData))//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
-	//{
-	//	//1. 패링 입력 최우선 처리
-	//	if (PriorityInputData.InputType == EInputType::Period)
-	//	{
-	//		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
-	//		//InterruptAllActions();   //진행중인 모든몽타주 stop
-	//		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
-	//		bCanMove = false;
-	//		if (IsAttackMode)
-	//		{
-	//			AttackMode();
-	//		}
-	//		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
-	//		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-	//		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-	//		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
-	//		return; // 여기서 바로 종료 (다른 입력 무시)
-	//	}
-	//}
 	FInputActionData PriorityInputData{};
 	if (!m_inputQueue->GetLastInputData(PriorityInputData) && !m_inputQueue->GetLastChargingInputData(PriorityInputData)) return;//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
 	//1. 패링 입력 최우선 처리
 	if (PriorityInputData.InputType == EInputType::Period)
 	{
-		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
-		//InterruptAllActions();   //진행중인 모든몽타주 stop
-		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+		//if (RunningState == ERunningSystemState::Down)
+		//{
+		RunningState = ERunningSystemState::Busy;
 		bCanMove = false;
-		if (IsAttackMode)
-		{
-			AttackMode();
-		}
-		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
-		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
-		return; // 여기서 바로 종료 (다른 입력 무시)
+		E4WayDirection Direction = Set4_WayDirection(PriorityInputData.TargetPoint);
+		IsPeriod = true;
+		m_skillCom->UsingSkill(FName("DownPeriod"), Direction);//이름교체
+		m_inputQueue->ClearQueueList();
+		return;
+		//}
+		//-------------------------------------------다운패링테스트---------------------------------------------------
+		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
+		//RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+		//bCanMove = false;
+		//if (IsAttackMode)
+		//{
+		//	AttackMode();
+		//}
+		//CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
+		//IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+		//m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
+		//m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
+		//return; // 여기서 바로 종료 (다른 입력 무시)
 	}
 	if (RunningState == ERunningSystemState::Idle)
 	{
@@ -452,7 +442,7 @@ void AC_Player::ClearMoveState()
 	CalMoveData();
 }
 
-void AC_Player::Set4_WayDirection(const FVector& mousePoint)
+E4WayDirection AC_Player::Set4_WayDirection(const FVector& mousePoint)
 {
 	FVector ToMouse = mousePoint - GetActorLocation();
 	ToMouse.Z = 0;
@@ -462,33 +452,31 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	Forward.Z = 0;
 	Forward.Normalize();
 
-	// DotProduct는 두 벡터 사이의 각도 관계를 알 수 있음
-	float Dot = FVector::DotProduct(Forward, ToMouse);
-	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
+	float Dot = FVector::DotProduct(Forward, ToMouse);//0~1사이값 =>각도를 얻어옴
+	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));//라디안값으로 각도로 변환
+	//캐릭터 포워드기준으로 오른쪽은 90도 왼쪽은 -90도
 
-	// CrossProduct는 왼쪽 / 오른쪽 판별용으로 사용
+	// CrossProduct는 왼쪽 / 오른쪽 판별용으로 사용//오른손법칙 z>0 ->왼쪽, z<0 ->오른쪽
 	float CrossZ = FVector::CrossProduct(Forward, ToMouse).Z;
-
-	E4WayDirection Direction;
-
+	E4WayDirectionPlayer Direction;
 	if (AngleDegrees <= 45.0f)
 	{
-		Direction = E4WayDirection::Foward;
+		Direction = E4WayDirectionPlayer::Foward;
 	}
 	else if (AngleDegrees > 135.0f)
 	{
-		Direction = E4WayDirection::Back;
+		Direction = E4WayDirectionPlayer::Back;
 	}
 	else
 	{
 		// 90도 ±45도는 옆방향, CrossZ로 왼/오 구분
 		if (CrossZ > 0)
 		{
-			Direction = E4WayDirection::Left;
+			Direction = E4WayDirectionPlayer::Right;
 		}
 		else
 		{
-			Direction = E4WayDirection::Right;
+			Direction = E4WayDirectionPlayer::Left;
 		}
 	}
 
@@ -496,16 +484,25 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	FString DirString;
 	switch (Direction)
 	{
-	case E4WayDirection::Foward: DirString = TEXT("Forward"); break;
-	case E4WayDirection::Back:   DirString = TEXT("Back"); break;
-	case E4WayDirection::Left:   DirString = TEXT("Left"); break;
-	case E4WayDirection::Right:  DirString = TEXT("Right"); break;
+	case E4WayDirectionPlayer::Foward: DirString = TEXT("Forward"); break;
+	case E4WayDirectionPlayer::Back:   DirString = TEXT("Back"); break;
+	case E4WayDirectionPlayer::Left:   DirString = TEXT("Left"); break;
+	case E4WayDirectionPlayer::Right:  DirString = TEXT("Right"); break;
 	}
-
 	UE_LOG(LogTemp, Warning, TEXT("4-Way Direction: %s"), *DirString);
-
-	// 여기에 멤버 변수 세팅 또는 추가 로직
-	// Direction; // 디렉션을 저장하든 넘겨주든하면됨.
+	
+	switch (Direction)
+	{
+	case E4WayDirectionPlayer::Foward:
+		return E4WayDirection::Forward;
+	case E4WayDirectionPlayer::Back:
+		return E4WayDirection::Back;
+	case E4WayDirectionPlayer::Left:
+		return E4WayDirection::Left;
+	case E4WayDirectionPlayer::Right:
+		return E4WayDirection::Right;
+	}
+	return E4WayDirection::Default;
 }
 void AC_Player::AttackMode()
 {
