@@ -18,7 +18,6 @@ class PROJECTRPG_API UC_StaggerComponent : public UActorComponent
 private:
 	float m_fBreakTimer = 0.0f;
 
-protected:
 	UPROPERTY(EditAnywhere, Category = "Stagger")
 	float m_fMaxStagger = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
@@ -58,7 +57,9 @@ public:
 	void setStaggerPoint(float fStagger);
 	void setBreakDuration(float fDuration);
 
+	UFUNCTION(BlueprintCallable)
 	float getMaxStaggerPoint() const;
+	UFUNCTION(BlueprintCallable)
 	float getCurrentStaggerPoint() const;
 	float getCurrentBreakPoint() const;
 
