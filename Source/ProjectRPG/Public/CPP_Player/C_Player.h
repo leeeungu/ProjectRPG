@@ -27,12 +27,14 @@ enum class ERunningSystemState : uint8
 	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
 	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
 };
+UENUM()
 enum class E4WayDirectionPlayer : uint8
 {
 	Foward,
 	Back,
 	Left,
-	Right
+	Right,
+	Default
 };
 /**
  * 
@@ -65,6 +67,8 @@ private:
 	//플레이어 상태
 	UPROPERTY()
 	ERunningSystemState RunningState = ERunningSystemState::Idle;
+	UPROPERTY()
+	E4WayDirectionPlayer DirectionSkillState = E4WayDirectionPlayer::Default;
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;
@@ -100,7 +104,7 @@ private:
 	void CalMoveData();
 	void RunningSystemManager();
 	void ClearMoveState();
-
+	//플레이어에서 방향계산후 애님인스턴스에 넘겨줄 이넘으로 변환
 	E4WayDirection Set4_WayDirection(const FVector& mousePoint);
 
 	//플레이어 상태(idle? attck?)

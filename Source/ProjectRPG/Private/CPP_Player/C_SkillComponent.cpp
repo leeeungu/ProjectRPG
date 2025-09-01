@@ -17,25 +17,70 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum01.AttackPowerMultiplier = 200.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
-	/*if (skill1obj.Succeeded())
-	{
-		SkillNum01.SkillMontage = skill1obj.Object;
-	}*/
-	SkillMap.Add(SkillNum01.SkillName, SkillNum01);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
+
+	FSkillData SkillNum02;
+	SkillNum02.SkillName = "S_02";
+	SkillNum02.Cooldown = 5.0f;
+	SkillNum02.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_02_Montage.SpearSkill_02_Montage"));
+	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
+	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
+
+	FSkillData SkillNum03;
+	SkillNum03.SkillName = "S_03";
+	SkillNum03.Cooldown = 5.0f;
+	SkillNum03.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_03_Montage.SpearSkill_03_Montage"));
+	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
+	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
+
+	FSkillData SkillNum04;
+	SkillNum04.SkillName = "S_04";
+	SkillNum04.Cooldown = 5.0f;
+	SkillNum04.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_04_Montage.SpearSkill_04_Montage"));
+	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
+	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
+
+	FSkillData SkillNum05;
+	SkillNum05.SkillName = "S_05";
+	SkillNum05.Cooldown = 5.0f;
+	SkillNum05.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT(""));//5번스킬은 이동기라 보류
+	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
+	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
+
+	FSkillData SkillNum06;
+	SkillNum06.SkillName = "S_06";
+	SkillNum06.Cooldown = 5.0f;
+	SkillNum06.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_06_Montage.SpearSkill_06_Montage"));
+	if (skill6obj.Succeeded()) SkillNum06.DirectionMontages.Add(E4WayDirection::Default, skill6obj.Object);
+	SkillMap.Add(SkillNum06.SkillName, SkillNum06);
+
+	FSkillData SkillNum07;
+	SkillNum07.SkillName = "S_07";
+	SkillNum07.Cooldown = 5.0f;
+	SkillNum07.AttackPowerMultiplier = 200.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_07_Montage.SpearSkill_07_Montage"));
+	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
+	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
+
 	//패링
-	FSkillData Pering;
-	Pering.SkillName = "Period";
-	Pering.Cooldown = 5.0f;
-	Pering.AttackPowerMultiplier = 0.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
-	if (skill1obj.Succeeded())
-	{
-		Pering.SkillMontage = Peringobj.Object;
-	}
-	SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
+	//FSkillData Pering;
+	//Pering.SkillName = "1Period";
+	//Pering.Cooldown = 5.0f;
+	//Pering.AttackPowerMultiplier = 0.f;
+	//static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
+	//if (skill1obj.Succeeded())
+	//{
+	//	Pering.SkillMontage = Peringobj.Object;
+	//}
+	//SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
 	//다운패링
 	FSkillData DownPering;
-	DownPering.SkillName = "DownPeriod";
+	DownPering.SkillName = "Period";
 	DownPering.Cooldown = 5.0f;
 	DownPering.AttackPowerMultiplier = 0.f;
 

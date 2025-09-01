@@ -79,15 +79,36 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(Q_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnQ_Action);
         }
+        if (W_Key)
+        {
+            EnhancedInput->BindAction(W_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnW_Action);
+        }
+        if (E_Key)
+        {
+            EnhancedInput->BindAction(E_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnE_Action);
+        }
+        if (R_Key)
+        {
+            EnhancedInput->BindAction(R_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnR_Action);
+        }
+        if (A_Key)
+        {
+            EnhancedInput->BindAction(A_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnA_Action);
+        }
+        if (S_Key)
+        {
+            EnhancedInput->BindAction(S_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnS_Action);
+        }
+        if (D_Key)
+        {
+            EnhancedInput->BindAction(D_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnD_Action);
+        }
         if (F_Key)
         {
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnF_ActionStarted);
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Triggered, this, &AC_PlayerController::OnF_ActionOngoing);
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnF_ActionCanceld);
-            EnhancedInput->BindAction(F_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnF_ActionCompleted);\
-
-            if (F_Key->Triggers.Num() >= 1 && Cast< UInputTriggerHold>(F_Key->Triggers[0].Get()))//차징 스킬 가중치 테스트
-                UE_LOG(C_PlayerController, Error, TEXT("%f"), Cast< UInputTriggerHold>(F_Key->Triggers[0].Get())->HoldTimeThreshold);
+            EnhancedInput->BindAction(F_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnF_ActionCompleted);
         }
         if (Number1_Key)
         {
@@ -134,12 +155,84 @@ void AC_PlayerController::OnSpaceBarAction(const FInputActionValue& Value)
         InputQueueSystem->PushInput(NewInputData);
     }
 }
-//Q스킬 입력
+//스킬 입력
 void AC_PlayerController::OnQ_Action(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
     NewInputData.ActionName = "S_01";
     NewInputData.InputType = EInputType::Skill; 
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnW_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_02";
+    NewInputData.InputType = EInputType::Skill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnE_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_03";
+    NewInputData.InputType = EInputType::Skill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnR_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_04";
+    NewInputData.InputType = EInputType::Skill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnA_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_05";
+    NewInputData.InputType = EInputType::Skill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnS_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_06";
+    NewInputData.InputType = EInputType::Skill;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+    }
+}
+void AC_PlayerController::OnD_Action(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "S_07";
+    NewInputData.InputType = EInputType::Skill;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
     if (InputQueueSystem)
@@ -254,56 +347,35 @@ AC_PlayerController::AC_PlayerController()
     static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(
         TEXT("/Game/RPG_Player/Input/PlayerInputMappingContexts.PlayerInputMappingContexts")
     );
-    if (IMC.Succeeded())
-    {
-        InputMapping = IMC.Object;
-    }
+    if (IMC.Succeeded()) InputMapping = IMC.Object;
     //마우스클릭
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(
-        TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick")
-    );
-    if (IA_RightClick.Succeeded())
-    {
-        RightClick = IA_RightClick.Object;
-    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick"));
+    if (IA_RightClick.Succeeded()) RightClick = IA_RightClick.Object;
     //스페이스바(패링)
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(
-        TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar")
-    );
-    if (IA_SpaceBar.Succeeded())
-    {
-        SpaceBar = IA_SpaceBar.Object;
-    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar"));
+    if (IA_SpaceBar.Succeeded()) SpaceBar = IA_SpaceBar.Object;
     //스킬
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_QAction(
-        TEXT("/Game/RPG_Player/Input/Actions/Q_Action.Q_Action")
-    );
-    if (IA_QAction.Succeeded())
-    {
-        Q_Key = IA_QAction.Object;
-    }
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(
-        TEXT("/Game/RPG_Player/Input/Actions/F_Action.F_Action")
-    );
-    if (IA_FAction.Succeeded())
-    {
-        F_Key = IA_FAction.Object;
-    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_QAction(TEXT("/Game/RPG_Player/Input/Actions/Q_Action.Q_Action"));
+    if (IA_QAction.Succeeded()) Q_Key = IA_QAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_WAction(TEXT("/Game/RPG_Player/Input/Actions/W_Action.W_Action"));
+    if (IA_QAction.Succeeded()) W_Key = IA_WAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_EAction(TEXT("/Game/RPG_Player/Input/Actions/E_Action.E_Action"));
+    if (IA_QAction.Succeeded()) E_Key = IA_EAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_RAction(TEXT("/Game/RPG_Player/Input/Actions/R_Action.R_Action"));
+    if (IA_QAction.Succeeded()) R_Key = IA_RAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_AAction(TEXT("/Game/RPG_Player/Input/Actions/A_Action.A_Action"));
+    if (IA_QAction.Succeeded()) A_Key = IA_AAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_SAction(TEXT("/Game/RPG_Player/Input/Actions/S_Action.S_Action"));
+    if (IA_QAction.Succeeded()) S_Key = IA_SAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_DAction(TEXT("/Game/RPG_Player/Input/Actions/D_Action.D_Action"));
+    if (IA_QAction.Succeeded()) D_Key = IA_DAction.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(TEXT("/Game/RPG_Player/Input/Actions/F_Action.F_Action"));
+    if (IA_FAction.Succeeded()) F_Key = IA_FAction.Object;
     //아이템
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(
-        TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action")
-    );
-    if (IA_Number1Action.Succeeded())
-    {
-        Number1_Key = IA_Number1Action.Object;
-    }
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number2Action(
-        TEXT("/Game/RPG_Player/Input/Actions/Number2_Acrion.Number2_Acrion")
-    );
-    if (IA_Number2Action.Succeeded())
-    {
-        Number2_Key = IA_Number2Action.Object;
-    }
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action"));
+    if (IA_Number1Action.Succeeded()) Number1_Key = IA_Number1Action.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number2Action(TEXT("/Game/RPG_Player/Input/Actions/Number2_Acrion.Number2_Acrion"));
+    if (IA_Number2Action.Succeeded()) Number2_Key = IA_Number2Action.Object;
     
     m_pInventoryComponent = CreateDefaultSubobject<UC_InventoryComponent>(TEXT("InventoryComponent"));
     m_pCurrencyComponent = CreateDefaultSubobject<UC_CurrencyComponent>(TEXT("CurrencyComponent"));
