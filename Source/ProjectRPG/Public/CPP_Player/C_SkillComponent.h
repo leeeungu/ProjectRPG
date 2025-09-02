@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "S_SkillData.h"
 #include "C_SkillComponent.generated.h"
+#define DEBUG_DRAW
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillMontageRequested, class UAnimMontage*, MontageToPlay);
 
@@ -19,6 +20,8 @@ private:
 	UPROPERTY()
 	TMap<FName, FSkillData> SkillMap;
 	TMap<FName, float> SkillCooldownEndTime;
+	FName CurrentSkillName = {};
+	void SpawnSkillCollision(const FSkillCollisionData& data);
 public:	
 	// Sets default values for this component's properties
 	UC_SkillComponent();
@@ -39,6 +42,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void InitializeComponent() override;
 	void UsingSkill(FName skill_Key, E4WayDirection Direction = E4WayDirection::Default);
+	void HandleSkillHit();
 
 	bool IsCooldownReady(FName SkillName) const;
 	void StartCooldown(FName SkillName);

@@ -6,6 +6,69 @@
 #include "CPP_Player/C_PlayerAnimInstance.h"
 #include "GameFramework/Character.h"
 
+void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
+{
+	FVector SpawnLocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorRotation().RotateVector(data.RelativeOffset);
+	FQuat Rotation = GetOwner()->GetActorQuat();
+
+	FCollisionShape CollisionShape;
+	switch (data.ShapeType)
+	{
+	case ESkillCollisionShapeType::Sphere:
+		CollisionShape = FCollisionShape::MakeSphere(data.Dimensions.X);
+		break;
+	case ESkillCollisionShapeType::Box:
+		CollisionShape = FCollisionShape::MakeBox(data.Dimensions);
+		break;
+	case ESkillCollisionShapeType::Capsule:
+		CollisionShape = FCollisionShape::MakeCapsule(data.Dimensions.X, data.Dimensions.Z);
+		break;
+	}
+
+	// 데미지 적용 로직 예시
+	TArray<FHitResult> HitResults;
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		SpawnLocation,
+		SpawnLocation,
+		Rotation,
+		ECC_Pawn,
+		CollisionShape
+	);
+
+#ifdef DEBUG_DRAW
+	switch (data.ShapeType)
+	{
+	case ESkillCollisionShapeType::Sphere:
+		DrawDebugSphere(GetWorld(), SpawnLocation, data.Dimensions.X, 16, FColor::Green, false, 2.f);
+		break;
+
+	case ESkillCollisionShapeType::Box:
+		DrawDebugBox(GetWorld(), SpawnLocation, data.Dimensions * 0.5f, Rotation, FColor::Blue, false, 2.f);
+		break;
+
+	case ESkillCollisionShapeType::Capsule:
+		DrawDebugCapsule(GetWorld(), SpawnLocation, data.Dimensions.Z, data.Dimensions.X, Rotation, FColor::Red, false, 2.f);
+		break;
+	}
+#endif
+
+	//if (bHit)
+	//{
+	//	for (const FHitResult& Hit : HitResults)
+	//	{
+	//		AActor* HitActor = Hit.GetActor();
+	//		if (HitActor && HitActor != GetOwner())
+	//		{
+	//			UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitActor->GetName());
+	//          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
+	//          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
+	//          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음.
+	//		}
+	//	}
+	//}
+}
+
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
 {
@@ -13,16 +76,24 @@ UC_SkillComponent::UC_SkillComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	FSkillData SkillNum01;
 	SkillNum01.SkillName = "S_01";
-	SkillNum01.Cooldown = 5.0f;
+	SkillNum01.Cooldown = 0.0f;//테스트용 0초
 	SkillNum01.AttackPowerMultiplier = 200.f;
+	SkillNum01.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
+	SkillNum01.CollisionData.Dimensions = FVector(100.f, 100.f, 500.f);
+	SkillNum01.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
+	SkillNum01.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
 
 	FSkillData SkillNum02;
 	SkillNum02.SkillName = "S_02";
-	SkillNum02.Cooldown = 5.0f;
+	SkillNum02.Cooldown = 0.0f;
 	SkillNum02.AttackPowerMultiplier = 200.f;
+	SkillNum02.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
+	SkillNum02.CollisionData.Dimensions = FVector(400.f, 400.f, 300.f);
+	SkillNum02.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
+	SkillNum02.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_02_Montage.SpearSkill_02_Montage"));
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
@@ -47,7 +118,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum05.SkillName = "S_05";
 	SkillNum05.Cooldown = 5.0f;
 	SkillNum05.AttackPowerMultiplier = 200.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT(""));//5번스킬은 이동기라 보류
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_05(Tumble)/SpearSkill_07_B_Montage.SpearSkill_07_B_Montage"));
 	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
 	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
 
@@ -61,8 +132,12 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData SkillNum07;
 	SkillNum07.SkillName = "S_07";
-	SkillNum07.Cooldown = 5.0f;
+	SkillNum07.Cooldown = 0.0f;
 	SkillNum07.AttackPowerMultiplier = 200.f;
+	SkillNum07.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
+	SkillNum07.CollisionData.Dimensions = FVector(700.f, 100.f, 100.f);
+	SkillNum07.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
+	SkillNum07.CollisionData.Duration = 0.3f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_07_Montage.SpearSkill_07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
@@ -100,8 +175,12 @@ UC_SkillComponent::UC_SkillComponent()
 	//F차징스킬(start)
 	FSkillData ChargingSkill_Start;
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
-	ChargingSkill_Start.Cooldown = 10.0f;
+	ChargingSkill_Start.Cooldown = 0.0f;
 	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
+	ChargingSkill_Start.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
+	ChargingSkill_Start.CollisionData.Dimensions = FVector(800.f, 100.f, 50.f);
+	ChargingSkill_Start.CollisionData.RelativeOffset = FVector::ForwardVector * 300.f;
+	ChargingSkill_Start.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Pull.SpearSkill_08_Pull"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
@@ -189,6 +268,7 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//스킬맵에 같은이름을가진게있다면 찿아서 Skill변수에 저장->이게 성공하면 true
 	{
 		UAnimMontage* MontageToPlay = nullptr;//실행할몽타주 백업용
+		CurrentSkillName = skill_Key;
 		// 4방향 전용 스킬이라면
 		if (Skill->DirectionMontages.Num() > 0)//Skill이 방향을 가지고있는 데이터라면?
 		{
@@ -218,6 +298,20 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 	}
 }
 
+void UC_SkillComponent::HandleSkillHit()//애님노티파이(SkillHit)호출용
+{
+	UE_LOG(LogTemp, Warning, TEXT("SetCollision"));
+	const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
+	if (!SkillData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NonePlayingSkill"));
+		return;
+	}
+	const FSkillCollisionData& CollisionData = SkillData->CollisionData;//스킬데이터의 컬리젼데이터를 참조하는 래퍼런스생성.
+	SpawnSkillCollision(CollisionData);
+
+}
+
 bool UC_SkillComponent::IsCooldownReady(FName SkillName) const
 {
 	//Skill쿨타임 맵에 해당 스킬데이터가없으면 아직 눌리지않았으니 ture로 리턴
@@ -232,6 +326,11 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 	if (!SkillMap.Contains(SkillName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Skill [%s] not found in SkillDataMap"), *SkillName.ToString());
+		return;
+	}
+	if (!GetWorld())
+	{
+		UE_LOG(LogTemp, Error, TEXT("StartCooldown: GetWorld() is nullptr!"));
 		return;
 	}
 	// 스킬 데이터에서 쿨타임 값 가져오기
