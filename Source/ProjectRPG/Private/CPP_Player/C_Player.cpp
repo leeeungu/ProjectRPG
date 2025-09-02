@@ -256,53 +256,6 @@ void AC_Player::Reset_Implementation(UCameraComponent* Camera)
 
 void AC_Player::SetPeriodInfo()
 {
-
-	/*if (RunningState != ERunningSystemState::Down)
-	{
-		FVector Forward = GetActorForwardVector();
-		Forward.Z = 0.0f;
-		ParryDirection = Forward.GetSafeNormal();
-		IsPeriod = true;
-		return;
-	}*/
-	/*else if (RunningState == ERunningSystemState::Down)
-	{
-		FVector DirectionVector;
-		switch (DirectionSkillState)
-		{
-		case E4WayDirectionPlayer::Foward:
-			DirectionVector = GetActorForwardVector();
-			DirectionVector.Z = 0.0f;
-			ParryDirection = DirectionVector.GetSafeNormal();
-			IsPeriod = true;
-			break;
-		case E4WayDirectionPlayer::Back:
-			DirectionVector = -GetActorForwardVector();
-			DirectionVector.Z = 0.0f;
-			ParryDirection = DirectionVector.GetSafeNormal();
-			IsPeriod = true;
-			break;
-		case E4WayDirectionPlayer::Left:
-			DirectionVector = -GetActorRightVector();
-			DirectionVector.Z = 0.0f;
-			ParryDirection = DirectionVector.GetSafeNormal();
-			IsPeriod = true;
-			break;
-		case E4WayDirectionPlayer::Right:
-			DirectionVector = GetActorRightVector();
-			DirectionVector.Z = 0.0f;
-			ParryDirection = DirectionVector.GetSafeNormal();
-			IsPeriod = true;
-			break;
-		case E4WayDirectionPlayer::Default:
-			DirectionVector = GetActorForwardVector();
-			DirectionVector.Z = 0.0f;
-			ParryDirection = DirectionVector.GetSafeNormal();
-			IsPeriod = true;
-			break;
-		}
-
-	}*/
 	FVector DirectionVector;
 	switch (DirectionSkillState)
 	{
