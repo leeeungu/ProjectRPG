@@ -71,7 +71,6 @@ protected:
 	UDataTable* m_pItemDataTable{};
 	FString m_strDataTablePath = TEXT("/Game/Item/DataTable/DT_ItemData.DT_ItemData");
 	UPROPERTY()
-	TArray<FS_InventorySlotData> m_arrInventory{};
 	int m_arrQuickSlotItem[6]{};
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData{};
@@ -102,11 +101,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
-
-	UFUNCTION(BlueprintCallable)
-	void loadInventroyData(UC_InventoryComponent* pInventory);
-	UFUNCTION(BlueprintCallable)
-	void saveInventroyData(UC_InventoryComponent* pInventory);
 
 	UFUNCTION(BlueprintCallable)
 	void loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot);
