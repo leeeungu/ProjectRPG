@@ -63,6 +63,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClick;
 	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* LeftClick;
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SpaceBar;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Q_Key;
@@ -92,6 +94,7 @@ protected:
 	UInputAction* m_pQuickSlot{};
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
+	void OnLeftClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
 	void OnQ_Action(const FInputActionValue& Value);
 	void OnW_Action(const FInputActionValue& Value);

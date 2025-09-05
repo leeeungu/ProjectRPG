@@ -72,8 +72,57 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
 {
-	//Q스킬
 	PrimaryComponentTick.bCanEverTick = true;
+	//평타
+	FSkillData PlainAttack01;
+	PlainAttack01.SkillName = "PA_01";
+	PlainAttack01.Cooldown = 0.0f;//테스트용 0초
+	PlainAttack01.AttackPowerMultiplier = 200.f;
+	PlainAttack01.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
+	PlainAttack01.CollisionData.Dimensions = FVector(100.f, 100.f, 100.f);
+	PlainAttack01.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
+	PlainAttack01.CollisionData.Duration = 2.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA1obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_1_Montage.Spear_Combo04_1_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack01.DirectionMontages.Add(E4WayDirection::Default, PA1obj.Object);
+	SkillMap.Add(PlainAttack01.SkillName, PlainAttack01);
+
+	FSkillData PlainAttack02;
+	PlainAttack02.SkillName = "PA_02";
+	PlainAttack02.Cooldown = 0.0f;//테스트용 0초
+	PlainAttack02.AttackPowerMultiplier = 200.f;
+	PlainAttack02.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
+	PlainAttack02.CollisionData.Dimensions = FVector(70.f, 70.f, 200.f);
+	PlainAttack02.CollisionData.RelativeOffset = FVector::ForwardVector * 60.f;
+	PlainAttack02.CollisionData.Duration = 2.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA2obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_2_Montage.Spear_Combo04_2_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack02.DirectionMontages.Add(E4WayDirection::Default, PA2obj.Object);
+	SkillMap.Add(PlainAttack02.SkillName, PlainAttack02);
+
+	FSkillData PlainAttack03;
+	PlainAttack03.SkillName = "PA_03";
+	PlainAttack03.Cooldown = 0.0f;//테스트용 0초
+	PlainAttack03.AttackPowerMultiplier = 200.f;
+	PlainAttack03.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
+	PlainAttack03.CollisionData.Dimensions = FVector(300.f, 100.f, 100.f);
+	PlainAttack03.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
+	PlainAttack03.CollisionData.Duration = 2.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA3obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_3_Montage.Spear_Combo04_3_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack03.DirectionMontages.Add(E4WayDirection::Default, PA3obj.Object);
+	SkillMap.Add(PlainAttack03.SkillName, PlainAttack03);
+
+	FSkillData PlainAttack04;
+	PlainAttack04.SkillName = "PA_04";
+	PlainAttack04.Cooldown = 0.0f;//테스트용 0초
+	PlainAttack04.AttackPowerMultiplier = 200.f;
+	PlainAttack04.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
+	PlainAttack04.CollisionData.Dimensions = FVector(100.f, 100.f, 50.f);
+	PlainAttack04.CollisionData.RelativeOffset = FVector::ForwardVector * 150.f;
+	PlainAttack04.CollisionData.Duration = 2.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA4obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_4_Montage.Spear_Combo04_4_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack04.DirectionMontages.Add(E4WayDirection::Default, PA4obj.Object);
+	SkillMap.Add(PlainAttack04.SkillName, PlainAttack04);
+
+	//Q스킬
 	FSkillData SkillNum01;
 	SkillNum01.SkillName = "S_01";
 	SkillNum01.Cooldown = 0.0f;//테스트용 0초
@@ -110,6 +159,10 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum04.SkillName = "S_04";
 	SkillNum04.Cooldown = 5.0f;
 	SkillNum04.AttackPowerMultiplier = 200.f;
+	SkillNum04.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
+	SkillNum04.CollisionData.Dimensions = FVector(250.f, 250.f, 150.f);
+	SkillNum04.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
+	SkillNum04.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_04_Montage.SpearSkill_04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);

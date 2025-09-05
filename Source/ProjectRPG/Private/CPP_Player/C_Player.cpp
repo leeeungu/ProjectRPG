@@ -19,6 +19,29 @@
 
 
 
+FName AC_Player::SetPlainAttack()
+{
+	switch (m_nComboCount)
+	{
+	case 0: m_nComboCount = 1; return FName("PA_01");
+	case 1: m_nComboCount = 2; return FName("PA_02");
+	case 2: m_nComboCount = 3; return FName("PA_03");
+	case 3: m_nComboCount = 0; return FName("PA_04");
+	default:
+		m_nComboCount = 0;
+		return FName("PA_01");
+	}
+}
+
+void AC_Player::ComboCountSetting(float DeltaTime)//콤보타임세팅중
+{
+	ComboTime += DeltaTime;
+	if (ComboTime >= 2.f)
+	{
+
+	}
+}
+
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
@@ -157,6 +180,16 @@ void AC_Player::RunningSystemManager()
 			m_inputQueue->ClearQueueList();//그냥 마지막인덱스를 가져온거기때문에 끝나고 다시 큐에서 가져옴 그렇기떄문에 가져오고나서 리스트를비워줘야 끝나고 자동으로 가져오지않음.
 			switch (CurrentInputData.InputType)
 			{
+			case EInputType::PlainAttack:
+				RunningState = ERunningSystemState::Busy;
+				if (myAnimInterface)
+				{
+					myAnimInterface->SetAttackMode(true);
+				}
+				bCanMove = false;
+				CalRotateData(CurrentInputData.TargetPoint);
+				m_skillCom->UsingSkill(SetPlainAttack());
+				break;
 			case EInputType::Skill:
 				if (m_skillCom->IsCooldownReady(CurrentInputData.ActionName))
 				{
@@ -363,6 +396,8 @@ void AC_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	PlayerStateCheking(DeltaTime);
+
+
 	FString StateName;
 
 	switch (RunningState)
@@ -586,6 +621,7 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 	if (!IsAttackMode) return;//아이들모드면 체킹할필요없음
 	AttackingModeTime += DeltaTime;
 	//UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
+
 	if (AttackingModeTime > 5.f)
 	{
 		IsAttackMode = false;//다시 아이들모드로 되돌림.

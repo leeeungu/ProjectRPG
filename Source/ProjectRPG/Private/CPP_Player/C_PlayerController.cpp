@@ -72,6 +72,10 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(RightClick, ETriggerEvent::Triggered, this, &AC_PlayerController::OnRightClickAction);
         }
+        if (LeftClick)
+        {
+            EnhancedInput->BindAction(LeftClick, ETriggerEvent::Triggered, this, &AC_PlayerController::OnLeftClickAction);
+        }
         if (SpaceBar)
         {
             EnhancedInput->BindAction(SpaceBar, ETriggerEvent::Started, this, &AC_PlayerController::OnSpaceBarAction);
@@ -150,6 +154,19 @@ void AC_PlayerController::OnRightClickAction(const FInputActionValue& Value)
     else if (HitType == EMouseHitType::Ground)
     {
         player->OnMoveToPosPlayer(CachedHit.ImpactPoint);
+    }
+}
+void AC_PlayerController::OnLeftClickAction(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "PA_01";
+    NewInputData.InputType = EInputType::PlainAttack;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
+    if (InputQueueSystem)
+    {
+        InputQueueSystem->PushInput(NewInputData);
+        UE_LOG(LogTemp, Warning, TEXT("Attack"));
     }
 }
 //스페이스바 입력
@@ -392,6 +409,8 @@ AC_PlayerController::AC_PlayerController()
     //마우스클릭
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_RightClick(TEXT("/Game/RPG_Player/Input/Actions/RighClick.RighClick"));
     if (IA_RightClick.Succeeded()) RightClick = IA_RightClick.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_LeftClick(TEXT("/Game/RPG_Player/Input/Actions/LeftClick.LeftClick"));
+    if (IA_LeftClick.Succeeded()) LeftClick = IA_LeftClick.Object;
     //스페이스바(패링)
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_SpaceBar(TEXT("/Game/RPG_Player/Input/Actions/SpaceBar.SpaceBar"));
     if (IA_SpaceBar.Succeeded()) SpaceBar = IA_SpaceBar.Object;

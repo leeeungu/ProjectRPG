@@ -94,6 +94,12 @@ private:
 	//차징스킬
 	bool bHoldSkillPlayed = false;
 	bool bChargingReady = false;
+
+	//콤보어택
+	int32 m_nComboCount{};
+	FName SetPlainAttack();
+	float ComboTime = 0.f;
+	void ComboCountSetting(float DeltaTime);
 public:
 	
 

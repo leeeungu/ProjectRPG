@@ -11,6 +11,7 @@ enum class EInputType : uint8
     None,
     Period,
     Skill,
+    PlainAttack,
     ChargeSkill,
     Item,
     AnimItem
