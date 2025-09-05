@@ -16,7 +16,7 @@
 #include "Item/Component/C_EquipComponent.h"
 #include "C_QuickSlotManagerComponent.h"
 #include "C_InventoryComponent.h"
-#include "C_InteractionDetectorComponent.h"
+#include "C_ItemDataSubsystem.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(C_PlayerController, Log, All);
@@ -327,26 +327,30 @@ void AC_PlayerController::OnInteraction(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
     NewInputData.ActionName = "Interaction";
-    //NewInputData.InputType = EInputType::;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
     AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
-    if (pPlayer && pPlayer->getInteractionDetectComponent())
+    if (pPlayer)
     {
-        pPlayer->getInteractionDetectComponent()->runInteraction();
+        pPlayer->runInteraction();
     }
 }
 
 void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
 {
     FInputActionData NewInputData;
-    NewInputData.ActionName = "Interaction";
-    //NewInputData.InputType = EInputType::;
+    NewInputData.ActionName = "QuickSlot";
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    if (getQuestManagerComponent())
+    int nItemID{};
+    if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID(E_QuickSlotType::E_QuickSlot1, nItemID))
     {
-        //getQuestManagerComponent()->();
+        UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+        if (GameInstance)
+        {
+            UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
+            pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
+        }
     }
 }
 
