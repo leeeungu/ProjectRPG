@@ -67,6 +67,11 @@ float UC_StaggerComponent::getCurrentBreakPoint() const
 	return m_fBrokenDuration;
 }
 
+void UC_StaggerComponent::setMode(E_StaggerMode eMode)
+{
+	m_eCurrentMode = eMode;
+}
+
 void UC_StaggerComponent::recover()
 {
 	m_bIsBroken = false;

@@ -9,6 +9,12 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBroken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRecover);
 
+enum class E_StaggerMode
+{
+	Normal,
+	Gimick
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_StaggerComponent : public UActorComponent
@@ -18,6 +24,8 @@ class PROJECTRPG_API UC_StaggerComponent : public UActorComponent
 private:
 	float m_fBreakTimer = 0.0f;
 
+	E_StaggerMode m_eCurrentMode = E_StaggerMode::Normal;
+
 	UPROPERTY(EditAnywhere, Category = "Stagger")
 	float m_fMaxStagger = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
@@ -26,6 +34,8 @@ private:
 	float m_fBrokenDuration = 3.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
 	bool m_bIsBroken = false;
+
+
 
 
 public:
@@ -62,6 +72,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float getCurrentStaggerPoint() const;
 	float getCurrentBreakPoint() const;
+
+	void setMode(E_StaggerMode eMode);
 
 public:	
 	// Called every frame

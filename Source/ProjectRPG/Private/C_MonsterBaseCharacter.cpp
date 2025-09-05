@@ -132,7 +132,7 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 		
 	}
 	
-	
+	UE_LOG(LogTemp, Warning, TEXT("MaxStagger : %.f"), m_pStaggerComp->getMaxStaggerPoint());
 }
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
@@ -331,24 +331,11 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 	* 기믹 전용 무력화 수치와 그로기 시간을 지정
 	*/
 
-	if (m_pStaggerComp)
+	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
-		m_fKeepMaxStagger = m_pStaggerComp->getMaxStaggerPoint();
-		m_fKeepStagger = m_pStaggerComp->getCurrentStaggerPoint();
-		m_fKeepBreak = m_pStaggerComp->getCurrentBreakPoint();
-
-		if (m_pStaggerGimmickComp)
-		{
-			float fGoalStagger = m_pStaggerGimmickComp->getGoalStagger();
-			float fGoalBreak = m_pStaggerGimmickComp->getBrokenDuration();
-
-			m_pStaggerComp->setMaxStaggerPoint(fGoalStagger);
-			m_pStaggerComp->setBreakDuration(fGoalBreak);
-		}
+		m_pStaggerGimmickComp->applyGimmickStagger(m_pStaggerComp);
 
 	}
-	UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_fKeepMaxStagger);
-	UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_fKeepStagger);
 
 	/*
 	* 무력화를 방해시킬 공격
@@ -377,18 +364,9 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 
 void AC_MonsterBaseCharacter::endStaggerGimmick()
 {
-	if (m_pStaggerComp)
+	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
-		m_pStaggerComp->setStaggerPoint(m_fKeepStagger);
-		m_pStaggerComp->setBreakDuration(m_fKeepBreak);
-
-		m_fKeepStagger = 0.0f;
-		m_fKeepBreak = 0.0f;
-
-
-		UE_LOG(LogTemp, Error, TEXT("MaxStagger :  %.f"), m_pStaggerComp->getMaxStaggerPoint());
-		UE_LOG(LogTemp, Error, TEXT("CurrentStagger :  %.f"), m_pStaggerComp->getCurrentStaggerPoint());
-		
+		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
 	}
 
 	/*
