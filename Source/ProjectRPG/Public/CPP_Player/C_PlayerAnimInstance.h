@@ -21,23 +21,33 @@ class PROJECTRPG_API UC_PlayerAnimInstance : public UAnimInstance ,public II_Pla
 	GENERATED_BODY()
 private:
 	UAnimMontage* CurrentActiveMontage{};
+	void AnimChangeMode();
+	UFUNCTION()
+	void OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 protected:
+	UPROPERTY(BlueprintReadOnly)
+	bool m_bIsAttackMode = false;
 	UPROPERTY(BlueprintReadOnly)
 	bool m_bIsAttack = false;
 	UPROPERTY(BlueprintReadOnly)
 	bool m_ActiveValue = false;
+	UPROPERTY()
+	UAnimMontage* UnEquipMontage;
 public:
 	virtual void NativeInitializeAnimation() override;
 	UPROPERTY(BlueprintReadOnly)
 	bool IsMove{};
 	UFUNCTION()
 	void PlaySkillMontage(UAnimMontage* MontageToPlay);
+	UFUNCTION()
+	void PlayUnEquipMontage();
 	//노티파이발생시 사용함수
 	FChangeRunningStateDelegate ChangeRunningState;
 	void OnChangeRunningState();
 	FSetPlayerMovePointEnabled SetPlayerMovePointEnabled;
 	void OnEndMontage(UAnimMontage* Montage, bool bInterrupted);//end몽타주 바인딩용 함수(매개변수는 맞춰준것뿐)
-	FOnChargingReadyChanged ChargingReadyChanged;
+	
 
 	UPROPERTY(BlueprintAssignable, Category = "Montage")
 	FOnRequestJumpSection OnRequestJumpSection;
@@ -46,7 +56,7 @@ public:
 
 	//인터페이스
 	virtual void SetAttackMode(bool b) override;
-	virtual void SetActiveValue(bool b) override;
+	virtual void SetIsAttackingMode(bool b) override;
 	
 
 };

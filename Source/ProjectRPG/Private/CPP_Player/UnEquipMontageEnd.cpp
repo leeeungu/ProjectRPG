@@ -15,7 +15,7 @@ void UUnEquipMontageEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
         II_PlayerToAnimInstance* AnimInterface = Cast<II_PlayerToAnimInstance>(AnimInstance);
         if (AnimInterface)
         {
-            AnimInterface->SetActiveValue(false);
+            AnimInterface->SetIsAttackingMode(false);
             
             UE_LOG(LogTemp, Warning, TEXT("Period true"));
         }
