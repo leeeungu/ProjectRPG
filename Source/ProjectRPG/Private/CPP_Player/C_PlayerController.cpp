@@ -16,6 +16,7 @@
 #include "Item/Component/C_EquipComponent.h"
 #include "C_QuickSlotManagerComponent.h"
 #include "C_InventoryComponent.h"
+#include "C_InteractionDetectorComponent.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(C_PlayerController, Log, All);
@@ -117,6 +118,15 @@ void AC_PlayerController::SetupInputComponent()
         if (Number2_Key)
         {
             EnhancedInput->BindAction(Number2_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnNumber2_Action);
+        }
+
+        if (m_pInteraction)
+        {
+            EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, this, &AC_PlayerController::OnInteraction);
+        }
+        if (m_pQuickSlot)
+        {
+            EnhancedInput->BindAction(m_pQuickSlot, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlot);
         }
     }
 }
@@ -310,6 +320,33 @@ void AC_PlayerController::OnNumber2_Action(const FInputActionValue& Value)
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
+    }
+}
+
+void AC_PlayerController::OnInteraction(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "Interaction";
+    //NewInputData.InputType = EInputType::;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
+    AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
+    if (pPlayer && pPlayer->getInteractionDetectComponent())
+    {
+        pPlayer->getInteractionDetectComponent()->runInteraction();
+    }
+}
+
+void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "Interaction";
+    //NewInputData.InputType = EInputType::;
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
+    if (getQuestManagerComponent())
+    {
+        //getQuestManagerComponent()->();
     }
 }
 
