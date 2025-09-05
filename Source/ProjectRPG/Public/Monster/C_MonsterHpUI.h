@@ -14,11 +14,26 @@ class PROJECTRPG_API UC_MonsterHpUI : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(meta = (BindWidget))
+private:
 	TArray<class UProgressBar*> m_arrHpBars;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Hp")
+protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> HpBar_1;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> HpBar_2;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> HpBar_3;
+
+protected:
+	virtual void NativeConstruct() override;
+
+	
+
+public:
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Hp")
 	float m_fSegMentHp{};
 
 

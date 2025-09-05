@@ -379,11 +379,9 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 {
 	if (m_pStaggerComp)
 	{
-		m_pStaggerComp->setMaxStaggerPoint(m_fKeepMaxStagger);
 		m_pStaggerComp->setStaggerPoint(m_fKeepStagger);
 		m_pStaggerComp->setBreakDuration(m_fKeepBreak);
 
-		m_fKeepMaxStagger = 0.0f;
 		m_fKeepStagger = 0.0f;
 		m_fKeepBreak = 0.0f;
 
