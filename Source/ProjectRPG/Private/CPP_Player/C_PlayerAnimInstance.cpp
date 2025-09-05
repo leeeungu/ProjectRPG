@@ -29,6 +29,39 @@ void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
     }        
 }
 
+void UC_PlayerAnimInstance::PlayUnEquipMontage()
+{
+   
+	StopAllMontages(0.1f);
+	Montage_Play(UnEquipMontage);
+	UE_LOG(LogTemp, Warning, TEXT("UnEquip"));
+    //FOnMontageEnded MontageEndedDelegate;
+    //MontageEndedDelegate.Unbind();//이전델리게이트해재 (중복방지)
+    //MontageEndedDelegate.BindUObject(this, &UC_PlayerAnimInstance::OnUnEquipMontageEnded);
+    //Montage_SetEndDelegate(MontageEndedDelegate, UnEquipMontage);
+    
+}
+
+void UC_PlayerAnimInstance::AnimChangeMode()
+{
+    if (!m_bIsAttack)
+    {
+        //m_bIsAttackMode = m_bIsAttack;
+        PlayUnEquipMontage();
+        return;
+    }
+    m_bIsAttackMode = m_bIsAttack;
+    
+}
+
+void UC_PlayerAnimInstance::OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (Montage == UnEquipMontage)
+    {
+        m_bIsAttackMode = m_bIsAttack;//아이들상태로 변환
+    }
+}
+
 void UC_PlayerAnimInstance::NativeInitializeAnimation()
 {
     Super::NativeInitializeAnimation();
@@ -44,6 +77,14 @@ void UC_PlayerAnimInstance::NativeInitializeAnimation()
         //언바인딩을해야할경우->이 애님인스턴스를 더이상 쓰지않을떄.
     }
     OnRequestJumpSection.AddDynamic(this, &UC_PlayerAnimInstance::HandleJumpSection);//지금은 플레이어에서 직접호출하지만 컴포넌트로 옮겨야함 그래야 구조깔끔
+    if (UnEquipMontage == nullptr)
+    {
+        UnEquipMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Game/RPG_Hero_Animation/SpearUnequip_Montage.SpearUnequip_Montage"));
+        if (UnEquipMontage == nullptr)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Failed to load SpearUnequip_Montage in NativeInitializeAnimation"));
+        }
+    }
 }
 
 void UC_PlayerAnimInstance::OnChangeRunningState()
@@ -85,11 +126,12 @@ void UC_PlayerAnimInstance::SetAttackMode(bool b)
 {
     UE_LOG(LogTemp, Warning, TEXT("AttakcingMode"));
     m_bIsAttack = b;
+    AnimChangeMode();
 }
 
-void UC_PlayerAnimInstance::SetActiveValue(bool b)
+void UC_PlayerAnimInstance::SetIsAttackingMode(bool b)
 {
-    m_ActiveValue = b;
+    m_bIsAttackMode = b;
 }
 
 

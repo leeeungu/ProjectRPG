@@ -590,10 +590,6 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 	{
 		IsAttackMode = false;//다시 아이들모드로 되돌림.
 		AttackingModeTime = 0.f;
-		if (myAnimInterface)
-		{
-			myAnimInterface->SetActiveValue(true);
-		}
 		myAnimInterface->SetAttackMode(false);
 		UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
 		return;
