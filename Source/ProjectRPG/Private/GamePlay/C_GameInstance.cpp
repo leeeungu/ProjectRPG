@@ -7,6 +7,7 @@ void UC_GameInstance::Init()
 	UGameInstance::Init();
 	//UGameplayStatics::OpenLevel();
 	m_pDataManager = NewObject<UC_DataManager>(this, TEXT("DataMager"));
+	m_pDataManager->loadDataFiles();
 }
 
 void UC_GameInstance::Shutdown()

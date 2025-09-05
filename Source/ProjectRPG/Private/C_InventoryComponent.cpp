@@ -4,6 +4,8 @@
 #include "BlueprintFunctionLibrary/C_GameDataUtill.h"
 #include "GamePlay/C_DataManager.h"
 
+DEFINE_LOG_CATEGORY_STATIC(C_InventoryComponent, Log, All);
+
 UC_InventoryComponent::UC_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -257,6 +259,7 @@ void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface
 	if (pSlotData == &m_sDummyItemData || !pInterface || !pInterface->Implements<UC_InventorySlotInterface>())
 		return ;
 	pSlotData->pSlotInterface = TScriptInterface< IC_InventorySlotInterface>(pInterface);
+
 	runSlotChangeInterface(pSlotData);
 }
 
@@ -293,6 +296,7 @@ void UC_InventoryComponent::BeginPlay()
 		if (DataManager)
 		{
 			DataManager->registerDataFile(this);
+			DataManager->loadDataFiles();
 			DataManager->loadData(this);
 		}
 	}
@@ -342,10 +346,10 @@ int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 
 void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UC_GameDataUtill::saveBinaryData(this);
+	UActorComponent::EndPlay(EndPlayReason);
 	if (Cast<APlayerController>(GetOwner()))
 	{
-		UActorComponent::EndPlay(EndPlayReason);
+		UC_GameDataUtill::saveBinaryData(this);
 	}
 	//m_pItemDataSubsystem->saveInventroyData(this);
 }
@@ -368,7 +372,7 @@ void UC_InventoryComponent::runSlotChangeInterface(FS_InventorySlot* pItemSlot)
 
 E_DataType UC_InventoryComponent::getDataType()
 {
-	return E_DataType::E_StringArray;
+	return E_DataType::E_Binary;
 }
 
 FString UC_InventoryComponent::getFilePath(E_DataType eType)
@@ -379,15 +383,17 @@ FString UC_InventoryComponent::getFilePath(E_DataType eType)
 void UC_InventoryComponent::loadBinaryData(TArray<uint8>& arData)
 {
 	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
-	TArray<uint8> result{};
 	if (!UC_GameDataUtill::readBinaryFile(arData, &Data))
 		return;
 	m_nInventoryHeight = Data.nInventoryWidth;
 	m_nInventoryWidth = Data.nInventoryHeight;
 	m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
-	for (int i = 0; i < m_nInventorySize; i++)
+	for (int i = 0; i < m_nInventoryHeight; i++)
 	{
-		m_arrInventory[i].sData = Data.arrInventory[i].sData;
+		for (int j = 0; j < m_nInventoryWidth; j++)
+		{
+			setInventorySlotData(i, j, Data.arrInventory[getArrayIndex(i,j)].sData);
+		}
 	}
 }
 

@@ -9,8 +9,8 @@ enum class E_DataType : uint8
 {
 	E_NONE = 0,
 	E_String = 1,
-	E_StringArray = 2,
-	E_Binary = 3,
+	E_StringArray = 1 << 1,
+	E_Binary = 1 << 2,
 };
 
 UINTERFACE(MinimalAPI)

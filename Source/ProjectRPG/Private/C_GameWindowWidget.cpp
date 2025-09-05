@@ -1,6 +1,8 @@
 ﻿#include "C_GameWindowWidget.h"
 #include "C_MainWidget.h"
 
+DEFINE_LOG_CATEGORY_STATIC(C_GameWindowWidget, Log, All);
+
 UC_GameWindowWidget::UC_GameWindowWidget(const FObjectInitializer& ObjectInitializer) : 
 	UUserWidget{ ObjectInitializer }
 {

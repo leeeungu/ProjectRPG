@@ -15,36 +15,28 @@ void UC_DataManager::registerDataFile(TSoftObjectPtr<IC_DataManagerInterface> pI
 			if (!pPath)
 				pPath = &m_mapDataFile.Add(Path);
 			*pPath = (E_DataType)Bit;
+
+			switch ((E_DataType)Bit)
+			{
+			case E_DataType::E_String:
+				m_mapStringData.Add(Path);;
+				break;
+			case E_DataType::E_StringArray:
+				m_mapStringArrayData.Add(Path);
+				break;
+			case E_DataType::E_Binary:
+				m_mapBinaryArrayData.Add(Path);
+				break;
+			}
 		}
 	}
-
+	
 	m_arrSaveObjects.AddUnique(pInterface);
 }
 
 void UC_DataManager::loadDataFiles()
 {
-	for (TPair<FString,  E_DataType> &  sPair : m_mapDataFile)
-	{
-		FString& Path = sPair.Key;
-		switch (sPair.Value)
-		{
-		case E_DataType::E_String:
-		{
-			loadStringData(Path);
-			break;
-		}
-		case E_DataType::E_StringArray:
-		{
-			loadStringArrayData(Path);
-			break;
-		}
-		case E_DataType::E_Binary:
-		{
-			loadBinaryData(Path);
-			break;
-		}
-		}
-	}
+	
 }
 
 void UC_DataManager::saveDataFiles()
@@ -56,8 +48,6 @@ void UC_DataManager::saveDataFiles()
 	}
 	m_arrSaveObjects.Reset(0);
 }
-
-
 
 bool UC_DataManager::loadData(IC_DataManagerInterface* pInterface)
 {
@@ -71,7 +61,7 @@ bool UC_DataManager::loadData(IC_DataManagerInterface* pInterface)
 		uint8 Bit = 1 << i;
 		if (((uint8)Type & Bit) == Bit)
 		{
-			bResult ^= loadData(pInterface , (E_DataType)Bit);
+			bResult &= loadData(pInterface , (E_DataType)Bit);
 		}
 	}
 	return bResult;
@@ -95,6 +85,7 @@ bool UC_DataManager::loadData(IC_DataManagerInterface* pInterface, E_DataType Da
 		FString* pData = m_mapStringData.Find(Path);
 		if (!pData)
 			return false;
+		loadStringData(Path);
 		pInterface->loadStringData(*pData);
 		break;
 	}
@@ -103,6 +94,7 @@ bool UC_DataManager::loadData(IC_DataManagerInterface* pInterface, E_DataType Da
 		TArray<FString>* pData = m_mapStringArrayData.Find(Path);
 		if (!pData)
 			return false;
+		loadStringArrayData(Path);
 		pInterface->loadStringArrayData(*pData);
 		break;
 	}
@@ -111,6 +103,7 @@ bool UC_DataManager::loadData(IC_DataManagerInterface* pInterface, E_DataType Da
 		TArray<uint8>* pData = m_mapBinaryArrayData.Find(Path);
 		if (!pData)
 			return false;
+		loadBinaryData(Path);
 		pInterface->loadBinaryData(*pData);
 		break;
 	}

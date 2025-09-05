@@ -2,6 +2,8 @@
 #include <GameFramework/PlayerController.h>
 #include <C_InventoryComponent.h>
 #include <C_GameAlertSubsystem.h>
+#include "BlueprintFunctionLibrary/C_GameDataUtill.h"
+#include "GamePlay/C_DataManager.h"
 
 UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 	UActorComponent{}
@@ -12,20 +14,6 @@ UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 		m_arrQuickSlotItem[i] = UC_ItemDataSubsystem::getUnValidItemID_CPP();
 	}
 }
-
-//bool UC_QuickSlotManagerComponent::useQuickSlot(E_QuickSlotType QuickSlotType, int& useItemID, int nCount)
-//{
-//	if (!getQuickSlotItemID(QuickSlotType, useItemID))
-//		return false;
-//
-//	bool bResult = m_pInventoryComponent->removeItem(useItemID, nCount);
-//	int nRemainCount{};
-//	if (bResult && m_onQuickSlotNoneDelegate.IsBound()  && (!m_pInventoryComponent->getItemCountByID(useItemID, nRemainCount) || nRemainCount <= 0))
-//	{
-//		m_onQuickSlotNoneDelegate.Broadcast();
-//	}
-//	return bResult;
-//}
 
 void UC_QuickSlotManagerComponent::setQuickSlotItem(E_QuickSlotType QuickSlotType, int ItemID)
 {
@@ -75,7 +63,8 @@ bool UC_QuickSlotManagerComponent::getQuickSlotItemID(E_QuickSlotType QuickSlotT
 void UC_QuickSlotManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UActorComponent::EndPlay(EndPlayReason);
-	UC_ItemDataSubsystem::getInstance()->saveQuickSlotData(this);
+	UC_GameDataUtill::saveBinaryData(this);
+	//UC_ItemDataSubsystem::getInstance()->saveQuickSlotData(this);
 }
 
 int UC_QuickSlotManagerComponent::getQuickSlotID(E_QuickSlotType QuickSlotType) const
@@ -92,6 +81,44 @@ void UC_QuickSlotManagerComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 	m_pInventoryComponent = GetOwner()->GetComponentByClass<UC_InventoryComponent>();
-	UC_ItemDataSubsystem::getInstance()->loadQuickSlotData(this);
+	UC_DataManager* pManager = UC_GameDataUtill::getDataManager(GetWorld());
+	if (pManager)
+	{
+		pManager->registerDataFile(this);
+		pManager->loadData(this);
+	}
+}
 
+E_DataType UC_QuickSlotManagerComponent::getDataType()
+{
+	return E_DataType::E_Binary;
+}
+
+FString UC_QuickSlotManagerComponent::getFilePath(E_DataType eType)
+{
+	return  FPaths::ProjectSavedDir() + TEXT("QuickSlotData");
+}
+
+void UC_QuickSlotManagerComponent::loadBinaryData(TArray<uint8>& arData)
+{
+	FS_QuickSlotSaveData Data{};
+	if (!UC_GameDataUtill::readBinaryFile(arData, &Data))
+		return;
+
+	for (int i = 0; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+	{
+		setQuickSlotItem((E_QuickSlotType)i, Data.arrQuickSlotItem[i]);
+	}
+}
+
+TArray<uint8> UC_QuickSlotManagerComponent::getBinaryData()
+{
+	FS_QuickSlotSaveData Data{};
+	for (int i = 0; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+	{
+		Data.arrQuickSlotItem[i] = m_arrQuickSlotItem[i];
+	}
+	TArray<uint8> result{};
+	UC_GameDataUtill::saveBinaryFile< FS_QuickSlotSaveData>(result, &Data);
+	return result;
 }

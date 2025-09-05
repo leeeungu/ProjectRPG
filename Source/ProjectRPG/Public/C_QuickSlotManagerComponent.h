@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GamePlay/C_DataManagerInterface.h"
 #include "C_QuickSlotManagerComponent.generated.h"
 
 class UC_InventoryComponent;
@@ -22,18 +23,35 @@ enum class E_QuickSlotType : uint8
 	E_QuickSlot_MAX UMETA(Hidden, DisplayName = "Max Quick Slot")
 };
 
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROJECTRPG_API UC_QuickSlotManagerComponent : public UActorComponent
+class PROJECTRPG_API UC_QuickSlotManagerComponent : public UActorComponent, public IC_DataManagerInterface
 {
 	GENERATED_BODY()
+private:
+	struct FS_QuickSlotSaveData
+	{
+	public:
+		int arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
+
+
+		friend FArchive& operator<<(FArchive& Ar, FS_QuickSlotSaveData* Data)
+		{
+			for (int i = 0; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
+			{
+				Ar << Data->arrQuickSlotItem[i];
+			}
+			return Ar;
+		}
+	};
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite)
 	FOnQuickSlotNone m_onQuickSlotNoneDelegate{};
 	UPROPERTY()
 	FOnQuickSlotChange m_onQuickSlotChange[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
 private:
-	int m_arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX];
-	UC_InventoryComponent* m_pInventoryComponent;
+	int m_arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
+	UC_InventoryComponent* m_pInventoryComponent{};
 public:
 	UC_QuickSlotManagerComponent();
 
@@ -57,4 +75,11 @@ protected:
 	virtual void BeginPlay() override;
 
 
+public:
+	// IC_DataManagerInterface을(를) 통해 상속됨
+	virtual E_DataType getDataType() override;
+	virtual FString getFilePath(E_DataType eType) override;
+
+	virtual void loadBinaryData(TArray<uint8>& arData) override;
+	virtual TArray<uint8> getBinaryData() override;
 };
