@@ -119,6 +119,11 @@ private:
 	void AttackMode();
 	void PlayerStateCheking(float DeltaTime);
 
+	UFUNCTION(BlueprintCallable)
+	void PlayerDownTest();
+	void ReceiveDamage(float damageAmount);
+	void Down();
+
 public:
 	AC_Player();
 	virtual void BeginPlay() override;

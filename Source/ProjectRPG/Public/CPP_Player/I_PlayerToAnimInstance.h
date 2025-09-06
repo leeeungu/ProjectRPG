@@ -22,6 +22,7 @@ class PROJECTRPG_API II_PlayerToAnimInstance
 public:
 	virtual void SetAttackMode(bool b) {}
 	virtual void SetIsAttackingMode(bool b) {}
+	virtual void SetIsDownMode(bool b) {}
 	
 
 };

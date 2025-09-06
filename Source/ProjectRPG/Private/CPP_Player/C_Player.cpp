@@ -17,7 +17,27 @@
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 
+void AC_Player::PlayerDownTest()
+{
+	float damage = 5.f;
+	ReceiveDamage(damage);
+}
 
+void AC_Player::ReceiveDamage(float damageAmount)
+{
+	//hp에서 캐릭터 피깍음
+	//만약에 공형형태가 다운형태면
+	ClearMoveState();
+	Down();
+
+}
+void AC_Player::Down()
+{
+	RunningState = ERunningSystemState::Down;
+	ClearMoveState();
+	bCanMove = false;
+	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
+}
 
 FName AC_Player::SetPlainAttack()
 {
@@ -45,7 +65,6 @@ void AC_Player::ComboCountSetting(float DeltaTime)//콤보타임세팅중
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
-	
 }
 
 void AC_Player::CalMoveData()
