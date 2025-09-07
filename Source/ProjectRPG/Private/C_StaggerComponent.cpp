@@ -12,6 +12,7 @@ UC_StaggerComponent::UC_StaggerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+
 	// ...
 }
 
@@ -64,6 +65,11 @@ float UC_StaggerComponent::getCurrentStaggerPoint() const
 float UC_StaggerComponent::getCurrentBreakPoint() const
 {
 	return m_fBrokenDuration;
+}
+
+void UC_StaggerComponent::setMode(E_StaggerMode eMode)
+{
+	m_eCurrentMode = eMode;
 }
 
 void UC_StaggerComponent::recover()

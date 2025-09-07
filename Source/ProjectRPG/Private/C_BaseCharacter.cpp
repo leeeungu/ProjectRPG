@@ -38,11 +38,16 @@ bool AC_BaseCharacter::takeDamageEvent_Implementation(float fDamage)
 	m_fHp -= fDamage;
 
 
-	if (m_fHp > 0)
+	if (m_fHp > 0.f)
 		return true;
 
-	if (m_fHp <= 0)
+	if (m_fHp <= 0.f)
+	{
+		m_fHp = 0.f;
 		m_onDead.Broadcast();
+		return true;
+	}
+		
 
 
 	return false;
