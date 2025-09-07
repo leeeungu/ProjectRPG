@@ -79,10 +79,6 @@ private:
 	bool m_bIsAttacking = false;
 	bool m_bIsGimmickReady = false;
 
-	float m_fKeepMaxStagger = 0.0f;
-	float m_fKeepStagger = 0.0f;
-	float m_fKeepBreak = 0.0f;
-
 	FTimerHandle m_timeHandle;
 
 protected:

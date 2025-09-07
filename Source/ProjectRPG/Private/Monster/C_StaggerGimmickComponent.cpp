@@ -2,6 +2,7 @@
 
 
 #include "Monster/C_StaggerGimmickComponent.h"
+#include "C_StaggerComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_StaggerGimmickComponent, Log, All);
 
@@ -13,6 +14,56 @@ float UC_StaggerGimmickComponent::getGoalStagger() const
 float UC_StaggerGimmickComponent::getBrokenDuration() const
 {
 	return m_fBrokenDuration;
+}
+
+void UC_StaggerGimmickComponent::applyGimmickStagger(UC_StaggerComponent* pStaggerCom)
+{
+
+	if (!pStaggerCom)
+		return;
+
+	
+
+	if (m_fSavedMax <= 0.f)
+	{
+		m_fSavedMax = pStaggerCom->getMaxStaggerPoint();
+		m_fSavedBreak = pStaggerCom->getCurrentBreakPoint();
+		m_fSavedCurStagger = pStaggerCom->getCurrentStaggerPoint();
+
+		UE_LOG(LogTemp, Warning, TEXT("ApplyGimmickStagger: Max=%f, Cur=%f"),
+			pStaggerCom->getMaxStaggerPoint(),
+			pStaggerCom->getCurrentStaggerPoint());
+	}
+
+	
+
+	pStaggerCom->setMaxStaggerPoint(m_fGoalStagger);
+	pStaggerCom->setBreakDuration(m_fBrokenDuration);
+	pStaggerCom->setMode(E_StaggerMode::Gimick);
+}
+
+void UC_StaggerGimmickComponent::restoreStagger(UC_StaggerComponent* pStaggerCom)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Restore - SavedMax: %f, SavedCur: %f"),
+		m_fSavedMax, m_fSavedCurStagger);
+	if (!pStaggerCom)
+		return;
+	if (m_fSavedMax > 0.f)
+	{
+		pStaggerCom->setMaxStaggerPoint(m_fSavedMax);
+		pStaggerCom->setBreakDuration(m_fSavedBreak);
+		pStaggerCom->setStaggerPoint(m_fSavedCurStagger);
+
+		UE_LOG(LogTemp, Warning, TEXT("ApplyGimmickStagger: Max=%f, Cur=%f"),
+			pStaggerCom->getMaxStaggerPoint(),
+			pStaggerCom->getCurrentStaggerPoint());
+	}
+	
+
+	m_fSavedMax = 0.f;
+	m_fSavedBreak = 0.f;
+	m_fSavedCurStagger = 0.f;
+	pStaggerCom->setMode(E_StaggerMode::Normal);
 }
 
 bool UC_StaggerGimmickComponent::canGimmickStart(float fHp, float fMaxHp)
