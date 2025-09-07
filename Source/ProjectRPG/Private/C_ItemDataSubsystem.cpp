@@ -92,46 +92,6 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
     return pItem;
 }
 
-void UC_ItemDataSubsystem::loadInventroyData(UC_InventoryComponent* pInventory)
-{
-    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
-        return;
-
-    int nWidth = pInventory->getInventoryWidth();
-    int nHeight = pInventory->getInventoryHeight();
-    if (m_arrInventory.Num() != nWidth * nHeight)
-        return;
-    for (int i = 0; i < nHeight; i++)
-    {
-        for (int j = 0; j < nWidth; j++)
-        {
-            int nIndex = pInventory->getArrayIndex(i, j);
-            if (m_arrInventory.IsValidIndex(nIndex))
-            pInventory->setInventorySlotData(i, j, m_arrInventory[nIndex]);
-        }
-    }
-}
-
-void UC_ItemDataSubsystem::saveInventroyData(UC_InventoryComponent* pInventory)
-{
-    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
-        return;
-
-    m_arrInventory.Empty();
-	int nWidth = pInventory->getInventoryWidth();
-	int nHeight = pInventory->getInventoryHeight();
-	m_arrInventory.Init(FS_InventorySlotData{}, pInventory->getInventorySize());
-    for (int i = 0; i < nHeight; i++)
-    {
-        for (int j = 0; j < nWidth; j++)
-        {
-            int nIndex = pInventory->getArrayIndex(i, j);
-            if (m_arrInventory.IsValidIndex(nIndex))
-                pInventory->getInventorySlotData(i, j, m_arrInventory[nIndex]);
-        }
-    }
-}
-
 void UC_ItemDataSubsystem::loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
 {
     if (!pQuickSlot)

@@ -1,6 +1,10 @@
 ﻿#include "C_InventoryComponent.h"
 #include <C_GameAlertSubsystem.h>
 #include "C_ItemActorBase.h"
+#include "BlueprintFunctionLibrary/C_GameDataUtill.h"
+#include "GamePlay/C_DataManager.h"
+
+DEFINE_LOG_CATEGORY_STATIC(C_InventoryComponent, Log, All);
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
@@ -10,6 +14,7 @@ UC_InventoryComponent::UC_InventoryComponent()
 		m_nInventoryHeight = 10;
 		m_nInventoryWidth = 10;
 		m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
 	}
 }
 
@@ -254,6 +259,7 @@ void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface
 	if (pSlotData == &m_sDummyItemData || !pInterface || !pInterface->Implements<UC_InventorySlotInterface>())
 		return ;
 	pSlotData->pSlotInterface = TScriptInterface< IC_InventorySlotInterface>(pInterface);
+
 	runSlotChangeInterface(pSlotData);
 }
 
@@ -284,8 +290,17 @@ bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
 
 void UC_InventoryComponent::BeginPlay()
 {
-	if (m_nInventorySize > 0)
-		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
+	if (Cast<APlayerController>(GetOwner()))
+	{
+		UC_DataManager* DataManager = UC_GameDataUtill::getDataManager(GetWorld());
+		if (DataManager)
+		{
+			DataManager->registerDataFile(this);
+			DataManager->loadDataFiles();
+			DataManager->loadData(this);
+		}
+	}
+
 	UActorComponent::BeginPlay();
 
 	if (!GetWorld())
@@ -294,7 +309,7 @@ void UC_InventoryComponent::BeginPlay()
 	if (GameInstance)
 	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-		m_pItemDataSubsystem->loadInventroyData(this);
+		//m_pItemDataSubsystem->loadInventroyData(this);
 	}
 }
 
@@ -332,7 +347,11 @@ int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UActorComponent::EndPlay(EndPlayReason);
-	m_pItemDataSubsystem->saveInventroyData(this);
+	if (Cast<APlayerController>(GetOwner()))
+	{
+		UC_GameDataUtill::saveBinaryData(this);
+	}
+	//m_pItemDataSubsystem->saveInventroyData(this);
 }
 
 void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
@@ -351,4 +370,45 @@ void UC_InventoryComponent::runSlotChangeInterface(FS_InventorySlot* pItemSlot)
 	}
 }
 
+E_DataType UC_InventoryComponent::getDataType()
+{
+	return E_DataType::E_Binary;
+}
 
+FString UC_InventoryComponent::getFilePath(E_DataType eType)
+{
+	return  FPaths::ProjectSavedDir() + TEXT("InventoryData");
+}
+
+void UC_InventoryComponent::loadBinaryData(TArray<uint8>& arData)
+{
+	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
+	if (!UC_GameDataUtill::readBinaryFile(arData, &Data))
+		return;
+	m_nInventoryHeight = Data.nInventoryWidth;
+	m_nInventoryWidth = Data.nInventoryHeight;
+	m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+	for (int i = 0; i < m_nInventoryHeight; i++)
+	{
+		for (int j = 0; j < m_nInventoryWidth; j++)
+		{
+			setInventorySlotData(i, j, Data.arrInventory[getArrayIndex(i,j)].sData);
+		}
+	}
+}
+
+TArray<uint8> UC_InventoryComponent::getBinaryData()
+{
+	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
+	TArray<uint8> result{};
+	UC_GameDataUtill::saveBinaryFile< FS_InventorySaveData>(result, &Data);
+	return result;
+}
+
+FS_InventorySaveData::FS_InventorySaveData(int Width, int Height, TArray<FS_InventorySlot>& Inventory)
+	: arrInventory{}, nInventoryWidth{}, nInventoryHeight{}
+{
+	nInventoryWidth = Width;
+	nInventoryHeight = Height;
+	arrInventory = Inventory;
+}
