@@ -33,6 +33,10 @@ public:
 	UFUNCTION()
 	void RequestJumpToSection(FName SectionName);
 
+	//스킬쿨타임 반환함수
+	// UFUNTION(BlueprintCallable)
+	//float getskillcool(FName skillKey) 
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

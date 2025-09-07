@@ -52,7 +52,7 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
 		break;
 	}
 #endif
-
+	//블록?, 오버랩? 
 	//if (bHit)
 	//{
 	//	for (const FHitResult& Hit : HitResults)
@@ -64,6 +64,10 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
 	//          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
 	//          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
 	//          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음.
+	// 
+	// //여기서 카운터스킬은 몬스터의 트라이카운터호출까지 해야됨.
+	//그럼 스킬중에 카운터스킬에는 카운터스킬이 있다는것을 설정해줘야함.
+	// //노티파이에서 카운터 실행 (몬스터베이스에서 트라이카운터를 가져오는게 목표)
 	//		}
 	//	}
 	//}
@@ -388,6 +392,7 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 	}
 	// 스킬 데이터에서 쿨타임 값 가져오기
 	float CooldownDuration = SkillMap[SkillName].Cooldown;
+	//********스킬쿨타임이 시작되는시점이 이부분 -> 여기서 델리게이트로 알려줌 스킬키를 가져와서,***********
 	// 쿨타임 종료 시간 계산 후 TMap에 기록
 	float EndTime = GetWorld()->GetTimeSeconds() + CooldownDuration;
 	SkillCooldownEndTime.Add(SkillName, EndTime);
