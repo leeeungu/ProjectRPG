@@ -11,17 +11,60 @@
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_InputActionData.h"
+#include "CPP_Player/S_SkillData.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 
+void AC_Player::PlayerDownTest()
+{
+	float damage = 5.f;
+	ReceiveDamage(damage);
+}
 
+void AC_Player::ReceiveDamage(float damageAmount)
+{
+	//hp에서 캐릭터 피깍음
+	//만약에 공형형태가 다운형태면
+	ClearMoveState();
+	Down();
+
+}
+void AC_Player::Down()
+{
+	RunningState = ERunningSystemState::Down;
+	ClearMoveState();
+	bCanMove = false;
+	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
+}
+
+FName AC_Player::SetPlainAttack()
+{
+	switch (m_nComboCount)
+	{
+	case 0: m_nComboCount = 1; return FName("PA_01");
+	case 1: m_nComboCount = 2; return FName("PA_02");
+	case 2: m_nComboCount = 3; return FName("PA_03");
+	case 3: m_nComboCount = 0; return FName("PA_04");
+	default:
+		m_nComboCount = 0;
+		return FName("PA_01");
+	}
+}
+
+void AC_Player::ComboCountSetting(float DeltaTime)//콤보타임세팅중
+{
+	ComboTime += DeltaTime;
+	if (ComboTime >= 2.f)
+	{
+
+	}
+}
 
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
-	
 }
 
 void AC_Player::CalMoveData()
@@ -63,7 +106,31 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	Direction.Z = 0.0f; // Pitch 무시
 	Direction.Normalize();
 
-	float TargetYaw = Direction.Rotation().Yaw;
+	FVector AdjustedDirection;
+	switch (DirectionSkillState)
+	{
+	case E4WayDirectionPlayer::Default:
+		AdjustedDirection = Direction;
+		break;
+
+	case E4WayDirectionPlayer::Foward:
+		AdjustedDirection = Direction;
+		break;
+
+	case E4WayDirectionPlayer::Back:
+		AdjustedDirection = -Direction; // Back 벡터가 TargetPoint를 향하게
+		break;
+
+	case E4WayDirectionPlayer::Left:
+		AdjustedDirection = FVector::CrossProduct(FVector::UpVector, Direction); // 왼쪽 90도 회전
+		break;
+
+	case E4WayDirectionPlayer::Right:
+		AdjustedDirection = FVector::CrossProduct(Direction, FVector::UpVector); // 오른쪽 90도 회전
+		break;
+	}
+
+	float TargetYaw = AdjustedDirection.Rotation().Yaw;
 	float CurrentYaw = GetActorRotation().Yaw;
 	float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentYaw, TargetYaw);
 	float FinalYaw = CurrentYaw + DeltaYaw;
@@ -77,45 +144,52 @@ void AC_Player::RunningSystemManager()
 {
 	//우선순위키데이터(현제 : 패링)
 	//패링은 RunningState에 영향을받지않음 즉 쿨타임을 제대로 설정하지않으면 무한으로 사용가능 
-	//FInputActionData PriorityInputData{};
-	//if (m_inputQueue->GetLastInputData(PriorityInputData))//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
-	//{
-	//	//1. 패링 입력 최우선 처리
-	//	if (PriorityInputData.InputType == EInputType::Period)
-	//	{
-	//		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
-	//		//InterruptAllActions();   //진행중인 모든몽타주 stop
-	//		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
-	//		bCanMove = false;
-	//		if (IsAttackMode)
-	//		{
-	//			AttackMode();
-	//		}
-	//		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
-	//		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-	//		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-	//		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
-	//		return; // 여기서 바로 종료 (다른 입력 무시)
-	//	}
-	//}
 	FInputActionData PriorityInputData{};
 	if (!m_inputQueue->GetLastInputData(PriorityInputData) && !m_inputQueue->GetLastChargingInputData(PriorityInputData)) return;//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
 	//1. 패링 입력 최우선 처리
 	if (PriorityInputData.InputType == EInputType::Period)
 	{
-		// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
-		//InterruptAllActions();   //진행중인 모든몽타주 stop
-		RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
-		bCanMove = false;
-		if (IsAttackMode)
+		if (m_skillCom->IsCooldownReady(PriorityInputData.ActionName))
 		{
-			AttackMode();
+			//-------------------------------------------다운패링테스트---------------------------------------------------
+			if (RunningState == ERunningSystemState::Down)
+			{
+				RunningState = ERunningSystemState::Busy;
+				bCanMove = false;
+				if (IsAttackMode)
+				{
+					AttackMode();
+				}
+				E4WayDirection Direction = Set4_WayDirection(PriorityInputData.TargetPoint);
+				CalRotateData(PriorityInputData.TargetPoint);
+				IsPeriod = true;
+				m_skillCom->UsingSkill(FName("DownPeriod"), Direction);//이름교체
+				m_skillCom->StartCooldown(PriorityInputData.ActionName);
+				m_inputQueue->ClearQueueList();
+				return;
+			}
+			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
+			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+			bCanMove = false;
+			if (IsAttackMode)
+			{
+				AttackMode();
+			}
+			CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
+			IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
+			m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
+			m_skillCom->StartCooldown(PriorityInputData.ActionName);
+			m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
+			return; // 여기서 바로 종료 (다른 입력 무시)
 		}
-		CalRotateData(PriorityInputData.TargetPoint);//여기서 보간이먼저켜짐
-		IsPeriod = true;//그다음 패링이켜짐 즉 보간이먼저켜지면서 true로바뀌니 패링쪽에서 보간이 false가되기전까진 진행할수없음.
-		m_skillCom->UsingSkill(PriorityInputData.ActionName);//이동로직은 플레이어쪽이라 이함수는 단지 몽타주실행과 쿨타임관리만있음.
-		m_inputQueue->ClearQueueList(); // 패링 처리 후 큐 초기화
-		return; // 여기서 바로 종료 (다른 입력 무시)
+		else
+		{
+			// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
+			float remainTime = m_skillCom->GetRemainingCooldown(PriorityInputData.ActionName);
+			UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+			return;
+		}
+		
 	}
 	if (RunningState == ERunningSystemState::Idle)
 	{
@@ -125,6 +199,16 @@ void AC_Player::RunningSystemManager()
 			m_inputQueue->ClearQueueList();//그냥 마지막인덱스를 가져온거기때문에 끝나고 다시 큐에서 가져옴 그렇기떄문에 가져오고나서 리스트를비워줘야 끝나고 자동으로 가져오지않음.
 			switch (CurrentInputData.InputType)
 			{
+			case EInputType::PlainAttack:
+				RunningState = ERunningSystemState::Busy;
+				if (myAnimInterface)
+				{
+					myAnimInterface->SetAttackMode(true);
+				}
+				bCanMove = false;
+				CalRotateData(CurrentInputData.TargetPoint);
+				m_skillCom->UsingSkill(SetPlainAttack());
+				break;
 			case EInputType::Skill:
 				if (m_skillCom->IsCooldownReady(CurrentInputData.ActionName))
 				{
@@ -224,9 +308,27 @@ void AC_Player::Reset_Implementation(UCameraComponent* Camera)
 
 void AC_Player::SetPeriodInfo()
 {
-	FVector Forward = GetActorForwardVector();
-	Forward.Z = 0.0f;
-	ParryDirection = Forward.GetSafeNormal();
+	FVector DirectionVector;
+	switch (DirectionSkillState)
+	{
+	case E4WayDirectionPlayer::Foward:
+		DirectionVector = GetActorForwardVector();
+		break;
+	case E4WayDirectionPlayer::Back:
+		DirectionVector = -GetActorForwardVector();
+		break;
+	case E4WayDirectionPlayer::Left:
+		DirectionVector = -GetActorRightVector();
+		break;
+	case E4WayDirectionPlayer::Right:
+		DirectionVector = GetActorRightVector();
+		break;
+	case E4WayDirectionPlayer::Default:
+		DirectionVector = GetActorForwardVector();
+		break;
+	}
+	DirectionVector.Z = 0.0f;
+	ParryDirection = DirectionVector.GetSafeNormal();
 	IsPeriod = true;
 }
 
@@ -313,6 +415,8 @@ void AC_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	PlayerStateCheking(DeltaTime);
+
+
 	FString StateName;
 
 	switch (RunningState)
@@ -412,6 +516,8 @@ void AC_Player::Tick(float DeltaTime)
 		if (PeriodDist < 0.2f)//도착
 		{
 			PeriodDist = 300.f;
+			//여기서 계속 꺼트려줌 ->SetInfo에서 세팅을하고 켜줘야 넘어감.
+			DirectionSkillState = E4WayDirectionPlayer::Default;
 			IsPeriod = false;
 		}
 		else
@@ -452,7 +558,7 @@ void AC_Player::ClearMoveState()
 	CalMoveData();
 }
 
-void AC_Player::Set4_WayDirection(const FVector& mousePoint)
+E4WayDirection AC_Player::Set4_WayDirection(const FVector& mousePoint)
 {
 	FVector ToMouse = mousePoint - GetActorLocation();
 	ToMouse.Z = 0;
@@ -462,50 +568,58 @@ void AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	Forward.Z = 0;
 	Forward.Normalize();
 
-	// DotProduct는 두 벡터 사이의 각도 관계를 알 수 있음
-	float Dot = FVector::DotProduct(Forward, ToMouse);
-	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
+	float Dot = FVector::DotProduct(Forward, ToMouse);//0~1사이값 =>각도를 얻어옴
+	float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));//라디안값으로 각도로 변환
+	//캐릭터 포워드기준으로 오른쪽은 90도 왼쪽은 -90도
 
-	// CrossProduct는 왼쪽 / 오른쪽 판별용으로 사용
+	// CrossProduct는 왼쪽 / 오른쪽 판별용으로 사용//오른손법칙 z>0 ->왼쪽, z<0 ->오른쪽
 	float CrossZ = FVector::CrossProduct(Forward, ToMouse).Z;
-
-	E4WayDirection Direction;
-
+	E4WayDirectionPlayer Direction;
 	if (AngleDegrees <= 45.0f)
 	{
-		Direction = E4WayDirection::Foward;
+		Direction = E4WayDirectionPlayer::Foward;
 	}
 	else if (AngleDegrees > 135.0f)
 	{
-		Direction = E4WayDirection::Back;
+		Direction = E4WayDirectionPlayer::Back;
 	}
 	else
 	{
 		// 90도 ±45도는 옆방향, CrossZ로 왼/오 구분
 		if (CrossZ > 0)
 		{
-			Direction = E4WayDirection::Left;
+			Direction = E4WayDirectionPlayer::Right;
 		}
 		else
 		{
-			Direction = E4WayDirection::Right;
+			Direction = E4WayDirectionPlayer::Left;
 		}
 	}
-
+	//따로 상태저장
+	DirectionSkillState = Direction;
 	// 로그 출력 (테스트용)
 	FString DirString;
 	switch (Direction)
 	{
-	case E4WayDirection::Foward: DirString = TEXT("Forward"); break;
-	case E4WayDirection::Back:   DirString = TEXT("Back"); break;
-	case E4WayDirection::Left:   DirString = TEXT("Left"); break;
-	case E4WayDirection::Right:  DirString = TEXT("Right"); break;
+	case E4WayDirectionPlayer::Foward: DirString = TEXT("Forward"); break;
+	case E4WayDirectionPlayer::Back:   DirString = TEXT("Back"); break;
+	case E4WayDirectionPlayer::Left:   DirString = TEXT("Left"); break;
+	case E4WayDirectionPlayer::Right:  DirString = TEXT("Right"); break;
 	}
-
 	UE_LOG(LogTemp, Warning, TEXT("4-Way Direction: %s"), *DirString);
-
-	// 여기에 멤버 변수 세팅 또는 추가 로직
-	// Direction; // 디렉션을 저장하든 넘겨주든하면됨.
+	
+	switch (Direction)
+	{
+	case E4WayDirectionPlayer::Foward:
+		return E4WayDirection::Forward;
+	case E4WayDirectionPlayer::Back:
+		return E4WayDirection::Back;
+	case E4WayDirectionPlayer::Left:
+		return E4WayDirection::Left;
+	case E4WayDirectionPlayer::Right:
+		return E4WayDirection::Right;
+	}
+	return E4WayDirection::Default;
 }
 void AC_Player::AttackMode()
 {
@@ -526,14 +640,11 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 	if (!IsAttackMode) return;//아이들모드면 체킹할필요없음
 	AttackingModeTime += DeltaTime;
 	//UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
+
 	if (AttackingModeTime > 5.f)
 	{
 		IsAttackMode = false;//다시 아이들모드로 되돌림.
 		AttackingModeTime = 0.f;
-		if (myAnimInterface)
-		{
-			myAnimInterface->SetActiveValue(true);
-		}
 		myAnimInterface->SetAttackMode(false);
 		UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
 		return;
@@ -541,4 +652,11 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 
 }
 
-
+bool AC_Player::runInteraction()
+{
+	if (m_pInteractionDetectComponent)
+	{
+		return m_pInteractionDetectComponent->runInteraction();
+	}
+	return false;
+}

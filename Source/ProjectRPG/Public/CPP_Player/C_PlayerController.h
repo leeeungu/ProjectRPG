@@ -63,9 +63,23 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClick;
 	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* LeftClick;
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SpaceBar;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Q_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* W_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* E_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* R_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* A_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* S_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* D_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* F_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -73,17 +87,30 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number2_Key;
 
-	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pInteraction{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot{};
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
+	void OnLeftClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
 	void OnQ_Action(const FInputActionValue& Value);
+	void OnW_Action(const FInputActionValue& Value);
+	void OnE_Action(const FInputActionValue& Value);
+	void OnR_Action(const FInputActionValue& Value);
+	void OnA_Action(const FInputActionValue& Value);
+	void OnS_Action(const FInputActionValue& Value);
+	void OnD_Action(const FInputActionValue& Value);
 	void OnF_ActionStarted(const FInputActionValue& Value);
 	void OnF_ActionOngoing(const FInputActionValue& Value);
 	void OnF_ActionCanceld(const FInputActionValue& Value);
 	void OnF_ActionCompleted(const FInputActionValue& Value);
 	void OnNumber1_Action(const FInputActionValue& Value);
 	void OnNumber2_Action(const FInputActionValue& Value);
+	void OnInteraction(const FInputActionValue& Value);
+	void OnQuickSlot(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;

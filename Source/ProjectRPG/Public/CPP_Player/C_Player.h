@@ -8,6 +8,8 @@
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
 
+struct FSkillData;
+enum class E4WayDirection : uint8;
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -25,12 +27,14 @@ enum class ERunningSystemState : uint8
 	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
 	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
 };
-enum class E4WayDirection : uint8
+UENUM()
+enum class E4WayDirectionPlayer : uint8
 {
 	Foward,
 	Back,
 	Left,
-	Right
+	Right,
+	Default
 };
 /**
  * 
@@ -63,6 +67,8 @@ private:
 	//플레이어 상태
 	UPROPERTY()
 	ERunningSystemState RunningState = ERunningSystemState::Idle;
+	UPROPERTY()
+	E4WayDirectionPlayer DirectionSkillState = E4WayDirectionPlayer::Default;
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;
@@ -88,6 +94,12 @@ private:
 	//차징스킬
 	bool bHoldSkillPlayed = false;
 	bool bChargingReady = false;
+
+	//콤보어택
+	int32 m_nComboCount{};
+	FName SetPlainAttack();
+	float ComboTime = 0.f;
+	void ComboCountSetting(float DeltaTime);
 public:
 	
 
@@ -98,13 +110,19 @@ private:
 	void CalMoveData();
 	void RunningSystemManager();
 	void ClearMoveState();
-	void Set4_WayDirection(const FVector& mousePoint);
+	//플레이어에서 방향계산후 애님인스턴스에 넘겨줄 이넘으로 변환
+	E4WayDirection Set4_WayDirection(const FVector& mousePoint);
 
 	//플레이어 상태(idle? attck?)
 	bool IsAttackMode = false;
 	float AttackingModeTime = 0.f;
 	void AttackMode();
 	void PlayerStateCheking(float DeltaTime);
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerDownTest();
+	void ReceiveDamage(float damageAmount);
+	void Down();
 
 public:
 	AC_Player();
@@ -136,4 +154,6 @@ public:
 	UC_InteractionDetectorComponent* getInteractionDetectComponent() { return m_pInteractionDetectComponent; }
 	UFUNCTION(BlueprintPure, Category = "TravelComponent")
 	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
+
+	bool runInteraction();
 };
