@@ -115,22 +115,38 @@ void AC_PlayerController::SetupInputComponent()
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnF_ActionCanceld);
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnF_ActionCompleted);
         }
-        if (Number1_Key)
+        /*if (Number1_Key)
         {
             EnhancedInput->BindAction(Number1_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnNumber1_Action);
         }
         if (Number2_Key)
         {
             EnhancedInput->BindAction(Number2_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnNumber2_Action);
-        }
+        }*/
 
         if (m_pInteraction)
         {
             EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, this, &AC_PlayerController::OnInteraction);
         }
-        if (m_pQuickSlot)
+      /*  if (m_pQuickSlot)
         {
             EnhancedInput->BindAction(m_pQuickSlot, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlot);
+        }*/
+        if(m_pQuickSlot1)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot1, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 1);
+        }
+        if (m_pQuickSlot2)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot2, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 2);
+        }
+        if (m_pQuickSlot3)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot3, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 3);
+        }
+        if (m_pQuickSlot4)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot4, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 4);
         }
         if (m_pInventoryWidget)
         {
@@ -345,7 +361,6 @@ void AC_PlayerController::OnNumber2_Action(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::AnimItem;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] number2 Skill On"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
@@ -372,7 +387,27 @@ void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
     int nItemID{};
+    FVector2D v  = Value.Get<FVector2D>();
+    UE_LOG(C_PlayerController, Log, TEXT("%s"), *v.ToString());
     if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID(E_QuickSlotType::E_QuickSlot1, nItemID))
+    {
+        UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+        if (GameInstance)
+        {
+            UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
+            pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
+        }
+    }
+}
+
+void AC_PlayerController::OnQuickSlotv2(const FInputActionValue& Value, int Type)
+{
+    FInputActionData NewInputData;
+    NewInputData.ActionName = "QuickSlot";
+    NewInputData.InputStateType = EInputStateType::Pressed;
+    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
+    int nItemID{};
+    if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID((E_QuickSlotType)Type, nItemID))
     {
         UGameInstance* GameInstance = GetWorld()->GetGameInstance();
         if (GameInstance)
@@ -462,10 +497,10 @@ AC_PlayerController::AC_PlayerController()
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(TEXT("/Game/RPG_Player/Input/Actions/F_Action.F_Action"));
     if (IA_FAction.Succeeded()) F_Key = IA_FAction.Object;
     //아이템
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action"));
+    /*static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action"));
     if (IA_Number1Action.Succeeded()) Number1_Key = IA_Number1Action.Object;
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number2Action(TEXT("/Game/RPG_Player/Input/Actions/Number2_Acrion.Number2_Acrion"));
-    if (IA_Number2Action.Succeeded()) Number2_Key = IA_Number2Action.Object;
+    if (IA_Number2Action.Succeeded()) Number2_Key = IA_Number2Action.Object;*/
     
     m_pInventoryComponent = CreateDefaultSubobject<UC_InventoryComponent>(TEXT("InventoryComponent"));
     m_pCurrencyComponent = CreateDefaultSubobject<UC_CurrencyComponent>(TEXT("CurrencyComponent"));

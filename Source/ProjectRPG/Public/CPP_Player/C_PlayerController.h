@@ -82,16 +82,22 @@ protected:
 	UInputAction* D_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* F_Key;
-	UPROPERTY(EditAnywhere, Category = "Input")
+	/*UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number1_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* Number2_Key;
+	UInputAction* Number2_Key;*/
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* m_pInteraction{};
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* m_pQuickSlot{};
+	UInputAction* m_pQuickSlot1{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot2{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot3{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot4{};
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* m_pInventoryWidget{};
@@ -120,6 +126,7 @@ public:
 	void OnNumber2_Action(const FInputActionValue& Value);
 	void OnInteraction(const FInputActionValue& Value);
 	void OnQuickSlot(const FInputActionValue& Value);
+	void OnQuickSlotv2(const FInputActionValue& Value, int Type);
 	void OnToggleInventory(const FInputActionValue& Value);
 	void OnTogglePlayerInfo(const FInputActionValue& Value);
 	void OnToggleQuest(const FInputActionValue& Value);
