@@ -24,7 +24,6 @@ void UC_MonsterHpUI::updateHpBars(float fCurHp, float fMaxHp)
 		return;
 	
 		
-
 	/*
 	* 전체 체력을 한 구간 체력으로 나누면 몇개의 구간으로 나뉘는지 계산
 	* 소수점이 있으면 올림
@@ -41,7 +40,7 @@ void UC_MonsterHpUI::updateHpBars(float fCurHp, float fMaxHp)
 		nNumSegments = m_arrHpBars.Num();
 	}
 
-	for (int32 i = 0; i < nNumSegments; ++i)
+	for (int32 i = 0; i < nNumSegments; i++)
 	{
 		float fSegmentStartHp = i * m_fSegMentHp;
 
@@ -57,7 +56,7 @@ void UC_MonsterHpUI::updateHpBars(float fCurHp, float fMaxHp)
 
 	if (fCurHp <= 0.f)
 	{
-		for (int32 i = nNumSegments; i < m_arrHpBars.Num(); ++i)
+		for (int32 i = nNumSegments; i < m_arrHpBars.Num(); i++)
 		{
 			m_arrHpBars[i]->SetPercent(0.f);
 			m_arrHpBars[i]->SetRenderOpacity(0.f);

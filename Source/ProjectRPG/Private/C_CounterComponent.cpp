@@ -27,7 +27,7 @@ void UC_CounterComponent::startCounterWindow(float fDuration)
 		&UC_CounterComponent::endCounterWindow,fDuration, false);
 }
 
-bool UC_CounterComponent::tryCounter(AActor* pPlayer)
+bool UC_CounterComponent::tryCounter()
 {
 	if (!m_bCanCounter)
 	{

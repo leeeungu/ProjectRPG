@@ -36,7 +36,7 @@ public:
 	void startCounterWindow(float fDuration);
 
 	UFUNCTION(BlueprintCallable, Category = "Counter")
-	bool tryCounter(AActor* pPlayer);
+	bool tryCounter();
 
 protected:
 	// Called when the game starts

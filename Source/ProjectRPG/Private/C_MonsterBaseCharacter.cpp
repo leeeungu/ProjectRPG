@@ -72,6 +72,17 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 
+	TArray<AActor*> arrFound{};
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+
+	if (arrFound.Num() > 0)
+	{
+		AActor* pFoundActor = arrFound[0];
+		FVector vFoundPos = pFoundActor->GetActorLocation();
+		m_vGimmickPos = vFoundPos;
+	}
+
 }
 
 void AC_MonsterBaseCharacter::playStaggerMontage()
@@ -166,6 +177,14 @@ void AC_MonsterBaseCharacter::onCounterSuccess()
 void AC_MonsterBaseCharacter::onCounterFailed()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Counter Failed!!!!!!!!"));
+}
+
+void AC_MonsterBaseCharacter::tryCounter()
+{
+	if (m_pCounterComp)
+	{
+		m_pCounterComp->tryCounter();
+	}
 }
 
 void AC_MonsterBaseCharacter::onDead()
@@ -280,21 +299,9 @@ void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage
 	moveToGimmick();
 }
 
-FVector AC_MonsterBaseCharacter::getGimmickPos()
+FVector AC_MonsterBaseCharacter::getGimmickPos() const
 {
-	TArray<AActor*> arrFound{};
-	FVector vGimmickPos{};
-
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
-
-	if (arrFound.Num() > 0)
-	{
-		AActor* pFoundActor = arrFound[0];
-		FVector vFoundPos = pFoundActor->GetActorLocation();
-		vGimmickPos = vFoundPos;
-	}
-
-	return vGimmickPos;
+	return m_vGimmickPos;
 }
 
 void AC_MonsterBaseCharacter::moveToGimmick()

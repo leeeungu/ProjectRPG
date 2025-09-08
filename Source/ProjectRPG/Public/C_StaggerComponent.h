@@ -36,8 +36,6 @@ private:
 	bool m_bIsBroken = false;
 
 
-
-
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stagger")
 	FOnBroken m_onBroken;

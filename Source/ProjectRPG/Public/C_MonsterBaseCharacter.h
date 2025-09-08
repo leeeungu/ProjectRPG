@@ -79,6 +79,8 @@ private:
 	bool m_bIsAttacking = false;
 	bool m_bIsGimmickReady = false;
 
+	FVector m_vGimmickPos;
+
 	FTimerHandle m_timeHandle;
 
 protected:
@@ -152,6 +154,9 @@ public:
 	UFUNCTION()
 	void onCounterFailed();
 
+	UFUNCTION(BlueprintCallable)
+	void tryCounter();
+
 	/*
 	* 죽음 소멸 관련 
 	*/
@@ -164,7 +169,7 @@ public:
 	/*
 	*  기믹 관련
 	*/
-	FVector getGimmickPos();
+	FVector getGimmickPos() const;
 
 	void moveToGimmick();
 
