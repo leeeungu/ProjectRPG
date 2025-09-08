@@ -1,8 +1,8 @@
 ﻿#include "C_InventoryComponent.h"
 #include <C_GameAlertSubsystem.h>
 #include "C_ItemActorBase.h"
-#include "BlueprintFunctionLibrary/C_GameDataUtill.h"
-#include "GamePlay/C_DataManager.h"
+#include "GamePlay/C_DataMangerSubsystem.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(C_InventoryComponent, Log, All);
 
@@ -292,13 +292,7 @@ void UC_InventoryComponent::BeginPlay()
 {
 	if (Cast<APlayerController>(GetOwner()))
 	{
-		UC_DataManager* DataManager = UC_GameDataUtill::getDataManager(GetWorld());
-		if (DataManager)
-		{
-			DataManager->registerDataFile(this);
-			DataManager->loadDataFiles();
-			DataManager->loadData(this);
-		}
+		UC_DataMangerSubsystem::loadData(this);
 	}
 
 	UActorComponent::BeginPlay();
@@ -349,9 +343,8 @@ void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UActorComponent::EndPlay(EndPlayReason);
 	if (Cast<APlayerController>(GetOwner()))
 	{
-		UC_GameDataUtill::saveBinaryData(this);
+		UC_DataMangerSubsystem::saveBinaryData(this);
 	}
-	//m_pItemDataSubsystem->saveInventroyData(this);
 }
 
 void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
@@ -383,7 +376,7 @@ FString UC_InventoryComponent::getFilePath(E_DataType eType)
 void UC_InventoryComponent::loadBinaryData(TArray<uint8>& arData)
 {
 	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
-	if (!UC_GameDataUtill::readBinaryFile(arData, &Data))
+	if (!UC_DataMangerSubsystem::readBinaryFile(arData, &Data))
 		return;
 	m_nInventoryHeight = Data.nInventoryWidth;
 	m_nInventoryWidth = Data.nInventoryHeight;
@@ -401,7 +394,7 @@ TArray<uint8> UC_InventoryComponent::getBinaryData()
 {
 	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
 	TArray<uint8> result{};
-	UC_GameDataUtill::saveBinaryFile< FS_InventorySaveData>(result, &Data);
+	UC_DataMangerSubsystem::saveBinaryFile< FS_InventorySaveData>(result, &Data);
 	return result;
 }
 

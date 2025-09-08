@@ -48,16 +48,6 @@ void UC_EquipComponent::unRegisterEquip(AC_EquipItem* pItemBase)
 	}
 }
 
-void UC_EquipComponent::BeginPlay()
-{
-	UActorComponent::BeginPlay();
-	APlayerController* Controller = Cast<APlayerController>(GetOwner());
-	if (Controller)
-	{
-		pPlayer = Cast<AC_BaseCharacter>(Controller->AcknowledgedPawn);
-	}
-}
-
 void UC_EquipComponent::effectEuip(AC_EquipItem* pItemBase)
 {
 	if (pPlayer && pItemBase)
@@ -90,6 +80,17 @@ void UC_EquipComponent::braodCastEquip(E_EquipEffectType EquipType, bool IsEquip
 			Binding.Delegate.Execute(IsEquip, pItem);
 		}
 
+	}
+}
+
+
+void UC_EquipComponent::BeginPlay()
+{
+	UActorComponent::BeginPlay();
+	APlayerController* Controller = Cast<APlayerController>(GetOwner());
+	if (Controller)
+	{
+		pPlayer = Cast<AC_BaseCharacter>(Controller->AcknowledgedPawn);
 	}
 }
 

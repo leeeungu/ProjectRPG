@@ -92,6 +92,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* m_pQuickSlot{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pInventoryWidget{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pPlayerInfoWidget{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuestWidget{};
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
 	void OnLeftClickAction(const FInputActionValue& Value);
@@ -111,6 +120,9 @@ public:
 	void OnNumber2_Action(const FInputActionValue& Value);
 	void OnInteraction(const FInputActionValue& Value);
 	void OnQuickSlot(const FInputActionValue& Value);
+	void OnToggleInventory(const FInputActionValue& Value);
+	void OnTogglePlayerInfo(const FInputActionValue& Value);
+	void OnToggleQuest(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;

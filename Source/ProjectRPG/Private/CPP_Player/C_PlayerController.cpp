@@ -132,6 +132,18 @@ void AC_PlayerController::SetupInputComponent()
         {
             EnhancedInput->BindAction(m_pQuickSlot, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlot);
         }
+        if (m_pInventoryWidget)
+        {
+            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnToggleInventory);
+        }
+        if (m_pPlayerInfoWidget)
+        {
+            EnhancedInput->BindAction(m_pPlayerInfoWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnTogglePlayerInfo);
+        }
+        if (m_pQuestWidget)
+        {
+            EnhancedInput->BindAction(m_pQuestWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnToggleQuest);
+        }
     }
 }
 
@@ -369,6 +381,24 @@ void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
             pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
         }
     }
+}
+
+void AC_PlayerController::OnToggleInventory(const FInputActionValue& Value)
+{
+    if (getGameWindowManager())
+        getGameWindowManager()->toggleWidget(E_WindowType::E_Inventory);
+}
+
+void AC_PlayerController::OnTogglePlayerInfo(const FInputActionValue& Value)
+{
+    if (getGameWindowManager())
+        getGameWindowManager()->toggleWidget(E_WindowType::E_PlayerInfo);
+}
+
+void AC_PlayerController::OnToggleQuest(const FInputActionValue& Value)
+{
+    if (getGameWindowManager())
+        getGameWindowManager()->toggleWidget(E_WindowType::E_QuestWindow);
 }
 
 void AC_PlayerController::OnPossess(APawn* pawn)
