@@ -14,7 +14,7 @@ class UC_InputQueueComponent;
 class UC_CurrencyComponent;
 class UC_GameWindowManager;
 class UC_QuickSlotManagerComponent;
-class UQuestManagerComponent;
+class UC_QuestManagerComponent;
 class UC_EquipComponent;
 class UC_InventoryComponent;
 /**
@@ -46,7 +46,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "QuickSlot", meta = (DisplayName = "QuickSlotManagerComponent"), BlueprintGetter = getQuickSlotManagerComponent)
 	UC_QuickSlotManagerComponent* m_pQuickSlotManagerComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "QuestManager", meta = (DisplayName = "QuestManagerComponent"), BlueprintGetter = getQuestManagerComponent)
-	UQuestManagerComponent* m_pQuestManagerComponent{};
+	UC_QuestManagerComponent* m_pQuestManagerComponent2{};
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "EquipComponent"), BlueprintGetter = getEquipComponent)
 	UC_EquipComponent* m_pEquipComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "InventoryComponent"), BlueprintGetter = getInventoryComponent)
@@ -144,7 +144,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "QuickSlot")
 	UC_QuickSlotManagerComponent* getQuickSlotManagerComponent() const { return m_pQuickSlotManagerComponent; }
 	UFUNCTION(BlueprintPure, Category = "QuestManager")
-	UQuestManagerComponent* getQuestManagerComponent() const { return m_pQuestManagerComponent; }
+	UC_QuestManagerComponent* getQuestManagerComponent() const { return m_pQuestManagerComponent2; }
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UC_EquipComponent* getEquipComponent() const { return m_pEquipComponent; }
 	UFUNCTION(BlueprintPure, Category = "Inventory")

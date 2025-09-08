@@ -12,12 +12,10 @@ class PROJECTRPG_API UC_NPCQuestComponent : public UActorComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditAnywhere, Category = "C_NPCQuestComponent")
-	UQuestAsset* m_pCurrentQuestAsset1{};
-
-	UPROPERTY(EditAnywhere, Category = "C_NPCQuestComponent")
-	UQuestAsset* m_pCurrentQuestAsset2{};
-
+	TArray< UQuestAsset*> m_arrQuestAsset{};
+	UPROPERTY()
 	UQuestAsset* m_CurrentQuestAsset{};
+	int m_nQuestAssetIndex{};
 	bool m_bQuestAccept{};
 public:	
 	UC_NPCQuestComponent();

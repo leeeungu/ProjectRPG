@@ -10,7 +10,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/S_InputActionData.h"
-#include "ActorComponent/QuestManagerComponent.h"
+#include "Quest/C_QuestManagerComponent.h"
 #include "C_GameWindowManager.h"
 #include "C_CurrencyComponent.h"
 #include "Item/Component/C_EquipComponent.h"
@@ -506,7 +506,7 @@ AC_PlayerController::AC_PlayerController()
     m_pCurrencyComponent = CreateDefaultSubobject<UC_CurrencyComponent>(TEXT("CurrencyComponent"));
     m_pGameWindowManager = CreateDefaultSubobject<UC_GameWindowManager>(TEXT("GameWindowManager"));
     m_pQuickSlotManagerComponent = CreateDefaultSubobject<UC_QuickSlotManagerComponent>(TEXT("QuickSlotManagerComponent"));
-    m_pQuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
+    m_pQuestManagerComponent2 = CreateDefaultSubobject<UC_QuestManagerComponent>(TEXT("QuestManagerComponent"));
     m_pEquipComponent = CreateDefaultSubobject<UC_EquipComponent>(TEXT("EquipComponent"));
 
 }
