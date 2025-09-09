@@ -13,19 +13,13 @@ void UUnEquipMontageEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
     UC_PlayerAnimInstance* AnimInstance = Cast<UC_PlayerAnimInstance>(MeshComp->GetAnimInstance());
     if (AnimInstance)
     {
+        AnimInstance->OnWeaponModeChanged.Broadcast(true); // 예시로 false 브로드캐스트
+        UE_LOG(LogTemp, Warning, TEXT("Brodcast"));
         II_PlayerToAnimInstance* AnimInterface = Cast<II_PlayerToAnimInstance>(AnimInstance);
         if (AnimInterface)
         {
             AnimInterface->SetIsAttackingMode(false);
-            
-            UE_LOG(LogTemp, Warning, TEXT("Period true"));
         }
     }
-    // 캐릭터 가져오기
-    AC_Player* myPlayer = Cast<AC_Player>(MeshComp->GetOwner());
-    if (myPlayer)
-    {
-        // false 전달 (무기 해제됨)
-        myPlayer->OnWeaponModeChanged.Broadcast(true);
-    }
+    
 }

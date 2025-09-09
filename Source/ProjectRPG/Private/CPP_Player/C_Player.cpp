@@ -42,6 +42,8 @@ void AC_Player::Down()
 void AC_Player::SetEquipMode(bool IsEquip)
 {
 	IsEquipMode = IsEquip;
+	AttachWeaponToSocket(IsEquipMode);
+	UE_LOG(LogTemp, Warning, TEXT("EquipReady"));
 }
 
 FName AC_Player::SetPlainAttack()
@@ -206,6 +208,7 @@ void AC_Player::RunningSystemManager()
 			{
 			case EInputType::PlainAttack:
 				RunningState = ERunningSystemState::Busy;
+				AttackMode();//스킬쓰면 어택킹모드진입
 				if (myAnimInterface)
 				{
 					myAnimInterface->SetAttackMode(true);
@@ -337,6 +340,20 @@ void AC_Player::SetPeriodInfo()
 	IsPeriod = true;
 }
 
+void AC_Player::AttachWeaponToSocket(bool bEquipMode)
+{
+	if (!EquippedWeapon) return;
+
+	FName SocketName = bEquipMode ? FName("Equip_Socket") : FName("r_weapon_socket");
+	EquippedWeapon->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		SocketName
+	);
+	UE_LOG(LogTemp, Warning, TEXT("AttachWeaponToSocket -> bEquipMode: %s"),
+		bEquipMode ? TEXT("True") : TEXT("False"));
+}
+
 AC_Player::AC_Player()
 {
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> res(TEXT("/Game/RPG_Hero_Character/Assets/Meshes/Adventurer/SK_Adventurer.SK_Adventurer"));
@@ -392,15 +409,18 @@ void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
-	//Delegate
-	OnWeaponModeChanged.AddDynamic(this, &AC_Player::SetEquipMode);
+	
 
-	//InterFace
+	
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
 		if (myAnimInstance)
 		{
+			//무기 파지법
+			myAnimInstance->OnWeaponModeChanged.AddDynamic(this, &AC_Player::SetEquipMode);
+
+			
 			//myAnimInterface에 플레이어의 애님인스턴스의 인터페이스 참조세팅
 			myAnimInterface.SetObject(myAnimInstance);                 
 			myAnimInterface.SetInterface(Cast<II_PlayerToAnimInstance>(myAnimInstance));
@@ -413,6 +433,15 @@ void AC_Player::BeginPlay()
 
 			//이제 노티파이발생시 애님인스턴스에서 브로드캐스트로 플레이어에게 전달
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
+		}
+	}
+	if (WeaponClass)
+	{
+		// 무기 스폰
+		EquippedWeapon = GetWorld()->SpawnActor<AActor>(WeaponClass);
+		if (EquippedWeapon)
+		{
+			AttachWeaponToSocket(IsEquipMode);
 		}
 	}
 	
@@ -640,6 +669,13 @@ void AC_Player::AttackMode()
 	else if (!IsAttackMode)
 	{
 		IsAttackMode = true;
+		if (IsEquipMode)
+		{
+			//무기파지
+			IsEquipMode = false;
+			AttachWeaponToSocket(IsEquipMode);
+			UE_LOG(LogTemp, Warning, TEXT("UNEquipMode"));
+		}
 	}
 	
 }

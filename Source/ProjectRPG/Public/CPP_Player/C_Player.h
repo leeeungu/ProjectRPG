@@ -7,7 +7,7 @@
 #include "Interface/C_CameraInterface.h"
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponModeChanged, bool, bIsWeaponEquipped);//Unequip노티파이로부터 bool값호출받음
+
 struct FSkillData;
 enum class E4WayDirection : uint8;
 
@@ -63,6 +63,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
 	UC_TravelManagerComponent* m_pTravelComponent{};
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AActor> WeaponClass;  // 블루프린트 무기 클래스 지정
+
+	UPROPERTY()
+	AActor* EquippedWeapon;  // 현재 장착된 무기
 
 	//플레이어 상태
 	UPROPERTY()
@@ -71,6 +76,7 @@ private:
 	E4WayDirectionPlayer DirectionSkillState = E4WayDirectionPlayer::Default;
 	//무기 부착상태
 	bool IsEquipMode = true;
+	UFUNCTION()
 	void SetEquipMode(bool IsEquip);
 
 	//이동 및 회전
@@ -143,8 +149,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//러닝스테이트 세팅
 	//무기부착상태(Unequip노티파이 호출 바인딩용)
-	UPROPERTY(BlueprintAssignable, Category = "Combat")
-	FOnWeaponModeChanged OnWeaponModeChanged;
+	
+	void AttachWeaponToSocket(bool bEquipMode);
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	ERunningSystemState GetRunningSystemState() { return RunningState; }
 
