@@ -158,11 +158,11 @@ void AC_PlayerController::SetupInputComponent()
         }
         if (m_pPlayerInfoWidget)
         {
-            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_PlayerInfo);
+            EnhancedInput->BindAction(m_pPlayerInfoWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_PlayerInfo);
         }
         if (m_pQuestWidget)
         {
-            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_QuestWindow);
+            EnhancedInput->BindAction(m_pQuestWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_QuestWindow);
         }
     }
 }

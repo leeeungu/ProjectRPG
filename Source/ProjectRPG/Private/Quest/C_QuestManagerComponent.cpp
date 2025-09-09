@@ -3,6 +3,7 @@
 #include "QuestAsset.h"
 #include "GameFramework/Controller.h"
 #include "Object/QuestObject.h"
+#include "GamePlay/C_DataMangerSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_QuestManagerComponent, Log, All);
 
@@ -18,6 +19,7 @@ void UC_QuestManagerComponent::BeginPlay()
 	{
 		UE_LOG(C_QuestManagerComponent, Error, TEXT("UC_QuestManagerComponent : Owner is Not Controller"));
 	}
+	UC_DataMangerSubsystem::loadData(this);
 }
 
 void UC_QuestManagerComponent::QuestEnd(UQuestAsset* pQuest)
@@ -128,6 +130,12 @@ bool UC_QuestManagerComponent::clearQuest(UQuestAsset* pQuest, bool bSucceed)
 	return true;
 }
 
+void UC_QuestManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UActorComponent::EndPlay(EndPlayReason);
+	UC_DataMangerSubsystem::saveBinaryData(this);
+}
+
 E_DataType UC_QuestManagerComponent::getDataType()
 {
 	return E_DataType::E_Binary;
@@ -140,9 +148,24 @@ FString UC_QuestManagerComponent::getFilePath(E_DataType eType)
 
 void UC_QuestManagerComponent::loadBinaryData(TArray<uint8>& arData)
 {
+	SQuestSaveData Data{};
+	UC_DataMangerSubsystem::readBinaryFile(arData, &Data);
+
+	for (auto& a : Data.mapQuestObject)
+	{
+		pushQuest((UQuestAsset*)a);
+	}
 }
 
 TArray<uint8> UC_QuestManagerComponent::getBinaryData()
 {
-	return TArray<uint8>();
+	SQuestSaveData Data{};
+	Data.nSize = m_mapQuestObject.Num();
+	for (auto  a  : m_mapQuestObject)
+	{
+		Data.mapQuestObject.Emplace((long long)a.Key);
+	}
+	TArray<uint8> result{};
+	UC_DataMangerSubsystem::saveBinaryFile< SQuestSaveData>(result, &Data);
+	return result;
 }

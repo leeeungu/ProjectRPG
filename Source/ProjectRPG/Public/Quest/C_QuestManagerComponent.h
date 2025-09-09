@@ -17,11 +17,23 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTRPG_API UC_QuestManagerComponent : public UActorComponent, public IC_DataManagerInterface
 {
 	GENERATED_BODY()
-
+private:
 	struct SQuestSaveData
 	{
-		UPROPERTY()
-		TMap<UQuestAsset*, AQuestObject*> mapQuestObject;
+		int nSize{};
+		TArray<long long> mapQuestObject{};
+
+		friend FArchive& operator<<(FArchive& Ar, SQuestSaveData* Data)
+		{
+			Ar << Data->nSize;
+			if (Data->mapQuestObject.Num() == 0)
+				Data->mapQuestObject.Init(0,Data->nSize);
+			for (long long& pAsset : Data->mapQuestObject)
+			{
+				Ar << pAsset;
+			}
+			return Ar;
+		}
 	};
 protected:
 	UPROPERTY()
@@ -57,6 +69,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool clearQuest(UQuestAsset* pQuest, bool bSucceed);
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	// IC_DataManagerInterface을(를) 통해 상속됨
 public:
 	virtual E_DataType getDataType() override;
