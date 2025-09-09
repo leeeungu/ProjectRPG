@@ -288,6 +288,15 @@ void UC_SkillComponent::RequestJumpToSection(FName SectionName)
 	}
 }
 
+float UC_SkillComponent::GetskillCoolTime(FName skill_Key)
+{
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))
+	{
+		return Skill->Cooldown;
+	}
+	return 0.0f;
+}
+
 // Called when the game starts
 void UC_SkillComponent::BeginPlay()
 {
@@ -398,7 +407,7 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 	SkillCooldownEndTime.Add(SkillName, EndTime);
 
 	// UI 동기화를 위한 브로드캐스트
-	//OnCooldownStarted.Broadcast(SkillName, CooldownDuration);
+	OnSkillCooldownStarted.Broadcast(SkillName);
 }
 
 float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const

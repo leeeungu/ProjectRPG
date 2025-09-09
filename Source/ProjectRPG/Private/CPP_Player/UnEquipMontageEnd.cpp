@@ -2,6 +2,7 @@
 
 
 #include "CPP_Player/UnEquipMontageEnd.h"
+#include "CPP_Player/C_Player.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
 
 void UUnEquipMontageEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -19,5 +20,12 @@ void UUnEquipMontageEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
             
             UE_LOG(LogTemp, Warning, TEXT("Period true"));
         }
+    }
+    // 캐릭터 가져오기
+    AC_Player* myPlayer = Cast<AC_Player>(MeshComp->GetOwner());
+    if (myPlayer)
+    {
+        // false 전달 (무기 해제됨)
+        myPlayer->OnWeaponModeChanged.Broadcast(true);
     }
 }

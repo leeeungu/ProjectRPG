@@ -39,6 +39,11 @@ void AC_Player::Down()
 	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
 }
 
+void AC_Player::SetEquipMode(bool IsEquip)
+{
+	IsEquipMode = IsEquip;
+}
+
 FName AC_Player::SetPlainAttack()
 {
 	switch (m_nComboCount)
@@ -387,7 +392,10 @@ void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
+	//Delegate
+	OnWeaponModeChanged.AddDynamic(this, &AC_Player::SetEquipMode);
 
+	//InterFace
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
