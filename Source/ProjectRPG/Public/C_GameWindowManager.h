@@ -24,6 +24,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool toggleWidget(E_WindowType eType);
+	void toggleWindow(E_WindowType eType);
 
 	UFUNCTION(BlueprintCallable)
 	bool removeWidgetFromMain(E_WindowType eType);

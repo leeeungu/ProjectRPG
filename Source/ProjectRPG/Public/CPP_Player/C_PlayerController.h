@@ -124,12 +124,6 @@ public:
 	void OnF_ActionCompleted(const FInputActionValue& Value);
 	void OnNumber1_Action(const FInputActionValue& Value);
 	void OnNumber2_Action(const FInputActionValue& Value);
-	void OnInteraction(const FInputActionValue& Value);
-	void OnQuickSlot(const FInputActionValue& Value);
-	void OnQuickSlotv2(const FInputActionValue& Value, int Type);
-	void OnToggleInventory(const FInputActionValue& Value);
-	void OnTogglePlayerInfo(const FInputActionValue& Value);
-	void OnToggleQuest(const FInputActionValue& Value);
 public:
 	AC_PlayerController();
 	virtual void OnPossess(APawn* pawn) override;

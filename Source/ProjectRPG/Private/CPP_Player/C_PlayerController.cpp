@@ -126,7 +126,11 @@ void AC_PlayerController::SetupInputComponent()
 
         if (m_pInteraction)
         {
-            EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, this, &AC_PlayerController::OnInteraction);
+            AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
+            if (pPlayer)
+            {
+                EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, pPlayer, &AC_Player::runInteraction);
+            }
         }
       /*  if (m_pQuickSlot)
         {
@@ -134,31 +138,31 @@ void AC_PlayerController::SetupInputComponent()
         }*/
         if(m_pQuickSlot1)
         {  
-             EnhancedInput->BindAction(m_pQuickSlot1, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 1);
+             EnhancedInput->BindAction(m_pQuickSlot1, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot1);
         }
         if (m_pQuickSlot2)
         {  
-             EnhancedInput->BindAction(m_pQuickSlot2, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 2);
+             EnhancedInput->BindAction(m_pQuickSlot2, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot2);
         }
         if (m_pQuickSlot3)
         {  
-             EnhancedInput->BindAction(m_pQuickSlot3, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 3);
+             EnhancedInput->BindAction(m_pQuickSlot3, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot3);
         }
         if (m_pQuickSlot4)
         {  
-             EnhancedInput->BindAction(m_pQuickSlot4, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlotv2, 4);
+             EnhancedInput->BindAction(m_pQuickSlot4, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot4);
         }
         if (m_pInventoryWidget)
         {
-            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnToggleInventory);
+            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_Inventory);
         }
         if (m_pPlayerInfoWidget)
         {
-            EnhancedInput->BindAction(m_pPlayerInfoWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnTogglePlayerInfo);
+            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_PlayerInfo);
         }
         if (m_pQuestWidget)
         {
-            EnhancedInput->BindAction(m_pQuestWidget, ETriggerEvent::Completed, this, &AC_PlayerController::OnToggleQuest);
+            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_QuestWindow);
         }
     }
 }
@@ -365,75 +369,6 @@ void AC_PlayerController::OnNumber2_Action(const FInputActionValue& Value)
     {
         InputQueueSystem->PushInput(NewInputData);
     }
-}
-
-void AC_PlayerController::OnInteraction(const FInputActionValue& Value)
-{
-    FInputActionData NewInputData;
-    NewInputData.ActionName = "Interaction";
-    NewInputData.InputStateType = EInputStateType::Pressed;
-    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
-    if (pPlayer)
-    {
-        pPlayer->runInteraction();
-    }
-}
-
-void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
-{
-    FInputActionData NewInputData;
-    NewInputData.ActionName = "QuickSlot";
-    NewInputData.InputStateType = EInputStateType::Pressed;
-    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    int nItemID{};
-    FVector2D v  = Value.Get<FVector2D>();
-    UE_LOG(C_PlayerController, Log, TEXT("%s"), *v.ToString());
-    if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID(E_QuickSlotType::E_QuickSlot1, nItemID))
-    {
-        UGameInstance* GameInstance = GetWorld()->GetGameInstance();
-        if (GameInstance)
-        {
-            UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-            pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
-        }
-    }
-}
-
-void AC_PlayerController::OnQuickSlotv2(const FInputActionValue& Value, int Type)
-{
-    FInputActionData NewInputData;
-    NewInputData.ActionName = "QuickSlot";
-    NewInputData.InputStateType = EInputStateType::Pressed;
-    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    int nItemID{};
-    if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID((E_QuickSlotType)Type, nItemID))
-    {
-        UGameInstance* GameInstance = GetWorld()->GetGameInstance();
-        if (GameInstance)
-        {
-            UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-            pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
-        }
-    }
-}
-
-void AC_PlayerController::OnToggleInventory(const FInputActionValue& Value)
-{
-    if (getGameWindowManager())
-        getGameWindowManager()->toggleWidget(E_WindowType::E_Inventory);
-}
-
-void AC_PlayerController::OnTogglePlayerInfo(const FInputActionValue& Value)
-{
-    if (getGameWindowManager())
-        getGameWindowManager()->toggleWidget(E_WindowType::E_PlayerInfo);
-}
-
-void AC_PlayerController::OnToggleQuest(const FInputActionValue& Value)
-{
-    if (getGameWindowManager())
-        getGameWindowManager()->toggleWidget(E_WindowType::E_QuestWindow);
 }
 
 void AC_PlayerController::OnPossess(APawn* pawn)

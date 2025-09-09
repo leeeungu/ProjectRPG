@@ -155,5 +155,5 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TravelComponent")
 	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
 
-	bool runInteraction();
+	void runInteraction();
 };

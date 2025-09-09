@@ -75,18 +75,25 @@ void UC_QuickSlotManagerComponent::bindSlotChangeDelegate(E_QuickSlotType QuickS
 	m_onQuickSlotChange[(int)QuickSlotType] = Delegate;
 }
 
+void UC_QuickSlotManagerComponent::useQuickSlotItemID(E_QuickSlotType QuickSlotType)
+{
+	int nItemID{};
+	if (getQuickSlotItemID(QuickSlotType, nItemID) && Cast<APlayerController>(GetOwner()))
+	{
+		UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+		if (GameInstance)
+		{
+			UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
+			pItemDataSubsystem->spawnEffectItem(nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+		}
+	}
+}
+
 void UC_QuickSlotManagerComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 	m_pInventoryComponent = GetOwner()->GetComponentByClass<UC_InventoryComponent>();
 	UC_DataMangerSubsystem::loadData(this);
-	//UC_DataManager* pManager = UC_GameDataUtill::getDataManager(GetWorld());
-	//if (pManager)
-	//{
-	//
-	//	pManager->registerDataFile(this);
-	//	pManager->loadData(this);
-	//}
 }
 
 E_DataType UC_QuickSlotManagerComponent::getDataType()

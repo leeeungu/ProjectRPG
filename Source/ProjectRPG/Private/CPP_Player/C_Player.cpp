@@ -652,11 +652,10 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 
 }
 
-bool AC_Player::runInteraction()
+void AC_Player::runInteraction()
 {
 	if (m_pInteractionDetectComponent)
 	{
-		return m_pInteractionDetectComponent->runInteraction();
+		m_pInteractionDetectComponent->runInteraction();
 	}
-	return false;
 }
