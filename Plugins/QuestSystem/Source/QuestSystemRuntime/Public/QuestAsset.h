@@ -24,6 +24,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
     bool bFinishQuest{};
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
+    bool bQuestAccept{};
+
     UPROPERTY()
     UQuestRuntimeGraph* Graph = nullptr;
 
@@ -41,9 +44,15 @@ public:
     UQuestRuntimeNode* GetQuestStartNode();
 
     UFUNCTION(BlueprintCallable, Category = "QuestAsset")
-    void SetFinishQuest(bool bValue) { bFinishQuest = bValue; }
+    void SetFinishQuest(bool bValue);
     UFUNCTION(BlueprintPure, Category = "QuestAsset")
     bool GetFinishQuest() const { return bFinishQuest; }
+
+
+    UFUNCTION(BlueprintCallable, Category = "QuestAsset")
+    void SetQuestAccept(bool bValue) { bQuestAccept = bValue; }
+    UFUNCTION(BlueprintPure, Category = "QuestAsset")
+    bool GetQuestAccept() const { return bQuestAccept; }
 
     void SetPreSaveListener(std::function<void()> onPreSaveListener) { _onPreSaveListener = onPreSaveListener ; }
 

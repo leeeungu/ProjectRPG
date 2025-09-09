@@ -95,7 +95,7 @@ bool UC_QuestManagerComponent::pushQuest(UQuestAsset* pQuest)
 	if (m_mapQuestObject.Find(pQuest))
 		return false;
 	AQuestObject*& ObjectRef = m_mapQuestObject.Add(pQuest);
-
+	pQuest->SetQuestAccept(true);
 	pQuest->OnQuestFail.AddDynamic(this, &UC_QuestManagerComponent::QuestFail);
 	pQuest->OnQuestSucceed.AddDynamic(this, &UC_QuestManagerComponent::QuestSucceed);
 	if (OnQuestPush.IsBound())
