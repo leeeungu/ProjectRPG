@@ -20,6 +20,7 @@ bool UC_InteractionDetectorComponent::runInteraction()
 {
 	if (!m_pFirst)
 		return false;
+	// 상호작용 이벤트 실행
 	m_pFirst->runInteraction(GetOwner());
 	return true;
 }
@@ -28,6 +29,7 @@ AActor* UC_InteractionDetectorComponent::getInteractionActor() const
 {
 	if (!m_pFirst)
 		return nullptr;
+	// 처음 탐색된 상호작용의 소유자 반환
 	return m_pFirst->GetOwner();
 }
 

@@ -114,10 +114,19 @@ void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, i
 	runSlotChangeInterface(pDstSlotData);
 }
 
+
+/**
+* 아이템을 인벤토리에 추가합니다.
+* @param nItemID - Item Key Value
+* @param nItemCount - Item Count
+*/
 bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 {
 	FS_InventorySlot* pSlotData = &m_sDummyItemData;
 	bool bStackable = m_pItemDataSubsystem->hasItemStateFlag(nItemID, (int32)E_EItemState::CanStackable);
+	// 1. 스택 가능한 아이템이면 첫번째로 발견되는 같은 아이템 슬롯 선택
+	// 2. 스택 불가능한 아이템이거나 같은 아이템이 없으면 빈 슬롯 선택
+	// 3. 빈 슬롯이 없으면 실패
 	for (int i = 0; i < m_nInventorySize && pSlotData  == &m_sDummyItemData; i++)
 	{
 		if (m_arrInventory[i].sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
@@ -126,6 +135,8 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 			pSlotData = &m_arrInventory[i];
 		}
 	}
+
+	// 4. 슬롯이 있으면 아이템 추가
 	if (pSlotData != &m_sDummyItemData)
 	{
 		pSlotData->sData.nItemID = nItemID;
@@ -140,11 +151,11 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 	}
 	else
 	{
+		// 인벤토리 공간 없음
 		FS_GameAlertSubsystemConfig config{};
 		config.strDefaultAlertMessage = FText::FromString(TEXT("인벤토리의 공간이 없습니다."));
 		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 	}
-
 	return  pSlotData != &m_sDummyItemData;
 }
 
