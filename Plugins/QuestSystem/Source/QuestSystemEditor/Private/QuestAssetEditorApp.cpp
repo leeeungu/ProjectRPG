@@ -31,6 +31,7 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
 		mode, initToolkitHost, TEXT("QuestSystem"), FTabManager::FLayout::NullLayout, true, true, ObjectsToEdit
 	);
 
+    // 에셋의 구성은 QuestAssetAppMode
 	AddApplicationMode(TEXT("QuestAppMode"), MakeShareable(new QuestAssetAppMode(SharedThis(this))));
 
 	SetCurrentMode(TEXT("QuestAppMode"));
@@ -38,21 +39,28 @@ void QuestAssetEditorApp::InitEditor(const EToolkitMode::Type mode, const TShare
     UpdateEditorGraphFromWorkingAsset();
 }
 
+
 void QuestAssetEditorApp::SetSelectedNodeDetailView(TSharedPtr<IDetailsView> detailsView)
 {
+    // detailsView은 QuestAssetPropertiesTabFactory 에서 생성되어 노드 선택 시 보여줄 에티터 뷰를 저장해둔다.
     _SelectedNodeDetailsView = detailsView;
-    _SelectedNodeDetailsView->OnFinishedChangingProperties().AddRaw(this, &QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated);
+    _SelectedNodeDetailsView->OnFinishedChangingProperties()
+        .AddRaw(this, &QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated);
 }
 
 void QuestAssetEditorApp::OnGraphSelectedChanged(const FGraphPanelSelectionSet& selection)
 {
+    // QuestAssetPrimaryTabFactory(오른 쪽 탭)에서 	SGraphEditor::FGraphEditorEvents의 OnSelectionChanged에 
+	//                     바인드 되어 있어 노드가 선택 혹은 해제 될 때 호출된다.
+    // 왼쪽 탭에서 노드가 선택 되면 오른 쪽 탭의 DetailsView 부분에 보여줄 언리얼 오브젝트를 선택한다.
+    // 왼쪽 아래 에디터 탭에서 보여주는 정보들은 UPROPERTY 매크로로 선언할 수 있다.
     UQuestGraphNodeBase* selectedNode = GetSelectedNode(selection);
     if (selectedNode)
     {
         _SelectedNodeDetailsView->SetObject(selectedNode->GetNodeInfo());
     }
     else
-    _SelectedNodeDetailsView->SetObject(nullptr);
+        _SelectedNodeDetailsView->SetObject(nullptr);
 }
 
 void QuestAssetEditorApp::OnClose()
@@ -77,7 +85,6 @@ void QuestAssetEditorApp::OnNodeDetailViewPropertiesUpdated(const FPropertyChang
 
 void QuestAssetEditorApp::OnWorkingAssetPreSave()
 {
-
     UpdateWorkingAssetFromGraph();
 }
 
