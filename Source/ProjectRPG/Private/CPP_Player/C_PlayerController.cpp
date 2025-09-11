@@ -320,7 +320,6 @@ void AC_PlayerController::OnF_ActionOngoing(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Held;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Ongoing"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);
@@ -333,7 +332,6 @@ void AC_PlayerController::OnF_ActionCanceld(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Cancel"));//실제론 canceld지만 complete와 동일하게처리
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);
@@ -346,7 +344,6 @@ void AC_PlayerController::OnF_ActionCompleted(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);

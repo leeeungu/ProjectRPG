@@ -289,6 +289,16 @@ void AC_Player::RunningSystemManager()
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
 				RunningState = ERunningSystemState::Busy;
 				m_inputQueue->ClearChargingQueueList();
+				if (ChargeInput.Timing == false)
+				{
+					//실패! 브로드캐스트( 몽타주[실패이펙트,사운드], UI실패)
+					UE_LOG(LogTemp, Warning, TEXT("Fail"));
+				}
+				else 
+				{
+					//성공! 
+					UE_LOG(LogTemp, Warning, TEXT("Succed"));
+				}
 				m_skillCom->RequestJumpToSection(FName("Released"));
 				break;
 			}
@@ -414,6 +424,7 @@ void AC_Player::BeginPlay()
 	
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{
+		myMesh->SetRenderCustomDepth(true);
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
 		if (myAnimInstance)
 		{
