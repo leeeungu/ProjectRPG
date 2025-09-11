@@ -1,4 +1,5 @@
 ﻿#include "C_CurrencyComponent.h"
+#include "GamePlay/C_DataMangerSubsystem.h"
 
 UC_CurrencyComponent::UC_CurrencyComponent()
 {
@@ -67,6 +68,12 @@ bool UC_CurrencyComponent::useCurrency(int nCurrencyID, int nCurrencyAmount)
 	return popCurrency(nCurrencyID, nCurrencyAmount);
 }
 
+void UC_CurrencyComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UActorComponent::EndPlay(EndPlayReason);
+	UC_DataMangerSubsystem::saveBinaryData(this);
+}
+
 void UC_CurrencyComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
@@ -75,7 +82,8 @@ void UC_CurrencyComponent::BeginPlay()
 	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
 	}
-	if (m_pItemDataSubsystem)
+	UC_DataMangerSubsystem::loadData(this);
+	if (m_pItemDataSubsystem && m_mapInventory.IsEmpty())
 		pushCurrency(m_pItemDataSubsystem->getCurrencyGoldItemID(), 0); // Initialize with 0 gold
 }
 
@@ -121,5 +129,35 @@ bool UC_CurrencyComponent::isValueCurrency(int nCurrencyID) const
 		return false;
 	}
 	return true;
+}
+
+E_DataType UC_CurrencyComponent::getDataType()
+{
+	return E_DataType::E_Binary;
+}
+
+FString UC_CurrencyComponent::getFilePath(E_DataType eType)
+{
+	return  FPaths::ProjectSavedDir() + TEXT("CurrencyData");
+}
+
+void UC_CurrencyComponent::loadBinaryData(TArray<uint8>& arData)
+{
+	SCurrencyData Data{};
+	if (!UC_DataMangerSubsystem::readBinaryFile(arData, &Data))
+		return;
+	pushCurrency(Data.ItemID, Data.nCount);
+}
+
+TArray<uint8> UC_CurrencyComponent::getBinaryData()
+{
+	SCurrencyData Data{};
+	TArray<uint8> result{};
+
+	Data.ItemID = m_pItemDataSubsystem->getCurrencyGoldItemID();
+	Data.nCount = m_mapInventory.FindOrAdd(Data.ItemID);
+
+	UC_DataMangerSubsystem::saveBinaryFile< SCurrencyData>(result, &Data);
+	return result;
 }
 

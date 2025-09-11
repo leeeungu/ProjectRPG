@@ -49,7 +49,6 @@ bool AC_EquipItem::itemEffect_Implementation()
 
 bool AC_EquipItem::useFail_Implementation()
 {
-	Destroy();
 	return true;
 }
 

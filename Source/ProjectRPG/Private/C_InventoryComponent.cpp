@@ -187,6 +187,7 @@ bool UC_InventoryComponent::getItemCountAtSlot(int nY, int nX, int& nCount)
 
 bool UC_InventoryComponent::getItemCountByID(int nItemID, int& nCount)
 {
+	nCount = 0;
 	int* pCount = m_mapItemCount.Find(nItemID);
 	if (!pCount)
 		return false;

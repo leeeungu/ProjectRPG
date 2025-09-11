@@ -87,11 +87,6 @@ bool UC_QuestManagerComponent::pushQuest(UQuestAsset* pQuest)
 		UE_LOG(C_QuestManagerComponent, Error, TEXT("UC_QuestManagerComponent : UQuestAsset is nullptr, Module Error"));
 		return false;
 	}
-	else if (!pQuest->GetQuestObjectClass())
-	{
-		UE_LOG(C_QuestManagerComponent, Error, TEXT("UC_QuestManagerComponent : UQuestAsset is nullptr"));
-		return false;
-	}
 	if (m_mapQuestObject.Find(pQuest))
 		return false;
 	AQuestObject*& ObjectRef = m_mapQuestObject.Add(pQuest);

@@ -4,12 +4,13 @@
 #include "Components/ActorComponent.h"
 #include <C_ItemDataSubsystem.h>
 #include <C_GameAlertSubsystem.h>
+#include "GamePlay/C_DataManagerInterface.h"
 #include "C_CurrencyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPushCurrency, int, nItemID, int, nItemCount);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTRPG_API UC_CurrencyComponent : public UActorComponent
+class PROJECTRPG_API UC_CurrencyComponent : public UActorComponent, public IC_DataManagerInterface
 {
 	GENERATED_BODY()
 	enum E_AlertType
@@ -19,6 +20,18 @@ class PROJECTRPG_API UC_CurrencyComponent : public UActorComponent
 		E_CantPop,
 		E_NotCurrency,
 		E_NotEnough
+	};
+
+	struct SCurrencyData
+	{
+		int ItemID{};
+		int nCount{};
+		friend FArchive& operator<<(FArchive& Ar, SCurrencyData* Data)
+		{
+			Ar << Data->ItemID;
+			Ar << Data->nCount;
+			return Ar;
+		}
 	};
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "UC_CurrencyComponent")
@@ -69,6 +82,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UC_CurrencyComponent")
 	bool useCurrency(int nCurrencyID, int nCurrencyAmount);
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -76,5 +90,11 @@ private:
 	void pushAlertMessage(E_AlertType eType) const;
 	bool getCurrencyCount(int nCurrencyID, int& rData) const;
 	bool isValueCurrency(int nCurrencyID) const;
+	// IC_DataManagerInterface을(를) 통해 상속됨
+public:
+	virtual E_DataType getDataType() override;
+	virtual FString getFilePath(E_DataType eType) override;
 
+	virtual void loadBinaryData(TArray<uint8>& arData) override;
+	virtual TArray<uint8> getBinaryData() override;
 };
