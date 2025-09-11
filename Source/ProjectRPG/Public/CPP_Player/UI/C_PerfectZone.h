@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Slate/WidgetTransform.h"
 #include "Components/Image.h"
 #include "C_PerfectZone.generated.h"
 
@@ -24,7 +25,8 @@ public:
     void StopProgressAnimation();
 
 private:
-    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+    //virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+    virtual void NativeConstruct() override;
 
 protected:
     // 애니메이션 참조
@@ -35,5 +37,7 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     UImage* BarBackup;
+
+    FWidgetTransform InitialBackupTransform;
 	
 };

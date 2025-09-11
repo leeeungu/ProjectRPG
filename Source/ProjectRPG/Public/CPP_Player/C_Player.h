@@ -7,6 +7,9 @@
 #include "Interface/C_CameraInterface.h"
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
+//위젯(perfectZone)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeEnd);
 
 struct FSkillData;
 enum class E4WayDirection : uint8;
@@ -110,8 +113,15 @@ private:
 	float ComboTime = 0.f;
 	void ComboCountSetting(float DeltaTime);
 public:
-	
 
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeStart OnChargeStart;
+
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeEnd OnChargeEnd;
+
+	void HandleChargeInputStart();
+	void HandleChargeInputEnd();
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();

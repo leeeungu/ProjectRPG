@@ -45,8 +45,8 @@ void UC_InputQueueComponent::PushInput_Charging(const FInputActionData& NewInput
 		InputQueue.RemoveAt(0);
 	}
 	float CurrentTime = GetWorld()->GetTimeSeconds();
-	float SuccedTimeStart = ChargingStratTime + 0.7f;
-	float SuccedTimeEnd = ChargingStratTime + 1.5f;
+	float SuccedTimeStart = ChargingStratTime + 0.6f;
+	float SuccedTimeEnd = ChargingStratTime + 0.8f;
 	FInputActionData ChargingInput = NewInput;
 	if (CurrentTime >= SuccedTimeStart && CurrentTime  <= SuccedTimeEnd)
 	{
@@ -58,10 +58,6 @@ void UC_InputQueueComponent::PushInput_Charging(const FInputActionData& NewInput
 	}
 	ChargingQueue.Add(ChargingInput);
 	SetComponentTickEnabled(true);
-	UE_LOG(LogTemp, Warning, TEXT("ChargingInput.Timing: %s (CurrentTime: %.2f, Start: %.2f, End: %.2f)"),
-		ChargingInput.Timing ? TEXT("true") : TEXT("false"),
-		CurrentTime, SuccedTimeStart, SuccedTimeEnd);
-
 }
 
 bool UC_InputQueueComponent::GetLastInputData(FInputActionData& OutInput) const

@@ -69,6 +69,16 @@ void AC_Player::ComboCountSetting(float DeltaTime)//콤보타임세팅중
 	}
 }
 
+void AC_Player::HandleChargeInputStart()
+{
+	OnChargeStart.Broadcast();
+}
+
+void AC_Player::HandleChargeInputEnd()
+{
+	OnChargeEnd.Broadcast();
+}
+
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
@@ -260,6 +270,7 @@ void AC_Player::RunningSystemManager()
 					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 					//쿨타임 시작
 					m_skillCom->StartCooldown(CurrentInputData.ActionName);
+					HandleChargeInputStart();
 				}
 				else
 				{
@@ -299,6 +310,7 @@ void AC_Player::RunningSystemManager()
 					//성공! 
 					UE_LOG(LogTemp, Warning, TEXT("Succed"));
 				}
+				HandleChargeInputEnd();
 				m_skillCom->RequestJumpToSection(FName("Released"));
 				break;
 			}
