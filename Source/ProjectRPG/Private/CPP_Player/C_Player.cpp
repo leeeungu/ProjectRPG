@@ -3,6 +3,7 @@
 
 #include "CPP_Player/C_Player.h"
 #include "GameFrameWork/SpringArmComponent.h"
+#include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
@@ -16,6 +17,7 @@
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "NiagaraComponent.h"
 
 void AC_Player::PlayerDownTest()
 {
@@ -34,9 +36,24 @@ void AC_Player::ReceiveDamage(float damageAmount)
 void AC_Player::Down()
 {
 	RunningState = ERunningSystemState::Down;
+	DeactivateAllNiagaraEffects();
 	ClearMoveState();
 	bCanMove = false;
 	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
+}
+
+void AC_Player::DeactivateAllNiagaraEffects()
+{
+	TArray<UNiagaraComponent*> NiagaraComponents;
+	GetComponents<UNiagaraComponent>(NiagaraComponents);
+
+	for (UNiagaraComponent* NiagaraComp : NiagaraComponents)
+	{
+		if (NiagaraComp && NiagaraComp->IsActive())
+		{
+			NiagaraComp->Deactivate();
+		}
+	}
 }
 
 void AC_Player::SetEquipMode(bool IsEquip)
@@ -187,6 +204,7 @@ void AC_Player::RunningSystemManager()
 			}
 			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
 			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+			DeactivateAllNiagaraEffects();
 			bCanMove = false;
 			if (IsAttackMode)
 			{

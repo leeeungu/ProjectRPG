@@ -25,6 +25,7 @@ private:
 	void AnimChangeMode();
 	UFUNCTION()
 	void OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

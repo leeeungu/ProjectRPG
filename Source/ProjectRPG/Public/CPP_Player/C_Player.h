@@ -142,6 +142,8 @@ private:
 	void PlayerDownTest();
 	void ReceiveDamage(float damageAmount);
 	void Down();
+	//VFX제거
+	void DeactivateAllNiagaraEffects();
 
 public:
 	AC_Player();
