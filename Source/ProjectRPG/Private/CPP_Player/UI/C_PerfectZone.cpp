@@ -13,6 +13,7 @@ void UC_PerfectZone::PlayProgressAnimation()
             // 에디터에서 잡아둔 초기 상태로 복원
             BarBackup->SetRenderTransform(InitialBackupTransform);
         }
+        IsTick = true;
         PlayAnimation(Start);
         UE_LOG(LogTemp, Warning, TEXT("Start"));
     }
@@ -20,6 +21,7 @@ void UC_PerfectZone::PlayProgressAnimation()
 
 void UC_PerfectZone::StopProgressAnimation()
 {
+    IsTick = false;
     if (Start && IsAnimationPlaying(Start))
     {
         // Stop 직전에 현재 Bar Transform을 백업에 복사
@@ -40,10 +42,20 @@ void UC_PerfectZone::StopProgressAnimation()
     
 }
 
+void UC_PerfectZone::UpdateSecondText(float TimeValue)
+{
+    if (Second)
+    {
+        // 소수 첫째 자리까지 문자열로 변환
+        FString TimeString = FString::Printf(TEXT("%.1f"), TimeValue);
+        Second->SetText(FText::FromString(TimeString));
+    }
+}
+
 void UC_PerfectZone::NativeConstruct()
 {
     Super::NativeConstruct();
-
+    UpdateSecondText(0.0f);
     if (APlayerController* myPC = GetOwningPlayer())
     {
         if (AC_Player* myPlayer = Cast<AC_Player>(myPC->GetPawn()))
@@ -58,23 +70,21 @@ void UC_PerfectZone::NativeConstruct()
     }
 }
 
-//void UC_PerfectZone::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-//{
-//    Super::NativeTick(MyGeometry, InDeltaTime);
-//   
-//    if (!bTickActive) return; // 애니메이션 중일 때만 Tick 작동
-//    if (!Bar || !BarBackup) return;
-//
-//    // 현재 AnimImage의 RenderTransform 가져오기
-//    const FWidgetTransform& AnimTransform = Bar->RenderTransform;
-//
-//    // X 스케일과 X 위치만 복사
-//    FWidgetTransform NewTransform = BarBackup->RenderTransform;
-//    NewTransform.Scale.X = AnimTransform.Scale.X;
-//    NewTransform.Translation.X = AnimTransform.Translation.X;
-//
-//    // 적용
-//    BarBackup->SetRenderTransform(NewTransform);
-//
-//    UE_LOG(LogTemp, Warning, TEXT("Ticking..."));
-//}
+void UC_PerfectZone::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+    if (!IsTick)
+    {
+        CurrentTime = 0;
+        return;
+    }
+    CurrentTime += InDeltaTime;
+    UpdateSecondText(CurrentTime);
+    if (CurrentTime > 0.8f)
+    {
+        CurrentTime = 0;
+        IsTick = false;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Ticking..."));
+}

@@ -45,16 +45,21 @@ void UC_InputQueueComponent::PushInput_Charging(const FInputActionData& NewInput
 		InputQueue.RemoveAt(0);
 	}
 	float CurrentTime = GetWorld()->GetTimeSeconds();
-	float SuccedTimeStart = ChargingStratTime + 0.6f;
+	float SuccedTimeStart = ChargingStratTime + 0.62f;
 	float SuccedTimeEnd = ChargingStratTime + 0.8f;
 	FInputActionData ChargingInput = NewInput;
 	if (CurrentTime >= SuccedTimeStart && CurrentTime  <= SuccedTimeEnd)
 	{
 		ChargingInput.Timing = true;
 	}
-	else
+	else if(CurrentTime < SuccedTimeStart)//성공시간보다작을때
 	{
 		ChargingInput.Timing = false;
+	}
+	else//끝나는시간보다 더누르고있을떄
+	{
+		ChargingInput.Timing = false;
+		ChargingInput.InputStateType = EInputStateType::Released;
 	}
 	ChargingQueue.Add(ChargingInput);
 	SetComponentTickEnabled(true);

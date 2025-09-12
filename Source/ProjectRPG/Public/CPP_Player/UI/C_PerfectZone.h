@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Slate/WidgetTransform.h"
 #include "Components/Image.h"
+#include "Components/Textblock.h"
 #include "C_PerfectZone.generated.h"
 
 /**
@@ -24,8 +25,12 @@ public:
     UFUNCTION(BlueprintCallable)
     void StopProgressAnimation();
 
+    void UpdateSecondText(float TimeValue);
+
 private:
-    //virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+    bool IsTick = false;
+    float CurrentTime = 0.f;
+    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
     virtual void NativeConstruct() override;
 
 protected:
@@ -37,6 +42,8 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     UImage* BarBackup;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* Second;
 
     FWidgetTransform InitialBackupTransform;
 	
