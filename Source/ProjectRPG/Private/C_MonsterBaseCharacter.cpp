@@ -251,11 +251,6 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	vDecalLocation.Z = 0.1f;
 	FRotator rRot = FRotator(-90.f, 0.f, 0.f);
 
-	
-	UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), sPattern.pNiagara, vDecalLocation, rRot,
-	sPattern.fNiagaraLife, sPattern.fNiagaraScale);
-
-	UE_LOG(C_MonsterBaseCharacte, Warning, TEXT("Spawn Niagara at Time: %f"), GetWorld()->GetTimeSeconds());
 
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
