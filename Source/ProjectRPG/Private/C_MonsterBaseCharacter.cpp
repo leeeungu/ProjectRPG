@@ -133,7 +133,7 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	if (pAiCon)
 		pAiCon->restartAi();
 
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.15f, m_pStaggerMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 
