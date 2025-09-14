@@ -76,6 +76,8 @@ void AC_AnimationInteraction::BeginPlay()
 	m_pInteractionWidget->SetVisibility(false);
 
 	AActor::BeginPlay();
+	// 인터렉션 콤포넌트에 상호작용 델리게이트 바인딩하고
+	// Ovelap 델리게이트도 기존 문법대로 사용할 수 있음
 	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::interactionStart);
 	m_pStartCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginOverlap);
 	m_pStartCollision->OnComponentEndOverlap.AddDynamic(this, &AC_AnimationInteraction::endOverlap);

@@ -55,7 +55,8 @@ struct FS_ItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	E_EItemType eItemType = E_EItemType::None;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data", meta = (Bitmask, BitmaskEnum = E_EItemState))
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data", 
+		meta = (Bitmask, BitmaskEnum = E_EItemState))
 	int32 eltemStateFlag = 255;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data")
@@ -97,11 +98,13 @@ public:
 	int getCurrencyGoldItemID() const { return 1; }
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
-	bool hasItemStateFlag(int ItemID, UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
+	bool hasItemStateFlag(int ItemID, 
+		UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
 
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
 
+	static AC_ItemActorBase* spawnEffectItem_Cpp(int ItemID, APawn* pInstigator);
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;
 };

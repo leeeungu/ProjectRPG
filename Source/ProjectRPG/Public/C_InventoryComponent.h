@@ -123,11 +123,11 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	void swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX);
-	/**
-	* @param nSrcY - Item1 Height/Row Index
-	* @param nSrcX - Item1 Width/Col Index
-	* @param nDstY - Item2 Height/Row Index
-	* @param nDstX - Item2 Width/Col Index
+
+	/**	
+	* 아이템을 인벤토리에 추가합니다.
+	* @param nItemID - Item Key Value
+	* @param nItemCount - Item Count
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	bool pushItem(int nItemID, int nItemCount);

@@ -16,11 +16,10 @@ QuestAssetPropertiesTabFactory::QuestAssetPropertiesTabFactory(TSharedPtr<QuestA
 TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
 	TSharedPtr<QuestAssetEditorApp> app = _app.Pin();
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
+    FPropertyEditorModule& propertyEditorModule = 
+        FModuleManager::LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
 
-
-
-
+    // 에디터 디테일 창에 대한 설정
     FDetailsViewArgs detailsViewArgs{};
     {
         detailsViewArgs.bAllowSearch = false;
@@ -34,17 +33,12 @@ TSharedRef<SWidget> QuestAssetPropertiesTabFactory::CreateTabBody(const FWorkflo
         detailsViewArgs.bShowScrollBar = false;
     }
 
-
+    // 디테일 창이 어떻게 보일지 정의
     TSharedPtr<IDetailsView> detailsView = propertyEditorModule.CreateDetailView(detailsViewArgs);
     detailsView->SetObject(app->GetWorkingAsset());
-
-    
     TSharedPtr<IDetailsView> selectedNodeDetailView = propertyEditorModule.CreateDetailView(detailsViewArgs);
     selectedNodeDetailView->SetObject(nullptr);
     app->SetSelectedNodeDetailView(selectedNodeDetailView);
-
-    
-    
     return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .FillHeight(1.0f)

@@ -25,13 +25,13 @@ private:
 
 		friend FArchive& operator<<(FArchive& Ar, SQuestSaveData* Data)
 		{
-			Ar << Data->nSize;
+		/*	Ar << Data->nSize;
 			if (Data->mapQuestObject.Num() == 0)
 				Data->mapQuestObject.Init(0,Data->nSize);
 			for (long long& pAsset : Data->mapQuestObject)
 			{
 				Ar << pAsset;
-			}
+			}*/
 			return Ar;
 		}
 	};

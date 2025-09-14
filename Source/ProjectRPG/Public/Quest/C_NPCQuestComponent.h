@@ -5,6 +5,10 @@
 #include "C_NPCQuestComponent.generated.h"
 
 class UQuestAsset;
+class UQuestRuntimeNode;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestChanged, bool, bHasNode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestEnd, UQuestRuntimeNode*, pQuestNode);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_NPCQuestComponent : public UActorComponent
@@ -16,23 +20,40 @@ protected:
 	UPROPERTY()
 	UQuestAsset* m_CurrentQuestAsset{};
 	int m_nQuestAssetIndex{};
-	bool m_bQuestAccept{};
+
+	UQuestRuntimeNode* m_pRunTimeNode{};
+public:
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C_NPCQuestComponent")
+	FOnQuestChanged m_onQuestChanged{};
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C_NPCQuestComponent")
+	FOnQuestEnd m_onQuestEnd{};
 public:	
 	UC_NPCQuestComponent();
 
 	UFUNCTION(BlueprintPure)
 	UQuestAsset* getCurrentQuestAsset() const { return m_CurrentQuestAsset; }
-	UFUNCTION(BlueprintCallable)
-	void setCurrentQuestAsset(UQuestAsset* pAsset);
-	UFUNCTION(BlueprintCallable)
-	void setQuestStart();
+
 	UFUNCTION(BlueprintPure)
-	bool getQuestAccept() const { return m_bQuestAccept; }
+	FText getQuestText() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool startTalk();
+
+
+	UFUNCTION(BlueprintCallable)
+	void setNextText(UQuestRuntimeNode* pNext);
+
+	UFUNCTION(BlueprintCallable)
+	void endTalk();
+
+	UFUNCTION(BlueprintPure)
+	bool getResponeNode(int nIndex, FText& NodeText, UQuestRuntimeNode*& pNode) const ;
+
+	UFUNCTION(BlueprintPure)
+	bool getResponeSize(int& nIndex) const;
+
 protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	void onQuestSucceed(UQuestAsset* pAsset);
-	UFUNCTION()
-	void onQuestFail(UQuestAsset* pAsset);
+
 };

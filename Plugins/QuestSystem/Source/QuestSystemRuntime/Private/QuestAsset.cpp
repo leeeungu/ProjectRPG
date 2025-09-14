@@ -31,6 +31,13 @@ UQuestRuntimeNode* UQuestAsset::GetQuestStartNode()
     return pNode;
 }
 
+void UQuestAsset::SetFinishQuest(bool bValue)
+{
+    bFinishQuest = bValue; 
+    if (bFinishQuest) 
+        bQuestAccept = false; 
+}
+
 void UQuestAsset::PreSave(FObjectPreSaveContext saveContext)
 {
 	UObject::PreSave(saveContext);

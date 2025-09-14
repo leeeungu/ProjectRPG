@@ -52,6 +52,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void unEffectEquip(AC_BaseCharacter* pCharacter);
 	virtual void unEffectEquip_Implementation(AC_BaseCharacter* pCharacter) {}
+protected:
+	virtual void BeginPlay() override;
 public:
 
 	// IC_ItemToolTipInterface을(를) 통해 상속됨

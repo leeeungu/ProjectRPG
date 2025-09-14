@@ -92,6 +92,23 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
     return pItem;
 }
 
+AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem_Cpp(int ItemID, APawn* pInstigator)
+{
+    FS_ItemData* pItemData = m_pInstance->getItemDataByID_Internal(ItemID);
+    if (!pItemData || !pInstigator || !pItemData->cEffectItemClass.Get())
+        return nullptr;
+    FTransform transfrom = pInstigator->GetActorTransform();
+
+    AC_ItemActorBase* pItem = m_pInstance->GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
+    if (pItem)
+    {
+        pItem->setItemID(ItemID);
+        pItem->SetInstigator(pInstigator);
+        pItem->FinishSpawning(transfrom);
+    }
+    return pItem;
+}
+
 FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
 {   
     if (const FS_ItemData* const* Found = m_mapItemData.Find(ItemID))
