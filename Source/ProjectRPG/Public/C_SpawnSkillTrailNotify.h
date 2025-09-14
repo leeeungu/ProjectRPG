@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -15,29 +15,29 @@ class PROJECTRPG_API UC_SpawnSkillTrailNotify : public UAnimNotifyState
 	GENERATED_BODY()
 
 public:
-    // »ç¿ëÇÒ Niagara System
+    // ì‚¬ìš©í•  Niagara System
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     class UNiagaraSystem* m_pTrailEffect;
 
-    // Niagara Component ½ºÄÉÀÏ
+    // Niagara Component ìŠ¤ì¼€ì¼
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     FVector m_vTrailScale = FVector(1.f);
 
-    // ¼ÒÄÏ¿¡ ºÙÀÏÁö ¿©ºÎ
+    // ì†Œì¼“ì— ë¶™ì¼ì§€ ì—¬ë¶€
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     bool m_bAttachToSocket = true;
 
-    // ºÙÀÏ ¼ÒÄÏ ÀÌ¸§
+    // ë¶™ì¼ ì†Œì¼“ ì´ë¦„
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     FName m_strSocketName = NAME_None;
 
 private:
-    // ½ºÆùÇÑ Niagara ÄÄÆ÷³ÍÆ®
+    // ìŠ¤í°í•œ Niagara ì»´í¬ë„ŒíŠ¸
     UPROPERTY(Transient)
     class UNiagaraComponent* m_pSpawnedTrail;
 
 public:
-    virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
-    virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+    //virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
+    //virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	
 };
