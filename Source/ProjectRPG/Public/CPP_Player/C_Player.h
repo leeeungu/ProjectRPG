@@ -112,7 +112,16 @@ private:
 	FName SetPlainAttack();
 	float ComboTime = 0.f;
 	void ComboCountSetting(float DeltaTime);
+
+	//Skill UI_MGR
+	
+
+	UPROPERTY()
+	class UC_PlayerSKillMGR* SkillUiWidget;
+
 public:
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UC_PlayerSKillMGR> SkillUiClass;
 
 	UPROPERTY(BlueprintAssignable, Category = "Charge")
 	FOnChargeStart OnChargeStart;

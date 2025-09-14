@@ -18,6 +18,7 @@
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "NiagaraComponent.h"
+#include "CPP_Player/UI/C_PlayerSKillMGR.h"
 
 void AC_Player::PlayerDownTest()
 {
@@ -284,6 +285,10 @@ void AC_Player::RunningSystemManager()
 					}
 					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
 					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
+					if (SkillUiWidget)
+					{
+						SkillUiWidget->ShowPerfectZone();
+					}
 					m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
 					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 					//쿨타임 시작
@@ -330,6 +335,10 @@ void AC_Player::RunningSystemManager()
 				}
 				HandleChargeInputEnd();
 				m_skillCom->RequestJumpToSection(FName("Released"));
+				/*if (SkillUiWidget)
+				{
+					SkillUiWidget->HidePerfectZone();
+				}*/
 				break;
 			}
 		}
@@ -443,6 +452,9 @@ AC_Player::AC_Player()
 		m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
 	}
+
+	
+	
 }
 
 void AC_Player::BeginPlay()
@@ -485,7 +497,15 @@ void AC_Player::BeginPlay()
 			AttachWeaponToSocket(IsEquipMode);
 		}
 	}
-	
+	//UI
+	if (SkillUiClass) // SkillUiClass는 UClass를 가리킴
+	{
+		SkillUiWidget = CreateWidget<UC_PlayerSKillMGR>(GetWorld(), SkillUiClass);
+		if (SkillUiWidget)
+		{
+			SkillUiWidget->AddToViewport();
+		}
+	}
 
 }
 
