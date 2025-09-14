@@ -38,17 +38,9 @@ struct FS_PatternData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* pNiagara;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraLife;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraScale;
-
 	float LastUsedTime = -100.f;
 };
+
 /**
  * 
  */
