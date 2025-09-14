@@ -6,6 +6,7 @@
 #include "C_QuickSlotManagerComponent.generated.h"
 
 class UC_InventoryComponent;
+struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuickSlotNone);
 UDELEGATE()
@@ -71,6 +72,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	void bindSlotChangeDelegate(E_QuickSlotType QuickSlotType, FOnQuickSlotChange Delegate);
+
+
+	//UFUNCTION(BlueprintPure, Category = "QuickSlot")
+	UFUNCTION()
+	void useQuickSlotItemID(E_QuickSlotType QuickSlotType) ;
+
 protected:
 	virtual void BeginPlay() override;
 

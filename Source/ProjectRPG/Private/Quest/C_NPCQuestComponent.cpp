@@ -30,13 +30,28 @@ void UC_NPCQuestComponent::setQuestStart()
 void UC_NPCQuestComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	setCurrentQuestAsset(m_pCurrentQuestAsset1);
+	while (!m_CurrentQuestAsset && m_arrQuestAsset.IsValidIndex(m_nQuestAssetIndex))
+	{
+		m_CurrentQuestAsset = m_arrQuestAsset[m_nQuestAssetIndex];
+		m_nQuestAssetIndex++;
+		if (m_CurrentQuestAsset && m_CurrentQuestAsset->GetFinishQuest())
+			m_CurrentQuestAsset = nullptr;
+	}
+	setCurrentQuestAsset(m_CurrentQuestAsset);
 }
 
 
 void UC_NPCQuestComponent::onQuestSucceed(UQuestAsset* pAsset)
 {
-	setCurrentQuestAsset(m_pCurrentQuestAsset2);
+	m_CurrentQuestAsset = nullptr;
+	while (!m_CurrentQuestAsset && m_arrQuestAsset.IsValidIndex(m_nQuestAssetIndex))
+	{
+		m_CurrentQuestAsset = m_arrQuestAsset[m_nQuestAssetIndex];
+		m_nQuestAssetIndex++;
+		if (m_CurrentQuestAsset && m_CurrentQuestAsset->GetFinishQuest())
+			m_CurrentQuestAsset = nullptr;
+	}
+	setCurrentQuestAsset(m_CurrentQuestAsset);
 }
 
 void UC_NPCQuestComponent::onQuestFail(UQuestAsset* pAsset)

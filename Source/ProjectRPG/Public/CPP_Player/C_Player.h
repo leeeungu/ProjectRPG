@@ -7,6 +7,9 @@
 #include "Interface/C_CameraInterface.h"
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
+//위젯(perfectZone)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeEnd);
 
 struct FSkillData;
 enum class E4WayDirection : uint8;
@@ -63,12 +66,21 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
 	UC_TravelManagerComponent* m_pTravelComponent{};
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AActor> WeaponClass;  // 블루프린트 무기 클래스 지정
+
+	UPROPERTY()
+	AActor* EquippedWeapon;  // 현재 장착된 무기
 
 	//플레이어 상태
 	UPROPERTY()
 	ERunningSystemState RunningState = ERunningSystemState::Idle;
 	UPROPERTY()
 	E4WayDirectionPlayer DirectionSkillState = E4WayDirectionPlayer::Default;
+	//무기 부착상태
+	bool IsEquipMode = true;
+	UFUNCTION()
+	void SetEquipMode(bool IsEquip);
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;
@@ -100,9 +112,25 @@ private:
 	FName SetPlainAttack();
 	float ComboTime = 0.f;
 	void ComboCountSetting(float DeltaTime);
-public:
+
+	//Skill UI_MGR
 	
 
+	UPROPERTY()
+	class UC_PlayerSKillMGR* SkillUiWidget;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UC_PlayerSKillMGR> SkillUiClass;
+
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeStart OnChargeStart;
+
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeEnd OnChargeEnd;
+
+	void HandleChargeInputStart();
+	void HandleChargeInputEnd();
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();
@@ -123,6 +151,8 @@ private:
 	void PlayerDownTest();
 	void ReceiveDamage(float damageAmount);
 	void Down();
+	//VFX제거
+	void DeactivateAllNiagaraEffects();
 
 public:
 	AC_Player();
@@ -139,6 +169,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//러닝스테이트 세팅
+	//무기부착상태(Unequip노티파이 호출 바인딩용)
+	
+	void AttachWeaponToSocket(bool bEquipMode);
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	ERunningSystemState GetRunningSystemState() { return RunningState; }
 
@@ -155,5 +188,5 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TravelComponent")
 	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
 
-	bool runInteraction();
+	void runInteraction();
 };

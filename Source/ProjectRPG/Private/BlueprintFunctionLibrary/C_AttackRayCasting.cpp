@@ -37,7 +37,7 @@ bool UC_AttackRayCasting::attackSphereTrace(AActor* pSelf, FVector sPositionfloa
 	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params{};
 	Params.AddIgnoredActor(pSelf);
-	UE_LOG(AttackBFL, Error, TEXT("UC_AttackRayCasting::attackSphereTrace : AC_BaseCharacter"));
+	//UE_LOG(AttackBFL, Error, TEXT("UC_AttackRayCasting::attackSphereTrace : AC_BaseCharacter"));
 
 	pSelf->GetWorld()->SweepMultiByObjectType(OutHits, Position, Position, FQuat::Identity, ObjectQueryParams
 		, CollisionShape, Params);

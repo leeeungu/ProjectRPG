@@ -10,7 +10,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "CPP_Player/C_InputQueueComponent.h"
 #include "CPP_Player/S_InputActionData.h"
-#include "ActorComponent/QuestManagerComponent.h"
+#include "Quest/C_QuestManagerComponent.h"
 #include "C_GameWindowManager.h"
 #include "C_CurrencyComponent.h"
 #include "Item/Component/C_EquipComponent.h"
@@ -115,22 +115,54 @@ void AC_PlayerController::SetupInputComponent()
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Canceled, this, &AC_PlayerController::OnF_ActionCanceld);
             EnhancedInput->BindAction(F_Key, ETriggerEvent::Completed, this, &AC_PlayerController::OnF_ActionCompleted);
         }
-        if (Number1_Key)
+        /*if (Number1_Key)
         {
             EnhancedInput->BindAction(Number1_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnNumber1_Action);
         }
         if (Number2_Key)
         {
             EnhancedInput->BindAction(Number2_Key, ETriggerEvent::Started, this, &AC_PlayerController::OnNumber2_Action);
-        }
+        }*/
 
         if (m_pInteraction)
         {
-            EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, this, &AC_PlayerController::OnInteraction);
+            AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
+            if (pPlayer)
+            {
+                EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, pPlayer, &AC_Player::runInteraction);
+            }
         }
-        if (m_pQuickSlot)
+      /*  if (m_pQuickSlot)
         {
             EnhancedInput->BindAction(m_pQuickSlot, ETriggerEvent::Completed, this, &AC_PlayerController::OnQuickSlot);
+        }*/
+        if(m_pQuickSlot1)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot1, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot1);
+        }
+        if (m_pQuickSlot2)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot2, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot2);
+        }
+        if (m_pQuickSlot3)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot3, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot3);
+        }
+        if (m_pQuickSlot4)
+        {  
+             EnhancedInput->BindAction(m_pQuickSlot4, ETriggerEvent::Completed, m_pQuickSlotManagerComponent, &UC_QuickSlotManagerComponent::useQuickSlotItemID, E_QuickSlotType::E_QuickSlot4);
+        }
+        if (m_pInventoryWidget)
+        {
+            EnhancedInput->BindAction(m_pInventoryWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_Inventory);
+        }
+        if (m_pPlayerInfoWidget)
+        {
+            EnhancedInput->BindAction(m_pPlayerInfoWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_PlayerInfo);
+        }
+        if (m_pQuestWidget)
+        {
+            EnhancedInput->BindAction(m_pQuestWidget, ETriggerEvent::Completed, m_pGameWindowManager, &UC_GameWindowManager::toggleWindow, E_WindowType::E_QuestWindow);
         }
     }
 }
@@ -288,7 +320,6 @@ void AC_PlayerController::OnF_ActionOngoing(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Held;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Ongoing"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);
@@ -301,7 +332,6 @@ void AC_PlayerController::OnF_ActionCanceld(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Cancel"));//실제론 canceld지만 complete와 동일하게처리
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);
@@ -314,7 +344,6 @@ void AC_PlayerController::OnF_ActionCompleted(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Released;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Completed"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput_Charging(NewInputData);
@@ -333,41 +362,9 @@ void AC_PlayerController::OnNumber2_Action(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::AnimItem;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] number2 Skill On"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
-    }
-}
-
-void AC_PlayerController::OnInteraction(const FInputActionValue& Value)
-{
-    FInputActionData NewInputData;
-    NewInputData.ActionName = "Interaction";
-    NewInputData.InputStateType = EInputStateType::Pressed;
-    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    AC_Player* pPlayer = Cast< AC_Player>(AcknowledgedPawn);
-    if (pPlayer)
-    {
-        pPlayer->runInteraction();
-    }
-}
-
-void AC_PlayerController::OnQuickSlot(const FInputActionValue& Value)
-{
-    FInputActionData NewInputData;
-    NewInputData.ActionName = "QuickSlot";
-    NewInputData.InputStateType = EInputStateType::Pressed;
-    NewInputData.TargetPoint = AcknowledgedPawn->GetActorLocation();
-    int nItemID{};
-    if (getQuickSlotManagerComponent() && getQuickSlotManagerComponent()->getQuickSlotItemID(E_QuickSlotType::E_QuickSlot1, nItemID))
-    {
-        UGameInstance* GameInstance = GetWorld()->GetGameInstance();
-        if (GameInstance)
-        {
-            UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-            pItemDataSubsystem->spawnEffectItem(nItemID, AcknowledgedPawn);
-        }
     }
 }
 
@@ -432,16 +429,16 @@ AC_PlayerController::AC_PlayerController()
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(TEXT("/Game/RPG_Player/Input/Actions/F_Action.F_Action"));
     if (IA_FAction.Succeeded()) F_Key = IA_FAction.Object;
     //아이템
-    static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action"));
+    /*static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number1Action(TEXT("/Game/RPG_Player/Input/Actions/Number1_Action.Number1_Action"));
     if (IA_Number1Action.Succeeded()) Number1_Key = IA_Number1Action.Object;
     static ConstructorHelpers::FObjectFinder<UInputAction> IA_Number2Action(TEXT("/Game/RPG_Player/Input/Actions/Number2_Acrion.Number2_Acrion"));
-    if (IA_Number2Action.Succeeded()) Number2_Key = IA_Number2Action.Object;
+    if (IA_Number2Action.Succeeded()) Number2_Key = IA_Number2Action.Object;*/
     
     m_pInventoryComponent = CreateDefaultSubobject<UC_InventoryComponent>(TEXT("InventoryComponent"));
     m_pCurrencyComponent = CreateDefaultSubobject<UC_CurrencyComponent>(TEXT("CurrencyComponent"));
     m_pGameWindowManager = CreateDefaultSubobject<UC_GameWindowManager>(TEXT("GameWindowManager"));
     m_pQuickSlotManagerComponent = CreateDefaultSubobject<UC_QuickSlotManagerComponent>(TEXT("QuickSlotManagerComponent"));
-    m_pQuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
+    m_pQuestManagerComponent2 = CreateDefaultSubobject<UC_QuestManagerComponent>(TEXT("QuestManagerComponent"));
     m_pEquipComponent = CreateDefaultSubobject<UC_EquipComponent>(TEXT("EquipComponent"));
 
 }

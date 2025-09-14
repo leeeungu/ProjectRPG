@@ -102,10 +102,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);
 
-	UFUNCTION(BlueprintCallable)
-	void loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot);
-	UFUNCTION(BlueprintCallable)
-	void saveQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot);
 private:
 	FS_ItemData* getItemDataByID_Internal(int ItemID) const;
 };

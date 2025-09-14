@@ -4,6 +4,7 @@
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_SkillData.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
+#include "C_Basecharacter.h"
 #include "GameFramework/Character.h"
 
 void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
@@ -53,24 +54,26 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
 	}
 #endif
 	//블록?, 오버랩? 
-	//if (bHit)
-	//{
-	//	for (const FHitResult& Hit : HitResults)
-	//	{
-	//		AActor* HitActor = Hit.GetActor();
-	//		if (HitActor && HitActor != GetOwner())
-	//		{
-	//			UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitActor->GetName());
-	//          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
-	//          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
-	//          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음.
-	// 
-	// //여기서 카운터스킬은 몬스터의 트라이카운터호출까지 해야됨.
-	//그럼 스킬중에 카운터스킬에는 카운터스킬이 있다는것을 설정해줘야함.
-	// //노티파이에서 카운터 실행 (몬스터베이스에서 트라이카운터를 가져오는게 목표)
-	//		}
-	//	}
-	//}
+	if (bHit)
+	{
+		//get owner
+		for (const FHitResult& Hit : HitResults)
+		{
+			AC_BaseCharacter* HitActor = Cast<AC_BaseCharacter>(Hit.GetActor());
+			if (HitActor && HitActor != GetOwner())
+			{
+				HitActor->takeDamageEvent(100);
+				UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitActor->GetName());
+	          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
+	          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
+	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음.
+	 
+	 //여기서 카운터스킬은 몬스터의 트라이카운터호출까지 해야됨.
+	 //그럼 스킬중에 카운터스킬에는 카운터스킬이 있다는것을 설정해줘야함.
+	 //노티파이에서 카운터 실행 (몬스터베이스에서 트라이카운터를 가져오는게 목표)
+			}
+		}
+	}
 }
 
 // Sets default values for this component's properties
@@ -78,7 +81,7 @@ UC_SkillComponent::UC_SkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	//평타
-	FSkillData PlainAttack01;
+	FSkillData PlainAttack01{};
 	PlainAttack01.SkillName = "PA_01";
 	PlainAttack01.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack01.AttackPowerMultiplier = 200.f;
@@ -288,6 +291,15 @@ void UC_SkillComponent::RequestJumpToSection(FName SectionName)
 	}
 }
 
+float UC_SkillComponent::GetskillCoolTime(FName skill_Key)
+{
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))
+	{
+		return Skill->Cooldown;
+	}
+	return 0.0f;
+}
+
 // Called when the game starts
 void UC_SkillComponent::BeginPlay()
 {
@@ -398,7 +410,7 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 	SkillCooldownEndTime.Add(SkillName, EndTime);
 
 	// UI 동기화를 위한 브로드캐스트
-	//OnCooldownStarted.Broadcast(SkillName, CooldownDuration);
+	OnSkillCooldownStarted.Broadcast(SkillName);
 }
 
 float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const

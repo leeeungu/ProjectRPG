@@ -25,6 +25,11 @@ bool UC_GameWindowManager::toggleWidget(E_WindowType eType)
 	return addWidgetToMain(eType);
 }
 
+void UC_GameWindowManager::toggleWindow(E_WindowType eType)
+{
+	toggleWidget(eType);
+}
+
 bool UC_GameWindowManager::removeWidgetFromMain(E_WindowType eType)
 {
 	return m_pMainWidget->removeWidgetFromMain(eType);

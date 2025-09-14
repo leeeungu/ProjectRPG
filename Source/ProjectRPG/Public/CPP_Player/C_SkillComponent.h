@@ -9,6 +9,7 @@
 #define DEBUG_DRAW
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillMontageRequested, class UAnimMontage*, MontageToPlay);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillCooldownStarted, FName, SkillName);
 
 struct FSkillData;
 
@@ -27,6 +28,8 @@ public:
 	UC_SkillComponent();
 	UPROPERTY(BlueprintAssignable, Category = "Skill")
 	FOnSkillMontageRequested OnSkillMontageRequested;
+	UPROPERTY(BlueprintAssignable, Category = "Skill")
+	FOnSkillCooldownStarted OnSkillCooldownStarted;
 	//스킬컴포넌트에서 애님인스턴스 참조용 포인터
 	UPROPERTY()
     class UC_PlayerAnimInstance* CachedAnimInstance;
@@ -34,8 +37,8 @@ public:
 	void RequestJumpToSection(FName SectionName);
 
 	//스킬쿨타임 반환함수
-	// UFUNTION(BlueprintCallable)
-	//float getskillcool(FName skillKey) 
+	UFUNCTION(BlueprintCallable)
+	float GetskillCoolTime(FName skill_Key);
 
 protected:
 	// Called when the game starts

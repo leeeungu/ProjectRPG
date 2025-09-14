@@ -10,6 +10,7 @@ DECLARE_MULTICAST_DELEGATE(FChangeRunningStateDelegate);
 DECLARE_MULTICAST_DELEGATE(FChangeDownState);
 DECLARE_MULTICAST_DELEGATE(FSetPlayerMovePointEnabled);//player의 bCanMove 활성화->MoveToPos사용가능상태로 변경
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestJumpSection, FName, SectionName);//플레이어가 애님인스턴스로 주는 델리게이트
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponModeChanged, bool, bIsWeaponEquipped);//Unequip노티파이로부터 bool값호출받음
 
 /**
  * 
@@ -24,6 +25,7 @@ private:
 	void AnimChangeMode();
 	UFUNCTION()
 	void OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
@@ -61,6 +63,9 @@ public:
 	FOnRequestJumpSection OnRequestJumpSection;
 	UFUNCTION()
 	void HandleJumpSection(FName SectionName);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnWeaponModeChanged OnWeaponModeChanged;
 
 	//인터페이스
 	virtual void SetAttackMode(bool b) override;

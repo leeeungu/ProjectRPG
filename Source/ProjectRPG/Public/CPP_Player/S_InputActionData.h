@@ -43,5 +43,8 @@ public:
 
     UPROPERTY(BlueprintReadWrite)
     float Timestamp = 0.f;
+
+    UPROPERTY(BlueprintReadWrite)
+    bool Timing = true;
     
 };

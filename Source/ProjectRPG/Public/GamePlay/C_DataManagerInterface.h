@@ -23,10 +23,8 @@ class PROJECTRPG_API IC_DataManagerInterface
 {
 	GENERATED_BODY()
 public:
-
 	virtual E_DataType getDataType() = 0;
 	virtual FString getFilePath(E_DataType eType) = 0;
-	virtual bool saveData() { return true; }
 
 	virtual void loadStringData(FString& Data) {};
 	virtual void loadStringArrayData(TArray<FString>& arData) {};

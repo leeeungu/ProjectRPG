@@ -3,6 +3,7 @@
 
 #include "CPP_Player/C_Player.h"
 #include "GameFrameWork/SpringArmComponent.h"
+#include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
@@ -16,6 +17,8 @@
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "NiagaraComponent.h"
+#include "CPP_Player/UI/C_PlayerSKillMGR.h"
 
 void AC_Player::PlayerDownTest()
 {
@@ -34,9 +37,31 @@ void AC_Player::ReceiveDamage(float damageAmount)
 void AC_Player::Down()
 {
 	RunningState = ERunningSystemState::Down;
+	DeactivateAllNiagaraEffects();
 	ClearMoveState();
 	bCanMove = false;
 	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
+}
+
+void AC_Player::DeactivateAllNiagaraEffects()
+{
+	TArray<UNiagaraComponent*> NiagaraComponents;
+	GetComponents<UNiagaraComponent>(NiagaraComponents);
+
+	for (UNiagaraComponent* NiagaraComp : NiagaraComponents)
+	{
+		if (NiagaraComp && NiagaraComp->IsActive())
+		{
+			NiagaraComp->Deactivate();
+		}
+	}
+}
+
+void AC_Player::SetEquipMode(bool IsEquip)
+{
+	IsEquipMode = IsEquip;
+	AttachWeaponToSocket(IsEquipMode);
+	UE_LOG(LogTemp, Warning, TEXT("EquipReady"));
 }
 
 FName AC_Player::SetPlainAttack()
@@ -60,6 +85,16 @@ void AC_Player::ComboCountSetting(float DeltaTime)//콤보타임세팅중
 	{
 
 	}
+}
+
+void AC_Player::HandleChargeInputStart()
+{
+	OnChargeStart.Broadcast();
+}
+
+void AC_Player::HandleChargeInputEnd()
+{
+	OnChargeEnd.Broadcast();
 }
 
 void AC_Player::HandleChangeRunningState()
@@ -170,6 +205,7 @@ void AC_Player::RunningSystemManager()
 			}
 			// 현재 어떤 상태이든 스킬/아이템/차징 강제 중단
 			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
+			DeactivateAllNiagaraEffects();
 			bCanMove = false;
 			if (IsAttackMode)
 			{
@@ -201,6 +237,7 @@ void AC_Player::RunningSystemManager()
 			{
 			case EInputType::PlainAttack:
 				RunningState = ERunningSystemState::Busy;
+				AttackMode();//스킬쓰면 어택킹모드진입
 				if (myAnimInterface)
 				{
 					myAnimInterface->SetAttackMode(true);
@@ -248,10 +285,15 @@ void AC_Player::RunningSystemManager()
 					}
 					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
 					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
+					if (SkillUiWidget)
+					{
+						SkillUiWidget->ShowPerfectZone();
+					}
 					m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
 					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 					//쿨타임 시작
 					m_skillCom->StartCooldown(CurrentInputData.ActionName);
+					HandleChargeInputStart();
 				}
 				else
 				{
@@ -281,7 +323,22 @@ void AC_Player::RunningSystemManager()
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
 				RunningState = ERunningSystemState::Busy;
 				m_inputQueue->ClearChargingQueueList();
+				if (ChargeInput.Timing == false)
+				{
+					//실패! 브로드캐스트( 몽타주[실패이펙트,사운드], UI실패)
+					UE_LOG(LogTemp, Warning, TEXT("Fail"));
+				}
+				else 
+				{
+					//성공! 
+					UE_LOG(LogTemp, Warning, TEXT("Succed"));
+				}
+				HandleChargeInputEnd();
 				m_skillCom->RequestJumpToSection(FName("Released"));
+				/*if (SkillUiWidget)
+				{
+					SkillUiWidget->HidePerfectZone();
+				}*/
 				break;
 			}
 		}
@@ -330,6 +387,20 @@ void AC_Player::SetPeriodInfo()
 	DirectionVector.Z = 0.0f;
 	ParryDirection = DirectionVector.GetSafeNormal();
 	IsPeriod = true;
+}
+
+void AC_Player::AttachWeaponToSocket(bool bEquipMode)
+{
+	if (!EquippedWeapon) return;
+
+	FName SocketName = bEquipMode ? FName("Equip_Socket") : FName("r_weapon_socket");
+	EquippedWeapon->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		SocketName
+	);
+	UE_LOG(LogTemp, Warning, TEXT("AttachWeaponToSocket -> bEquipMode: %s"),
+		bEquipMode ? TEXT("True") : TEXT("False"));
 }
 
 AC_Player::AC_Player()
@@ -381,18 +452,28 @@ AC_Player::AC_Player()
 		m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
 	}
+
+	
+	
 }
 
 void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
+	
 
+	
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{
+		myMesh->SetRenderCustomDepth(true);
 		UC_PlayerAnimInstance* myAnimInstance = Cast<UC_PlayerAnimInstance>(myMesh->GetAnimInstance());
 		if (myAnimInstance)
 		{
+			//무기 파지법
+			myAnimInstance->OnWeaponModeChanged.AddDynamic(this, &AC_Player::SetEquipMode);
+
+			
 			//myAnimInterface에 플레이어의 애님인스턴스의 인터페이스 참조세팅
 			myAnimInterface.SetObject(myAnimInstance);                 
 			myAnimInterface.SetInterface(Cast<II_PlayerToAnimInstance>(myAnimInstance));
@@ -407,7 +488,24 @@ void AC_Player::BeginPlay()
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
 		}
 	}
-	
+	if (WeaponClass)
+	{
+		// 무기 스폰
+		EquippedWeapon = GetWorld()->SpawnActor<AActor>(WeaponClass);
+		if (EquippedWeapon)
+		{
+			AttachWeaponToSocket(IsEquipMode);
+		}
+	}
+	//UI
+	if (SkillUiClass) // SkillUiClass는 UClass를 가리킴
+	{
+		SkillUiWidget = CreateWidget<UC_PlayerSKillMGR>(GetWorld(), SkillUiClass);
+		if (SkillUiWidget)
+		{
+			SkillUiWidget->AddToViewport();
+		}
+	}
 
 }
 
@@ -632,6 +730,13 @@ void AC_Player::AttackMode()
 	else if (!IsAttackMode)
 	{
 		IsAttackMode = true;
+		if (IsEquipMode)
+		{
+			//무기파지
+			IsEquipMode = false;
+			AttachWeaponToSocket(IsEquipMode);
+			UE_LOG(LogTemp, Warning, TEXT("UNEquipMode"));
+		}
 	}
 	
 }
@@ -652,11 +757,10 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 
 }
 
-bool AC_Player::runInteraction()
+void AC_Player::runInteraction()
 {
 	if (m_pInteractionDetectComponent)
 	{
-		return m_pInteractionDetectComponent->runInteraction();
+		m_pInteractionDetectComponent->runInteraction();
 	}
-	return false;
 }

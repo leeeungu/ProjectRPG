@@ -92,28 +92,6 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
     return pItem;
 }
 
-void UC_ItemDataSubsystem::loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
-{
-    if (!pQuickSlot)
-        return;
-
-    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
-    {
-        pQuickSlot->setQuickSlotItem((E_QuickSlotType)i, m_arrQuickSlotItem[i]);
-    }
-}
-
-void UC_ItemDataSubsystem::saveQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
-{
-    if (!pQuickSlot)
-        return;
-
-    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
-    {
-        m_arrQuickSlotItem[i] = pQuickSlot->getQuickSlotID((E_QuickSlotType)i);
-    }
-}
-
 FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
 {   
     if (const FS_ItemData* const* Found = m_mapItemData.Find(ItemID))
