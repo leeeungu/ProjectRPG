@@ -28,12 +28,19 @@ Git
 Build & Run
 
 ## 🎯 Features
-주요 기능 1
+플레이어 : InputQue 시스템
 
-주요 기능 2
+플레이어 : 퍼팩트 존 스킬
 
-주요 기능 3
+전투 : 무력화 시스템 
 
+전투 : 카운터 시스템
+
+게임 시스템 : 아이템 관리 시스템
+
+UI : 인벤토리, 캐릭터 정보 창, 퀘스트 창
+
+엔진 : 퀘스트 에디터 플러그인 제작
 
 ## 📌 Commit Message Convention
 |Type|Description|
