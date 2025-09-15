@@ -10,6 +10,8 @@
 //위젯(perfectZone)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeEnd);
+//위젯(perfectzone result)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResultOpen, bool, bIsSuccess);
 
 struct FSkillData;
 enum class E4WayDirection : uint8;
@@ -129,15 +131,19 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Charge")
 	FOnChargeEnd OnChargeEnd;
 
+	UPROPERTY(BlueprintAssignable, Category = "PerfectZone")
+	FOnResultOpen OnResultOpen;
+
 	void HandleChargeInputStart();
 	void HandleChargeInputEnd();
+
+	void HandleResult(bool result);
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();
 private:
 	void CalMoveData();
 	void RunningSystemManager();
-	void ClearMoveState();
 	//플레이어에서 방향계산후 애님인스턴스에 넘겨줄 이넘으로 변환
 	E4WayDirection Set4_WayDirection(const FVector& mousePoint);
 
@@ -160,6 +166,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)
 	void OnMoveToPosPlayer(FVector pos);//외부에서도 호출해서 pos값을넣어주면 해당위치로이동함.
+	UFUNCTION(BlueprintCallable)
+	void ClearMoveState();
 	FVector GetMousePointDir();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)

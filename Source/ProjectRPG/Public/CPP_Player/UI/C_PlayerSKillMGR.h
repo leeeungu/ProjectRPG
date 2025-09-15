@@ -16,17 +16,38 @@ class PROJECTRPG_API UC_PlayerSKillMGR : public UUserWidget
 public:
     UFUNCTION(BlueprintCallable, Category = "SkillUI")
     void ShowPerfectZone();
+    void InitPerfectZone();
+    void HiddenPerfectZone();
 
+    void InitResultWidgets();
+    UFUNCTION()
+    void ShowResult(bool result);
+
+protected:
+    virtual void NativeConstruct() override;
     // 퍼펙트존 클래스 세팅 (블루프린트에서 지정)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     TSubclassOf<UUserWidget> PerfectZoneClass;
 
     // 실제 생성된 퍼펙트존 포인터
     UPROPERTY()
-    UUserWidget* PerfectZoneWidget;
+    class UC_PerfectZone* PerfectZoneWidget;
 
-    UFUNCTION(BlueprintCallable, Category = "SkillUI")
-    void CreatePerfectZone();
+    bool EndPerfectZone = false;
+
+    //Result
+    UPROPERTY(EditAnywhere, Category = "PerfectZone|Result")
+    TSubclassOf<class UC_PerfectZoneResult> SuccessWidgetClass;
+
+    UPROPERTY(EditAnywhere, Category = "PerfectZone|Result")
+    TSubclassOf<UC_PerfectZoneResult> FailWidgetClass;
+
+    UPROPERTY()
+    UC_PerfectZoneResult* SuccessWidgetInstance;
+
+    UPROPERTY()
+    UC_PerfectZoneResult* FailWidgetInstance;
+    
 
 
 

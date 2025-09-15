@@ -97,6 +97,12 @@ void AC_Player::HandleChargeInputEnd()
 	OnChargeEnd.Broadcast();
 }
 
+void AC_Player::HandleResult(bool result)
+{
+	OnResultOpen.Broadcast(result); // 성공or실패
+}
+
+
 void AC_Player::HandleChangeRunningState()
 {
 	RunningState = ERunningSystemState::Idle;
@@ -323,22 +329,20 @@ void AC_Player::RunningSystemManager()
 			case EInputStateType::Released://캔슬과 완료일때 모두 Released가 세팅됨
 				RunningState = ERunningSystemState::Busy;
 				m_inputQueue->ClearChargingQueueList();
+				HandleChargeInputEnd();
 				if (ChargeInput.Timing == false)
 				{
+					HandleResult(ChargeInput.Timing);
 					//실패! 브로드캐스트( 몽타주[실패이펙트,사운드], UI실패)
 					UE_LOG(LogTemp, Warning, TEXT("Fail"));
 				}
 				else 
 				{
+					HandleResult(ChargeInput.Timing);
 					//성공! 
 					UE_LOG(LogTemp, Warning, TEXT("Succed"));
 				}
-				HandleChargeInputEnd();
 				m_skillCom->RequestJumpToSection(FName("Released"));
-				/*if (SkillUiWidget)
-				{
-					SkillUiWidget->HidePerfectZone();
-				}*/
 				break;
 			}
 		}

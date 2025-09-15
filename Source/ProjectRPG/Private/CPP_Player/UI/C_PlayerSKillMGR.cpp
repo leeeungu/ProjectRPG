@@ -3,6 +3,8 @@
 
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
 #include "CPP_Player/UI/C_PerfectZone.h"
+#include "CPP_Player/UI/C_PerfectZoneResult.h"
+#include "CPP_Player/C_Player.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,44 +13,123 @@
 
 void UC_PlayerSKillMGR::ShowPerfectZone()
 {
-    CreatePerfectZone();
+    if (!PerfectZoneWidget || !PerfectZoneWidget->Start) return;
+    PerfectZoneWidget->SetVisibility(ESlateVisibility::Visible);
+    PerfectZoneWidget->PlayAnimation(PerfectZoneWidget->Show);
 }
 
-void UC_PlayerSKillMGR::CreatePerfectZone()
+void UC_PlayerSKillMGR::InitPerfectZone()
 {
     if (!PerfectZoneClass) return;
 
-    // 이미 생성되어 있다면 제거
-    if (PerfectZoneWidget)
+    if (!PerfectZoneWidget)
     {
-        PerfectZoneWidget->RemoveFromParent();
-        PerfectZoneWidget = nullptr;
-    }
+        // 위젯 생성
+        UUserWidget* RawWidget = CreateWidget<UUserWidget>(GetWorld(), PerfectZoneClass);
+        PerfectZoneWidget = Cast<UC_PerfectZone>(RawWidget);
 
-    // 퍼펙트존 위젯 생성
-    PerfectZoneWidget = CreateWidget<UUserWidget>(GetWorld(), PerfectZoneClass);
-    if (!PerfectZoneWidget) return;
+        if (!PerfectZoneWidget) return;
 
-    // 스킬매니저 위젯의 캔버스패널에 추가
-    if (UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(GetRootWidget()))
-    {
-        RootCanvas->AddChild(PerfectZoneWidget);
-
-        // 위치 세팅: 화면 중앙 하단에서 살짝 위
-        if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(PerfectZoneWidget->Slot))
+        // 루트 캔버스에 추가
+        if (UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(GetRootWidget()))
         {
-            CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f)); // 화면 중앙 기준
-            CanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f)); // 위쪽 기준 조정
-            CanvasSlot->SetPosition(FVector2D(0.f, -100.f)); // 중앙에서 살짝 위로
-            CanvasSlot->SetSize(FVector2D(200.f, 200.f)); // 위젯 크기, 필요시 조정
+            RootCanvas->AddChild(PerfectZoneWidget);
+
+            if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(PerfectZoneWidget->Slot))
+            {
+                CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+                CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+                CanvasSlot->SetPosition(FVector2D(0.f, 200.f));
+                CanvasSlot->SetSize(FVector2D(200.f, 200.f));
+            }
+
+            PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+        }
+    }
+}
+
+void UC_PlayerSKillMGR::HiddenPerfectZone()
+{
+    PerfectZoneWidget->PlayAnimation(PerfectZoneWidget->NotShow);
+    PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UC_PlayerSKillMGR::InitResultWidgets()
+{
+    if (SuccessWidgetClass && !SuccessWidgetInstance)
+    {
+        SuccessWidgetInstance = CreateWidget<UC_PerfectZoneResult>(GetWorld(), SuccessWidgetClass);
+        if (SuccessWidgetInstance)
+        {
+            // 루트 캔버스에 추가
+            if (UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(GetRootWidget()))
+            {
+                RootCanvas->AddChild(SuccessWidgetInstance);
+
+                if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(SuccessWidgetInstance->Slot))
+                {
+                    CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+                    CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+                    CanvasSlot->SetPosition(FVector2D(0.f, 170.f));
+                    CanvasSlot->SetSize(FVector2D(200.f, 200.f));
+                }
+                SuccessWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+            }
         }
     }
 
-    //// 여기서 FadeIn 애니메이션 실행
-    //if (UWidgetAnimation* Anim = PerfectZoneWidget->FindAnimation(TEXT("FadeIn")))
-    //{
-    //    PlayAnimation(Anim);
-    //}
+    if (FailWidgetClass && !FailWidgetInstance)
+    {
+        FailWidgetInstance = CreateWidget<UC_PerfectZoneResult>(GetWorld(), FailWidgetClass);
+        if (FailWidgetInstance)
+        {
+            // 루트 캔버스에 추가
+            if (UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(GetRootWidget()))
+            {
+                RootCanvas->AddChild(FailWidgetInstance);
+
+                if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(FailWidgetInstance->Slot))
+                {
+                    CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+                    CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+                    CanvasSlot->SetPosition(FVector2D(0.f, 170.f));
+                    CanvasSlot->SetSize(FVector2D(200.f, 200.f));
+                }
+                FailWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+            }
+        }
+    }
 }
+
+void UC_PlayerSKillMGR::ShowResult(bool result)
+{
+    if (!SuccessWidgetInstance && !FailWidgetInstance) return;
+    if (result)//성공
+    {
+        SuccessWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+        SuccessWidgetInstance->Show();
+    }
+    if (!result)//실패
+    {
+        FailWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+        FailWidgetInstance->Show();
+    }
+}
+
+void UC_PlayerSKillMGR::NativeConstruct()
+{
+    Super::NativeConstruct();
+    InitPerfectZone();
+    InitResultWidgets();
+    if (APlayerController* myPC = GetOwningPlayer())
+    {
+        if (AC_Player* myPlayer = Cast<AC_Player>(myPC->GetPawn()))
+        {
+            myPlayer->OnResultOpen.AddDynamic(this, &UC_PlayerSKillMGR::ShowResult);
+        }
+    }
+}
+
+
 
 

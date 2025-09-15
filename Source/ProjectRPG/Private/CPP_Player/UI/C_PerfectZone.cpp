@@ -34,10 +34,11 @@ void UC_PerfectZone::StopProgressAnimation()
             NewTransform.Translation.X = AnimTransform.Translation.X;
 
             BarBackup->SetRenderTransform(NewTransform);
-            UE_LOG(LogTemp, Warning, TEXT("End"));
+            
         }
 
         StopAnimation(Start);
+        UE_LOG(LogTemp, Warning, TEXT("End"));
     }
     
 }
