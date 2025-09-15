@@ -7,6 +7,7 @@
 #include <NavigationSystem.h>
 #include <NavigationPath.h>
 #include "CPP_Player/C_Player.h"
+#include <GamePlay/C_InteractionArrow.h>
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
@@ -34,6 +35,8 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pInteractionWidget->SetRelativeRotation({ 0,180,0 });
 	m_pInteractionWidget->SetCollisionProfileName("NoCollision");
 
+	m_pInteractionArrow = CreateDefaultSubobject< UC_InteractionArrow>("InteractionArrow");
+	m_pInteractionArrow->SetupAttachment(RootComponent);
 	//Script/Engine.Texture2D'/Game/UI/Interaction/Texture/T_InteractionKey.T_InteractionKey'
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI'
 	static ConstructorHelpers::FClassFinder<UUserWidget> Texture(TEXT("/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI_C"));

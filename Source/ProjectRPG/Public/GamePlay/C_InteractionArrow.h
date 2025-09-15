@@ -10,11 +10,11 @@ class PROJECTRPG_API UC_InteractionArrow : public UStaticMeshComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "InteractionArrow")
-	float m_fHieght = 70.f;
+	float m_fHieght = 80.f;
 	UPROPERTY(EditDefaultsOnly, Category = "InteractionArrow")
-	float m_fMoveSpeed = 10.f;
+	float m_fMoveSpeed = 60.f;
 	UPROPERTY(EditDefaultsOnly, Category = "InteractionArrow")
-	float m_fRotateSpeed = 10.f;
+	float m_fRotateSpeed = 160.f;
 
 	float m_fPosition{};
 	float m_fYaw{};
@@ -22,5 +22,8 @@ protected:
 public:
 	UC_InteractionArrow(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+protected:
+	virtual void OnRegister() override;
 };
