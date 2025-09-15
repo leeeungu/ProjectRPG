@@ -19,14 +19,13 @@ public:
     class UNiagaraSystem* m_pRangeEffect;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
-    FVector m_vRangeScale = FVector(1.f);
+    float m_fRangeScale = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+    FVector m_vEffectLocationOffset = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     float m_fRangeLifeTime = 1.5f;
-
-    // true면 Actor 위치에, false면 Socket 위치에
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
-    bool m_bAttachToRoot = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
     FName m_strSocketName = NAME_None;

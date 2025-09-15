@@ -22,5 +22,7 @@ public class ProjectRPG : ModuleRules
 		{
              PublicDependencyModuleNames.AddRange(new string[] { "QuestSystemEditor" });
         }
+
+        PublicDefinitions.Add("__has_feature(x)=0");
     }
 }
