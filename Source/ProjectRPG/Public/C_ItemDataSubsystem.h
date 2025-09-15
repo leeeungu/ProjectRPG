@@ -20,7 +20,7 @@ enum class E_EItemType : uint8
 	E_Currency		UMETA(DisplayName = "CurrencyItem"),
 };
 
-UENUM(BlueprintType, meta = (Bitflags))
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class E_EItemState : uint8
 {
 	None = 0					UMETA(DisplayName = "None", Hidden),
@@ -37,7 +37,7 @@ enum class E_EItemState : uint8
 	// 아이템을 인벤토리에서 겹칠 수 있는 상태
 	CanStackable = 32		UMETA(DisplayName = "Stackable"),
 };
-
+ENUM_CLASS_FLAGS(E_EItemState);
 
 USTRUCT(BlueprintType)
 struct FS_ItemData : public FTableRowBase
@@ -56,8 +56,8 @@ struct FS_ItemData : public FTableRowBase
 	E_EItemType eItemType = E_EItemType::None;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data", 
-		meta = (Bitmask, BitmaskEnum = E_EItemState))
-	int32 eltemStateFlag = 255;
+		meta = (Bitmask, BitmaskEnum = "/Script/ProjectRPG.E_EItemState"))
+	uint8 eltemStateFlag = 255;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item Data")
 	TSubclassOf< AC_ItemActorBase> cEffectItemClass;
@@ -75,17 +75,16 @@ protected:
 	int m_arrQuickSlotItem[6]{};
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData{};
-	static UC_ItemDataSubsystem* m_pInstance;
 public:
 	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	static  UC_ItemDataSubsystem* const getInstance()  { return m_pInstance; }
+	static  UC_ItemDataSubsystem* getInstance(UObject* pWorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool getItemDataByID(int ItemID, FS_ItemData& OutData) const;
-	static bool getItemDataByID_CPP(int ItemID, FS_ItemData& OutData);
+	static bool getItemDataByID_CPP(UObject* pWorldContextObject, int ItemID, FS_ItemData& OutData);
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool isValidItemID(int ItemID) const;
 
@@ -99,7 +98,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ItemData")
 	bool hasItemStateFlag(int ItemID, 
-		UPARAM(meta = (Bitmask, BitmaskEnum = E_EItemState)) int32 Bitmask = 0) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/ProjectRPG.E_EItemState")) uint8 Bitmask = 0) const;
 
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	AC_ItemActorBase* spawnEffectItem(int ItemID, APawn* pInstigator);

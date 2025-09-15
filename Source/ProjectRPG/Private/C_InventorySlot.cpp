@@ -13,7 +13,7 @@ void UC_InventorySlot::NativeConstruct()
 	if (m_pInventory)
 	{
 		m_pInventory->getInventorySlotData(m_nIndexY, m_nIndexX, m_sInventorySlot);
-		UC_ItemDataSubsystem::getItemDataByID_CPP(m_sInventorySlot.nItemID, m_sItemData);
+		UC_ItemDataSubsystem::getItemDataByID_CPP(this, m_sInventorySlot.nItemID, m_sItemData);
 		if (m_sItemData.nItemID != UC_ItemDataSubsystem::getUnValidItemID_CPP())
 		{
 			m_onItemDataChangeEvent.Broadcast(m_sItemData.nItemID != UC_ItemDataSubsystem::getUnValidItemID_CPP(), m_sItemData);
@@ -25,7 +25,7 @@ void UC_InventorySlot::NativeConstruct()
 void UC_InventorySlot::slotChangeEvent(FS_InventorySlotData* sData)
 {
 	m_sInventorySlot = *sData;
-	UC_ItemDataSubsystem::getItemDataByID_CPP(m_sInventorySlot.nItemID, m_sItemData);
+	UC_ItemDataSubsystem::getItemDataByID_CPP(this, m_sInventorySlot.nItemID, m_sItemData);
 	bool bIsValidID = m_sInventorySlot.nItemID != UC_ItemDataSubsystem::getUnValidItemID_CPP();
 	if (m_onSlotChangeEvent.IsBound())
 	{
@@ -54,7 +54,7 @@ void UC_InventorySlot::NativeOnInitialized()
 	if (m_pInventory)
 	{
 		m_pInventory->getInventorySlotData(m_nIndexY, m_nIndexX, m_sInventorySlot);
-		UC_ItemDataSubsystem::getItemDataByID_CPP(m_sInventorySlot.nItemID, m_sItemData);
+		UC_ItemDataSubsystem::getItemDataByID_CPP(this, m_sInventorySlot.nItemID, m_sItemData);
 		m_onItemDataChangeEvent.Broadcast(m_sItemData.nItemID != UC_ItemDataSubsystem::getUnValidItemID_CPP() , m_sItemData);
 		m_onSlotChangeEvent.Broadcast(m_sItemData.nItemID != UC_ItemDataSubsystem::getUnValidItemID_CPP() , m_sInventorySlot);
 	}

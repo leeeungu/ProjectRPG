@@ -4,8 +4,6 @@
 #include "C_InventoryComponent.h"
 #include "C_QuickSlotManagerComponent.h"
 
-UC_ItemDataSubsystem* UC_ItemDataSubsystem::m_pInstance = nullptr;
-
 UC_ItemDataSubsystem::UC_ItemDataSubsystem()  
 {
     //Script/Engine.DataTable'/Game/Item/DataTable/DT_ItemData.DT_ItemData'
@@ -42,16 +40,19 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			}
         }
     }
-    if (!m_pInstance)
-        m_pInstance = this;
 }
 
 void UC_ItemDataSubsystem::Deinitialize()
 {
-    if (m_pInstance)
-        m_pInstance = nullptr;
     m_mapItemData.Empty();
 	Super::Deinitialize();
+}
+
+UC_ItemDataSubsystem* UC_ItemDataSubsystem::getInstance(UObject* pWorldContextObject)
+{
+    if (!pWorldContextObject || !pWorldContextObject->GetWorld() || !pWorldContextObject->GetWorld()->GetGameInstance())
+        return nullptr;
+    return pWorldContextObject->GetWorld()->GetGameInstance()->GetSubsystem<UC_ItemDataSubsystem>();
 }
 
 bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) const
@@ -65,9 +66,13 @@ bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) con
     return pItemData != nullptr;
 }
 
-bool UC_ItemDataSubsystem::getItemDataByID_CPP(int ItemID, FS_ItemData& OutData) 
+bool UC_ItemDataSubsystem::getItemDataByID_CPP(UObject* pWorldContextObject, int ItemID, FS_ItemData& OutData)
 {
-    return m_pInstance->getItemDataByID(ItemID, OutData);
+    if (UC_ItemDataSubsystem* pInstance = getInstance(pWorldContextObject))
+    {
+        return pInstance->getItemDataByID(ItemID, OutData);
+    }
+    return false;
 }
 
 bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const
@@ -94,12 +99,13 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
 
 AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem_Cpp(int ItemID, APawn* pInstigator)
 {
-    FS_ItemData* pItemData = m_pInstance->getItemDataByID_Internal(ItemID);
+    UC_ItemDataSubsystem* pInstance = getInstance(pInstigator);
+    FS_ItemData* pItemData = pInstance->getItemDataByID_Internal(ItemID);
     if (!pItemData || !pInstigator || !pItemData->cEffectItemClass.Get())
         return nullptr;
     FTransform transfrom = pInstigator->GetActorTransform();
 
-    AC_ItemActorBase* pItem = m_pInstance->GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
+    AC_ItemActorBase* pItem = pInstance->GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
     if (pItem)
     {
         pItem->setItemID(ItemID);
@@ -118,7 +124,7 @@ FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
     return nullptr;
 }
 
-bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID,  int32 Bitmask) const
+bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID, uint8 Bitmask) const
 {   
     FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
     if (pItemData)

@@ -10,7 +10,7 @@ AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
 FText AC_EquipItem::getItemDesc_Implementation() const
 {
 	FS_ItemData Data{};
-	if (!UC_ItemDataSubsystem::getItemDataByID_CPP(m_nItemID, Data))
+	if (!UC_ItemDataSubsystem::getItemDataByID_CPP((UObject*)this, m_nItemID, Data))
 		return FText();
 	FString Result = FString::Format(*Data.strItemDescription, { m_fEquipValue });
 	return  FText::FromString(Result);//FText::Format(LOCTEXT("Test", Data.strItemDescription), m_fEquipValue);
