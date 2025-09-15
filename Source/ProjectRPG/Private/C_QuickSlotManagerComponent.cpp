@@ -3,6 +3,7 @@
 #include <C_InventoryComponent.h>
 #include <C_GameAlertSubsystem.h>
 #include "GamePlay/C_DataMangerSubsystem.h"
+#include "C_ItemActorBase.h"
 
 UC_QuickSlotManagerComponent::UC_QuickSlotManagerComponent() :
 	UActorComponent{}
@@ -84,7 +85,11 @@ void UC_QuickSlotManagerComponent::useQuickSlotItemID(E_QuickSlotType QuickSlotT
 		if (GameInstance)
 		{
 			UC_ItemDataSubsystem* pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-			pItemDataSubsystem->spawnEffectItem(nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+			AC_ItemActorBase* Item = pItemDataSubsystem->spawnEffectItem(nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+			if (Item && Item->useItemActor())
+			{
+				m_pInventoryComponent->removeItem(nItemID, 1);
+			}
 		}
 	}
 }

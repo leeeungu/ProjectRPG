@@ -37,7 +37,7 @@ bool UC_CurrencyComponent::pushCurrency(int nCurrencyID, int nCurrencyAmount)
 	}
 	rCurrency += nCurrencyAmount;
 	if (m_onPushItem.IsBound())
-		m_onPushItem.Broadcast(nCurrencyID, rCurrency);
+		m_onPushItem.Broadcast(nCurrencyID, nCurrencyAmount);
 	return true;
 }
 
