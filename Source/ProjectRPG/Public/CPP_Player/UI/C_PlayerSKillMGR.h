@@ -17,11 +17,19 @@ public:
     UFUNCTION(BlueprintCallable, Category = "SkillUI")
     void ShowPerfectZone();
     void InitPerfectZone();
+    UFUNCTION()
     void HiddenPerfectZone();
 
     void InitResultWidgets();
     UFUNCTION()
     void ShowResult(bool result);
+    UFUNCTION()
+    void OnNotShowAnimFinished();
+
+    UFUNCTION()
+    void FailEnd();
+    UFUNCTION()
+    void SuccessEnd();
 
 protected:
     virtual void NativeConstruct() override;

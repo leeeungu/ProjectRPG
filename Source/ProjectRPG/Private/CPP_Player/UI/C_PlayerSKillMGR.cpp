@@ -50,8 +50,11 @@ void UC_PlayerSKillMGR::InitPerfectZone()
 
 void UC_PlayerSKillMGR::HiddenPerfectZone()
 {
-    PerfectZoneWidget->PlayAnimation(PerfectZoneWidget->NotShow);
-    PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+    UWidgetAnimation* HideAnim = PerfectZoneWidget->NotShow;
+    PerfectZoneWidget->PlayAnimation(HideAnim);
+    FWidgetAnimationDynamicEvent EndDelegate;
+    EndDelegate.BindDynamic(this, &UC_PlayerSKillMGR::OnNotShowAnimFinished);
+    PerfectZoneWidget->BindToAnimationFinished(HideAnim, EndDelegate);
 }
 
 void UC_PlayerSKillMGR::InitResultWidgets()
@@ -75,6 +78,8 @@ void UC_PlayerSKillMGR::InitResultWidgets()
                 }
                 SuccessWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
             }
+            SuccessWidgetInstance->OnRerultAnimEnd.AddDynamic(this, &UC_PlayerSKillMGR::SuccessEnd);
+            
         }
     }
 
@@ -97,7 +102,9 @@ void UC_PlayerSKillMGR::InitResultWidgets()
                 }
                 FailWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
             }
+            FailWidgetInstance->OnRerultAnimEnd.AddDynamic(this, &UC_PlayerSKillMGR::FailEnd);
         }
+        
     }
 }
 
@@ -116,6 +123,23 @@ void UC_PlayerSKillMGR::ShowResult(bool result)
     }
 }
 
+void UC_PlayerSKillMGR::OnNotShowAnimFinished()
+{
+    PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UC_PlayerSKillMGR::FailEnd()
+{
+    FailWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    HiddenPerfectZone();
+}
+
+void UC_PlayerSKillMGR::SuccessEnd()
+{
+    SuccessWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    HiddenPerfectZone();
+}
+
 void UC_PlayerSKillMGR::NativeConstruct()
 {
     Super::NativeConstruct();
@@ -128,6 +152,7 @@ void UC_PlayerSKillMGR::NativeConstruct()
             myPlayer->OnResultOpen.AddDynamic(this, &UC_PlayerSKillMGR::ShowResult);
         }
     }
+    
 }
 
 
