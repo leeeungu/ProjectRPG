@@ -167,6 +167,8 @@ void AC_MonsterBaseCharacter::onCounterSuccess()
 
 	SetActorRotation(rLookAt);
 
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.25f);
+
 	onStaggerBroken();
 
 	FTimerHandle sCounterEndHandle;
