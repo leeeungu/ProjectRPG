@@ -11,6 +11,7 @@ DECLARE_MULTICAST_DELEGATE(FChangeDownState);
 DECLARE_MULTICAST_DELEGATE(FSetPlayerMovePointEnabled);//player의 bCanMove 활성화->MoveToPos사용가능상태로 변경
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestJumpSection, FName, SectionName);//플레이어가 애님인스턴스로 주는 델리게이트
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponModeChanged, bool, bIsWeaponEquipped);//Unequip노티파이로부터 bool값호출받음
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPerfectZoneHiddenEvent);//퍼펙트존 히든용도
 
 /**
  * 
@@ -40,6 +41,7 @@ protected:
 	UAnimMontage* UnEquipMontage;
 	UPROPERTY()
 	UAnimMontage* DownMontage;
+	
 public:
 	virtual void NativeInitializeAnimation() override;
 	UPROPERTY(BlueprintReadOnly)
@@ -66,6 +68,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponModeChanged OnWeaponModeChanged;
+
+
+	// 블루프린트에서 바인딩 가능하게
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnPerfectZoneHiddenEvent OnPerfectZoneHidden;
+
+	// 호출 함수
+	UFUNCTION(BlueprintCallable, Category = "Event")
+	void TriggerPerfectZoneHidden();
 
 	//인터페이스
 	virtual void SetAttackMode(bool b) override;

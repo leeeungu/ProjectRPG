@@ -4,6 +4,7 @@
 #include "CPP_Player/UI/C_PerfectZone.h"
 #include "CPP_Player/C_Player.h"
 
+
 void UC_PerfectZone::PlayProgressAnimation()
 {
     if (Start)
@@ -77,6 +78,7 @@ void UC_PerfectZone::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (!IsTick)
     {
         CurrentTime = 0;
+        UE_LOG(LogTemp, Warning, TEXT("TickENd"));
         return;
     }
     CurrentTime += InDeltaTime;

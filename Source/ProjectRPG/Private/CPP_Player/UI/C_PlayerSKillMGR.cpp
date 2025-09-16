@@ -4,6 +4,7 @@
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
 #include "CPP_Player/UI/C_PerfectZone.h"
 #include "CPP_Player/UI/C_PerfectZoneResult.h"
+#include "CPP_Player/C_PlayerAnimInstance.h"
 #include "CPP_Player/C_Player.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -15,7 +16,9 @@ void UC_PlayerSKillMGR::ShowPerfectZone()
 {
     if (!PerfectZoneWidget || !PerfectZoneWidget->Start) return;
     PerfectZoneWidget->SetVisibility(ESlateVisibility::Visible);
+    StopAnimation(PerfectZoneWidget->Show);
     PerfectZoneWidget->PlayAnimation(PerfectZoneWidget->Show);
+    EndPerfectZone = false;
 }
 
 void UC_PlayerSKillMGR::InitPerfectZone()
@@ -44,14 +47,30 @@ void UC_PlayerSKillMGR::InitPerfectZone()
             }
 
             PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+            //PerfectZoneWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
         }
     }
 }
 
 void UC_PlayerSKillMGR::HiddenPerfectZone()
 {
+    EndPerfectZone = true;
     UWidgetAnimation* HideAnim = PerfectZoneWidget->NotShow;
+
+    // 델리게이트 먼저 해제
+    PerfectZoneWidget->UnbindAllFromAnimationFinished(HideAnim);
+
+    // 재생 중이면 강제 종료 처리 (선택 사항)
+    if (PerfectZoneWidget->IsAnimationPlaying(HideAnim))
+    {
+        PerfectZoneWidget->StopAnimation(HideAnim);
+        OnNotShowAnimFinished(); // 강제 종료 시 처리
+    }
+
+    // 애니메이션 재생
     PerfectZoneWidget->PlayAnimation(HideAnim);
+
+    // 종료 시 델리게이트 재바인딩
     FWidgetAnimationDynamicEvent EndDelegate;
     EndDelegate.BindDynamic(this, &UC_PlayerSKillMGR::OnNotShowAnimFinished);
     PerfectZoneWidget->BindToAnimationFinished(HideAnim, EndDelegate);
@@ -125,18 +144,29 @@ void UC_PlayerSKillMGR::ShowResult(bool result)
 
 void UC_PlayerSKillMGR::OnNotShowAnimFinished()
 {
-    PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+    //PerfectZoneWidget->SetVisibility(ESlateVisibility::Hidden);
+    PerfectZoneWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UC_PlayerSKillMGR::FailEnd()
 {
     FailWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    if (EndPerfectZone)
+    {
+        EndPerfectZone = false;
+        return;
+    }
     HiddenPerfectZone();
 }
 
 void UC_PlayerSKillMGR::SuccessEnd()
 {
     SuccessWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+    if (EndPerfectZone)
+    {
+        EndPerfectZone = false;
+        return;
+    }
     HiddenPerfectZone();
 }
 
@@ -150,6 +180,10 @@ void UC_PlayerSKillMGR::NativeConstruct()
         if (AC_Player* myPlayer = Cast<AC_Player>(myPC->GetPawn()))
         {
             myPlayer->OnResultOpen.AddDynamic(this, &UC_PlayerSKillMGR::ShowResult);
+            if (UC_PlayerAnimInstance* AnimInstance = Cast<UC_PlayerAnimInstance>(myPlayer->GetMesh()->GetAnimInstance()))
+            {
+                AnimInstance->OnPerfectZoneHidden.AddDynamic(this, &UC_PlayerSKillMGR::HiddenPerfectZone);
+            }
         }
     }
     

@@ -17,6 +17,7 @@ class PROJECTRPG_API UC_PerfectZone : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+
     // 애니메이션 참조
     UPROPERTY(meta = (BindWidgetAnim), Transient)
     UWidgetAnimation* Start;

@@ -3,6 +3,7 @@
 
 #include "CPP_Player/C_PlayerAnimInstance.h"
 #include "CPP_Player/C_SkillComponent.h"
+#include "CPP_Player/UI/C_PlayerSKillMGR.h"
 
 
 void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
@@ -113,6 +114,11 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     {
         // 강제 중단된 경우 → 이동 가능 상태 풀지 않음
         UE_LOG(LogTemp, Warning, TEXT("Montage interrupted. Ignore movement enable."));
+        if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))
+        {
+            // 차징 몽타주가 강제로 중단된 경우에만 퍼펙트존 숨기기
+            TriggerPerfectZoneHidden();
+        }
         return;//리턴을 때리면서 브로드캐스트 실행하지않음으로 여전히 이동불가상태로 남아있게됨.
         //선입력시스템으로 애니메이션이 전부끝나지않고 다른애니메이션이 호출되도 이로직으로 넘어오게됨.
         //*일단 패링은 스킬중간에쓰면 Interrupted로 처리가되는데 어차피 패링로직에 bCanMove 다시 false로 설정되서 추가 이동은 못하게됨.
@@ -134,6 +140,11 @@ void UC_PlayerAnimInstance::HandleJumpSection(FName SectionName)
     {
         Montage_JumpToSection(SectionName, CurrentActiveMontage);
     }
+}
+
+void UC_PlayerAnimInstance::TriggerPerfectZoneHidden()
+{
+    OnPerfectZoneHidden.Broadcast();
 }
 
 void UC_PlayerAnimInstance::SetAttackMode(bool b)
