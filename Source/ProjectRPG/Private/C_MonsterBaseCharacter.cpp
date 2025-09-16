@@ -169,7 +169,15 @@ void AC_MonsterBaseCharacter::onCounterSuccess()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.25f);
 
-	onStaggerBroken();
+	float fCounterMontageDuration = m_pCounterMontage->GetPlayLength();
+	GetMesh()->GetAnimInstance()->Montage_Play(m_pCounterMontage);
+
+	FTimerHandle sCounterStartHandle;
+	GetWorld()->GetTimerManager().SetTimer(sCounterStartHandle,
+		FTimerDelegate::CreateLambda([this]()
+			{
+				onStaggerBroken();
+			}), fCounterMontageDuration, false);
 
 	FTimerHandle sCounterEndHandle;
 	GetWorld()->GetTimerManager().SetTimer(sCounterEndHandle, this,
@@ -289,13 +297,6 @@ void AC_MonsterBaseCharacter::onAttackEnd()
 	m_bIsAttacking = false;
 }
 
-void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted)
-{
-	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
-
-	moveToGimmick();
-}
-
 FVector AC_MonsterBaseCharacter::getGimmickPos() const
 {
 	return m_vGimmickPos;
@@ -303,10 +304,49 @@ FVector AC_MonsterBaseCharacter::getGimmickPos() const
 
 void AC_MonsterBaseCharacter::moveToGimmick()
 {
-	SetActorLocation(getGimmickPos());
-	SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
-	stopAi();
-	m_bIsGimmickReady = true;
+	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
+
+	if (!pAnim->IsAnyMontagePlaying())
+	{
+		float fMontageDuration = m_pGimmickStartMontage->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(m_pGimmickStartMontage);
+
+		FTimerHandle sGimmickStartHandle;
+		GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
+			FTimerDelegate::CreateLambda([this]()
+				{
+					SetActorLocation(m_vGimmickPos);
+					SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
+					stopAi();
+					m_bIsGimmickReady = true;
+				}), fMontageDuration, false);
+	}
+	else
+	{
+		pAnim->OnMontageEnded.AddDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_GimmickStart);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("AnyMontagePlaying222222"));
+
+	}
+	
+}
+
+void AC_MonsterBaseCharacter::onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted)
+{
+	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_GimmickStart);
+
+	float fMontageDuration = m_pGimmickStartMontage->GetPlayLength();
+	GetMesh()->GetAnimInstance()->Montage_Play(m_pGimmickStartMontage);
+
+	FTimerHandle sGimmickStartHandle;
+	GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
+		FTimerDelegate::CreateLambda([this]()
+			{
+				SetActorLocation(m_vGimmickPos);
+				SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
+				stopAi();
+				m_bIsGimmickReady = true;
+			}), fMontageDuration, false);
+
 }
 
 void AC_MonsterBaseCharacter::startGimmick()
@@ -326,11 +366,19 @@ void AC_MonsterBaseCharacter::startGimmick()
 
 }
 
+void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted)
+{
+	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
+
+	moveToGimmick();
+
+}
+
 void AC_MonsterBaseCharacter::playStaggerGimmick()
 {
 	startGimmick();
 
-
+	m_pStaggerGimmickComp->excuteGimmick();
 	/*
 	* 기믹 전용 무력화 수치와 그로기 시간을 지정
 	*/
@@ -373,6 +421,7 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("End Gimmick failed!!!!!!!!!!"));
 	/*
 	* 기믹 실패 처리
 	* 광역 높은 데미지 등

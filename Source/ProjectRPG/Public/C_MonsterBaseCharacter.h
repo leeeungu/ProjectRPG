@@ -49,12 +49,34 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 {
 	GENERATED_BODY()
 
-private:	
+private:
+	/*
+	* 애님몽타주
+	*/
+
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Counter Montage")
+	UAnimMontage* m_pCounterMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Gimmick Montage")
+	UAnimMontage* m_pGimmickStartMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Gimmick Montage")
+	UAnimMontage* m_pGimmikPlayMontage;
+
+
+	/*
+	* 나이아가라
+	*/
+
 	UPROPERTY(EditAnywhere, Category = "Niagara")
 	UNiagaraSystem* m_pDangerPlace;
+
+	/*
+	* 컴포넌트
+	*/
 
 	UPROPERTY(EditAnywhere, Category = "Gimmick")
 	class UC_StaggerGimmickComponent* m_pStaggerGimmickComp;
@@ -68,10 +90,15 @@ private:
 	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
 
+
+
+	UPROPERTY(EditAnywhere)
+	FVector m_vGimmickPos;
+
 	bool m_bIsAttacking = false;
 	bool m_bIsGimmickReady = false;
 
-	FVector m_vGimmickPos;
+	
 
 	FTimerHandle m_timeHandle;
 
@@ -88,6 +115,9 @@ private:
 	float getDistanceToTarget() const;
 
 	void onAttackEnd();
+
+	UFUNCTION()
+	void onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted);
 
 
 protected:

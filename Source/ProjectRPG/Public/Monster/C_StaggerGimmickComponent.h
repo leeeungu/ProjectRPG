@@ -32,20 +32,20 @@ public:
 	FOnStaggerGimmickEnd m_onStaggerGimmickEnd;
 
 	
-
+private:
+	virtual void endGimmick() override;
 
 protected:
 	virtual bool canGimmickStart(float fHp, float fMaxHp) override;
-
-	virtual void excuteGimmick() override;
-
-	virtual void endGimmick() override; 
+	
 
 public:
 	UC_StaggerGimmickComponent();
 
 	float getGoalStagger() const;
 	float getBrokenDuration() const;
+
+	virtual void excuteGimmick() override;
 
 	void applyGimmickStagger(class UC_StaggerComponent* pStaggerCom);
 	void restoreStagger(class UC_StaggerComponent* pStaggerCom);

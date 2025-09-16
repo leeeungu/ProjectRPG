@@ -78,10 +78,12 @@ void UC_GimmickComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (m_bGimmickPlaying)
+	{
 		m_fGimmickTime -= DeltaTime;
-
-	if (m_fGimmickTime <= 0)
-		endGimmick();
+		if (m_fGimmickTime <= 0)
+			endGimmick();
+	}
+		
 
 	// ...
 }
