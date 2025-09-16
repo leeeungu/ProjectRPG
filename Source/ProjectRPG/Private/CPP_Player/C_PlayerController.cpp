@@ -377,6 +377,13 @@ void AC_PlayerController::OnPossess(APawn* pawn)
         {
             Subsystem->AddMappingContext(InputMapping, 0);//우선순위0맵핑
         }
+
+        AC_Player* pPlayer = Cast< AC_Player>(pawn);
+        UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent);
+        if (pPlayer)
+        {
+            EnhancedInput->BindAction(m_pInteraction, ETriggerEvent::Completed, pPlayer, &AC_Player::runInteraction);
+        }
     }
     if (pawn)
     {

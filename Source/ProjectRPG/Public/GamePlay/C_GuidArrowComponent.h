@@ -11,7 +11,7 @@ class PROJECTRPG_API UC_GuidArrowComponent : public UStaticMeshComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "GuidArrow")
-	float m_fRotateSpeed = 30.0f;
+	float m_fRotateSpeed = 360.0f;
 	UPROPERTY(VisibleAnywhere, Category = "GuidArrow")
 	FVector m_vTargetPosition;
 public:
