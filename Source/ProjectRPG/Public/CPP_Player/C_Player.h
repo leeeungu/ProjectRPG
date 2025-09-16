@@ -138,6 +138,15 @@ public:
 	void HandleChargeInputEnd();
 
 	void HandleResult(bool result);
+
+	//characterbase override function
+	UFUNCTION(BlueprintCallable)
+	void OnMonsterDownAttack(const FHitResult& Hit);
+	bool DownRecive = false;
+	FVector DownDirection{};
+	float DownDist = 300.f;
+
+	bool takeDamageEvent_Implementation(float fDamage) override;
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();
@@ -197,4 +206,6 @@ public:
 	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
 
 	void runInteraction();
+
+	
 };

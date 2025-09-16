@@ -4,10 +4,11 @@
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_SkillData.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
+#include "C_MonsterBaseCharacter.h"
 #include "C_Basecharacter.h"
 #include "GameFramework/Character.h"
 
-void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
+void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, bool IsGetCounter)
 {
 	FVector SpawnLocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorRotation().RotateVector(data.RelativeOffset);
 	FQuat Rotation = GetOwner()->GetActorQuat();
@@ -63,15 +64,16 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data)
 			if (HitActor && HitActor != GetOwner())
 			{
 				HitActor->takeDamageEvent(100);
-				UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitActor->GetName());
 	          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
 	          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
-	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음.
-	 
-	 //여기서 카운터스킬은 몬스터의 트라이카운터호출까지 해야됨.
-	 //그럼 스킬중에 카운터스킬에는 카운터스킬이 있다는것을 설정해줘야함.
-	 //노티파이에서 카운터 실행 (몬스터베이스에서 트라이카운터를 가져오는게 목표)
+	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음
 			}
+			if (IsGetCounter)
+			{
+				AC_MonsterBaseCharacter* BossMonster = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
+				BossMonster->tryCounter();
+			}
+			
 		}
 	}
 }
@@ -93,7 +95,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (PA1obj.Succeeded()) PlainAttack01.DirectionMontages.Add(E4WayDirection::Default, PA1obj.Object);
 	SkillMap.Add(PlainAttack01.SkillName, PlainAttack01);
 
-	FSkillData PlainAttack02;
+	FSkillData PlainAttack02{};
 	PlainAttack02.SkillName = "PA_02";
 	PlainAttack02.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack02.AttackPowerMultiplier = 200.f;
@@ -105,7 +107,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (PA1obj.Succeeded()) PlainAttack02.DirectionMontages.Add(E4WayDirection::Default, PA2obj.Object);
 	SkillMap.Add(PlainAttack02.SkillName, PlainAttack02);
 
-	FSkillData PlainAttack03;
+	FSkillData PlainAttack03{};
 	PlainAttack03.SkillName = "PA_03";
 	PlainAttack03.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack03.AttackPowerMultiplier = 200.f;
@@ -117,7 +119,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (PA1obj.Succeeded()) PlainAttack03.DirectionMontages.Add(E4WayDirection::Default, PA3obj.Object);
 	SkillMap.Add(PlainAttack03.SkillName, PlainAttack03);
 
-	FSkillData PlainAttack04;
+	FSkillData PlainAttack04{};
 	PlainAttack04.SkillName = "PA_04";
 	PlainAttack04.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack04.AttackPowerMultiplier = 200.f;
@@ -130,7 +132,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillMap.Add(PlainAttack04.SkillName, PlainAttack04);
 
 	//Q스킬
-	FSkillData SkillNum01;
+	FSkillData SkillNum01{};
 	SkillNum01.SkillName = "S_01";
 	SkillNum01.Cooldown = 0.0f;//테스트용 0초
 	SkillNum01.AttackPowerMultiplier = 200.f;
@@ -142,7 +144,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
 
-	FSkillData SkillNum02;
+	FSkillData SkillNum02{};
 	SkillNum02.SkillName = "S_02";
 	SkillNum02.Cooldown = 0.0f;
 	SkillNum02.AttackPowerMultiplier = 200.f;
@@ -154,7 +156,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
 
-	FSkillData SkillNum03;
+	FSkillData SkillNum03{};
 	SkillNum03.SkillName = "S_03";
 	SkillNum03.Cooldown = 5.0f;
 	SkillNum03.AttackPowerMultiplier = 200.f;
@@ -162,7 +164,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
 	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
 
-	FSkillData SkillNum04;
+	FSkillData SkillNum04{};
 	SkillNum04.SkillName = "S_04";
 	SkillNum04.Cooldown = 5.0f;
 	SkillNum04.AttackPowerMultiplier = 200.f;
@@ -174,7 +176,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
 
-	FSkillData SkillNum05;
+	FSkillData SkillNum05{};
 	SkillNum05.SkillName = "S_05";
 	SkillNum05.Cooldown = 5.0f;
 	SkillNum05.AttackPowerMultiplier = 200.f;
@@ -182,15 +184,16 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
 	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
 
-	FSkillData SkillNum06;
+	FSkillData SkillNum06{};
 	SkillNum06.SkillName = "S_06";
 	SkillNum06.Cooldown = 5.0f;
 	SkillNum06.AttackPowerMultiplier = 200.f;
+	SkillNum06.Counter = true;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_06_Montage.SpearSkill_06_Montage"));
 	if (skill6obj.Succeeded()) SkillNum06.DirectionMontages.Add(E4WayDirection::Default, skill6obj.Object);
 	SkillMap.Add(SkillNum06.SkillName, SkillNum06);
 
-	FSkillData SkillNum07;
+	FSkillData SkillNum07{};
 	SkillNum07.SkillName = "S_07";
 	SkillNum07.Cooldown = 0.0f;
 	SkillNum07.AttackPowerMultiplier = 200.f;
@@ -214,7 +217,7 @@ UC_SkillComponent::UC_SkillComponent()
 	//}
 	//SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
 	//다운패링
-	FSkillData DownPering;
+	FSkillData DownPering{};
 	DownPering.SkillName = "Period";
 	DownPering.Cooldown = 5.0f;
 	DownPering.AttackPowerMultiplier = 0.f;
@@ -233,7 +236,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillMap.Add(DownPering.SkillName, DownPering);
 
 	//F차징스킬(start)
-	FSkillData ChargingSkill_Start;
+	FSkillData ChargingSkill_Start{};
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 0.0f;
 	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
@@ -248,7 +251,7 @@ UC_SkillComponent::UC_SkillComponent()
 	}
 	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);
 	//F차징스킬(Hold)
-	FSkillData ChargingSkill_Hold;
+	FSkillData ChargingSkill_Hold{};
 	ChargingSkill_Hold.SkillName = "ChargingHoldingSkill";
 	ChargingSkill_Hold.Cooldown = 0.0f;
 	ChargingSkill_Hold.AttackPowerMultiplier = 0.f;
@@ -259,7 +262,7 @@ UC_SkillComponent::UC_SkillComponent()
 	}
 	SkillMap.Add(ChargingSkill_Hold.SkillName, ChargingSkill_Hold);
 	//F차징스킬(Cancel)
-	FSkillData ChargingSkill_Cancel;
+	FSkillData ChargingSkill_Cancel{};
 	ChargingSkill_Cancel.SkillName = "ChargingEndCancelSkill";
 	ChargingSkill_Cancel.Cooldown = 0.0f;
 	ChargingSkill_Cancel.AttackPowerMultiplier = 100.f;//막타 + 실패 배율
@@ -270,7 +273,7 @@ UC_SkillComponent::UC_SkillComponent()
 	}
 	SkillMap.Add(ChargingSkill_Cancel.SkillName, ChargingSkill_Cancel);
 	//F차징스킬(Complete)
-	FSkillData ChargingSkill_Complete;
+	FSkillData ChargingSkill_Complete{};
 	ChargingSkill_Complete.SkillName = "ChargingEndCompleteSkill";
 	ChargingSkill_Complete.Cooldown = 0.0f;
 	ChargingSkill_Complete.AttackPowerMultiplier = 200.f;//막타 + 성공 배율
@@ -377,7 +380,7 @@ void UC_SkillComponent::HandleSkillHit()//애님노티파이(SkillHit)호출용
 		return;
 	}
 	const FSkillCollisionData& CollisionData = SkillData->CollisionData;//스킬데이터의 컬리젼데이터를 참조하는 래퍼런스생성.
-	SpawnSkillCollision(CollisionData);
+	SpawnSkillCollision(CollisionData, SkillData->Counter);
 
 }
 

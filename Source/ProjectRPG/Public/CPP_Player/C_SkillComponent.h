@@ -22,7 +22,7 @@ private:
 	TMap<FName, FSkillData> SkillMap;
 	TMap<FName, float> SkillCooldownEndTime;
 	FName CurrentSkillName = {};
-	void SpawnSkillCollision(const FSkillCollisionData& data);
+	void SpawnSkillCollision(const FSkillCollisionData& data, bool IsGetCounter);
 public:	
 	// Sets default values for this component's properties
 	UC_SkillComponent();

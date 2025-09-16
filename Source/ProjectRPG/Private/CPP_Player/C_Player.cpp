@@ -29,7 +29,7 @@ void AC_Player::PlayerDownTest()
 void AC_Player::ReceiveDamage(float damageAmount)
 {
 	//hp에서 캐릭터 피깍음
-	//만약에 공형형태가 다운형태면
+	//만약에 공격형형태가 다운형태면
 	ClearMoveState();
 	Down();
 
@@ -41,6 +41,7 @@ void AC_Player::Down()
 	ClearMoveState();
 	bCanMove = false;
 	myAnimInterface->SetIsDownMode(true);//애님인스턴스 전달
+	//다운은 몽타주가아니아 애님시퀀스에서 돌아가므로 이동설정따로해야댐
 }
 
 void AC_Player::DeactivateAllNiagaraEffects()
@@ -103,9 +104,37 @@ void AC_Player::HandleResult(bool result)
 }
 
 
+void AC_Player::OnMonsterDownAttack(const FHitResult& Hit)
+{
+	FVector HitLocation = Hit.ImpactPoint;
+	FVector MyLocation = GetActorLocation();
+
+	// 맞은 방향 (내 위치에서 충돌지점 반대로)
+	FVector KnockbackDir = (MyLocation - HitLocation).GetSafeNormal();
+	KnockbackDir.Z = 0.f;
+	DownDirection = KnockbackDir;
+	Down();
+	DownRecive = true;
+}
+
+bool AC_Player::takeDamageEvent_Implementation(float fDamage)
+{
+	setHp(getHp() - fDamage);
+	return false;
+}
+
 void AC_Player::HandleChangeRunningState()
 {
+	if (RunningState == ERunningSystemState::Down)
+	{
+		bCanMove = true;
+	}
 	RunningState = ERunningSystemState::Idle;
+	if (myAnimInterface)
+	{
+		myAnimInterface->SetDownPeriodState(false);
+	}
+	
 }
 
 void AC_Player::CalMoveData()
@@ -201,10 +230,14 @@ void AC_Player::RunningSystemManager()
 				{
 					AttackMode();
 				}
+				if (myAnimInterface)
+				{
+					myAnimInterface->SetDownPeriodState(true);
+				}
 				E4WayDirection Direction = Set4_WayDirection(PriorityInputData.TargetPoint);
 				CalRotateData(PriorityInputData.TargetPoint);
 				IsPeriod = true;
-				m_skillCom->UsingSkill(FName("DownPeriod"), Direction);//이름교체
+				m_skillCom->UsingSkill(FName("Period"), Direction);//이름교체
 				m_skillCom->StartCooldown(PriorityInputData.ActionName);
 				m_inputQueue->ClearQueueList();
 				return;
@@ -456,8 +489,6 @@ AC_Player::AC_Player()
 		m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
 	}
-
-	
 	
 }
 
@@ -510,6 +541,9 @@ void AC_Player::BeginPlay()
 			SkillUiWidget->AddToViewport();
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fMaxHp);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fHp);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fAtk);
 
 }
 
@@ -630,6 +664,24 @@ void AC_Player::Tick(float DeltaTime)
 			PeriodDist -= MoveVec.Length();
 			UE_LOG(LogTemp, Warning, TEXT("Period true"));
 		}
+	}
+	if (DownRecive)
+	{
+		ClearMoveState();
+		if (DownDist < 0.2f)//도착
+		{
+			DownDist = 300.f;
+			DownRecive = false;
+		}
+		else
+		{
+			float speed = 20.f;
+			FVector MoveVec = DownDirection * speed;
+			AddActorWorldOffset(MoveVec, true);
+			PeriodDist -= MoveVec.Length();
+			UE_LOG(LogTemp, Warning, TEXT("Down true"));
+		}
+		
 	}
 	RunningSystemManager();
 

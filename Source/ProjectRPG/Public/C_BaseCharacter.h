@@ -29,11 +29,11 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stat")
 	FOnStatChange m_onChangeAtk{};
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite ,Category = "AC_BaseCharacter")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly ,Category = "AC_BaseCharacter")
 	float m_fMaxHp = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly ,Category = "AC_BaseCharacter")
 	float m_fHp;
-	UPROPERTY(EditAnywhere, Category = "AC_BaseCharacter")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AC_BaseCharacter")
 	float m_fAtk;
 
 private:

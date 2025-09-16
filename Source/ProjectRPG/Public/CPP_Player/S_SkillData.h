@@ -72,6 +72,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     float Cooldown = 0.f;
 
+    // 스킬 카운터여부
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+    bool Counter = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     FSkillCollisionData CollisionData;
 

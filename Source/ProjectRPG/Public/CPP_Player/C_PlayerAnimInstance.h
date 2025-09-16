@@ -37,6 +37,8 @@ protected:
 	bool m_ActiveValue = false;
 	UPROPERTY(BlueprintReadOnly)
 	bool m_IsDown = false;
+	UPROPERTY(BlueprintReadOnly)
+	bool m_IsDownPeriod = false;
 	UPROPERTY()
 	UAnimMontage* UnEquipMontage;
 	UPROPERTY()
@@ -82,5 +84,8 @@ public:
 	virtual void SetAttackMode(bool b) override;
 	virtual void SetIsAttackingMode(bool b) override;
 	virtual void SetIsDownMode(bool b) override;
+	virtual void SetDownPeriodState(bool b) override;
+	virtual void SetIsDownMode_DownState(bool b) override;
+	
 
 };

@@ -166,4 +166,20 @@ void UC_PlayerAnimInstance::SetIsDownMode(bool b)
     //m_IsDown = false;
 }
 
+void UC_PlayerAnimInstance::SetDownPeriodState(bool b)
+{
+    m_IsDownPeriod = b;
+    if (b)
+    {
+        m_IsDown = false;
+    }
+}
+
+void UC_PlayerAnimInstance::SetIsDownMode_DownState(bool b)
+{
+    m_IsDown = b;
+}
+
+
+
 
