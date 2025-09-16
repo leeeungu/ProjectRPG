@@ -70,9 +70,13 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TSubclassOf<AActor> WeaponClass;  // 블루프린트 무기 클래스 지정
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AActor> DualWeaponClass;  // 블루프린트 무기 클래스 지정
 
 	UPROPERTY()
 	AActor* EquippedWeapon;  // 현재 장착된 무기
+	UPROPERTY()
+	AActor* EquippedWeaponDual;  // 현재 장착된 보조무기
 
 	//플레이어 상태
 	UPROPERTY()
@@ -189,6 +193,7 @@ public:
 	//무기부착상태(Unequip노티파이 호출 바인딩용)
 	
 	void AttachWeaponToSocket(bool bEquipMode);
+	void AttachDualWeaponToSocket(bool bEquipMode);
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	ERunningSystemState GetRunningSystemState() { return RunningState; }
 

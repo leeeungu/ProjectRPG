@@ -430,14 +430,24 @@ void AC_Player::AttachWeaponToSocket(bool bEquipMode)
 {
 	if (!EquippedWeapon) return;
 
-	FName SocketName = bEquipMode ? FName("Equip_Socket") : FName("r_weapon_socket");
+	FName SocketName = bEquipMode ? FName("r_Equip_Socket") : FName("r_weapon_socket");
 	EquippedWeapon->AttachToComponent(
 		GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 		SocketName
 	);
-	UE_LOG(LogTemp, Warning, TEXT("AttachWeaponToSocket -> bEquipMode: %s"),
-		bEquipMode ? TEXT("True") : TEXT("False"));
+}
+
+void AC_Player::AttachDualWeaponToSocket(bool bEquipMode)
+{
+	if (!EquippedWeaponDual) return;
+
+	FName SocketName = bEquipMode ? FName("l_Equip_Socket") : FName("l_weapon_socket");
+	EquippedWeaponDual->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		SocketName
+	);
 }
 
 AC_Player::AC_Player()
@@ -530,6 +540,15 @@ void AC_Player::BeginPlay()
 		if (EquippedWeapon)
 		{
 			AttachWeaponToSocket(IsEquipMode);
+		}
+	}
+	if (DualWeaponClass)
+	{
+		// 무기 스폰
+		EquippedWeaponDual = GetWorld()->SpawnActor<AActor>(DualWeaponClass);
+		if (EquippedWeaponDual)
+		{
+			AttachDualWeaponToSocket(IsEquipMode);
 		}
 	}
 	//UI
@@ -791,7 +810,7 @@ void AC_Player::AttackMode()
 			//무기파지
 			IsEquipMode = false;
 			AttachWeaponToSocket(IsEquipMode);
-			UE_LOG(LogTemp, Warning, TEXT("UNEquipMode"));
+			AttachDualWeaponToSocket(IsEquipMode);
 		}
 	}
 	

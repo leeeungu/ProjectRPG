@@ -68,11 +68,12 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 	          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
 	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음
 			}
-			if (IsGetCounter)
+			//카운터스킬쓰면 크래쉬남
+			/*if (IsGetCounter)
 			{
 				AC_MonsterBaseCharacter* BossMonster = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
 				BossMonster->tryCounter();
-			}
+			}*/
 			
 		}
 	}
@@ -140,7 +141,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum01.CollisionData.Dimensions = FVector(100.f, 100.f, 500.f);
 	SkillNum01.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
 	SkillNum01.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill01_Montage.Dual_Skill01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
 
@@ -152,7 +153,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum02.CollisionData.Dimensions = FVector(400.f, 400.f, 300.f);
 	SkillNum02.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
 	SkillNum02.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_02_Montage.SpearSkill_02_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill02_Montage.Dual_Skill02_Montage"));
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
 
@@ -160,7 +161,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum03.SkillName = "S_03";
 	SkillNum03.Cooldown = 5.0f;
 	SkillNum03.AttackPowerMultiplier = 200.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_03_Montage.SpearSkill_03_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill03_Montage.Dual_Skill03_Montage"));
 	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
 	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
 
@@ -172,7 +173,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum04.CollisionData.Dimensions = FVector(250.f, 250.f, 150.f);
 	SkillNum04.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
 	SkillNum04.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_04_Montage.SpearSkill_04_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
 
@@ -180,7 +181,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum05.SkillName = "S_05";
 	SkillNum05.Cooldown = 5.0f;
 	SkillNum05.AttackPowerMultiplier = 200.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_05(Tumble)/SpearSkill_07_B_Montage.SpearSkill_07_B_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill05_Montage.Dual_Skill05_Montage"));
 	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
 	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
 
@@ -189,7 +190,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum06.Cooldown = 5.0f;
 	SkillNum06.AttackPowerMultiplier = 200.f;
 	SkillNum06.Counter = true;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_06_Montage.SpearSkill_06_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill06_Montage.Dual_Skill06_Montage"));
 	if (skill6obj.Succeeded()) SkillNum06.DirectionMontages.Add(E4WayDirection::Default, skill6obj.Object);
 	SkillMap.Add(SkillNum06.SkillName, SkillNum06);
 
@@ -201,7 +202,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum07.CollisionData.Dimensions = FVector(700.f, 100.f, 100.f);
 	SkillNum07.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
 	SkillNum07.CollisionData.Duration = 0.3f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_07_Montage.SpearSkill_07_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
 
@@ -244,7 +245,7 @@ UC_SkillComponent::UC_SkillComponent()
 	ChargingSkill_Start.CollisionData.Dimensions = FVector(800.f, 100.f, 50.f);
 	ChargingSkill_Start.CollisionData.RelativeOffset = FVector::ForwardVector * 300.f;
 	ChargingSkill_Start.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Pull.SpearSkill_08_Pull"));//변경
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill08_Montage.Dual_Skill08_Montage"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
