@@ -24,7 +24,7 @@ class USceneCaptureComponent2D;
 class UC_InteractionDetectorComponent;
 class UC_TravelManagerComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum class ERunningSystemState : uint8
 {
 	Idle,       // 입력 대기
@@ -194,8 +194,8 @@ public:
 	
 	void AttachWeaponToSocket(bool bEquipMode);
 	void AttachDualWeaponToSocket(bool bEquipMode);
-	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
-	ERunningSystemState GetRunningSystemState() { return RunningState; }
+	UFUNCTION(BlueprintPure, Category = "RunningSystem")
+	ERunningSystemState GetRunningSystemState() const { return RunningState; }
 
 
 	virtual UCameraComponent* getCamera_Implementation() override;
