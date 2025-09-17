@@ -2,6 +2,7 @@
 
 
 #include "CPP_Player/C_Player.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFrameWork/SpringArmComponent.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
@@ -208,6 +209,38 @@ void AC_Player::CalRotateData(const FVector& TargetPoint)
 	bRotate = true;
 }
 
+void AC_Player::ForceLandToGround()
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!Capsule) return;
+
+	// 에디터에서 지정한 값 직접 사용 (절반높이 = 88, 반경 = 34)
+	const float CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight(); // 88.0
+	const float CapsuleRadius = Capsule->GetScaledCapsuleRadius();         // 34.0
+
+	// 시작 위치를 캡슐 중심 + 하프높이 → 발바닥 기준에서 라인트레이스 쏘기
+	FVector Start = GetActorLocation() + FVector(0, 0, CapsuleHalfHeight);
+	FVector End = Start - FVector(0, 0, 2000.0f); // 충분히 아래로
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+	{
+		// 히트한 지점에서 캡슐 절반 높이만큼 위로 올려서 캡슐 바닥이 정확히 지면에 닿도록
+		FVector NewLocation = HitResult.Location + FVector(0, 0, CapsuleHalfHeight);
+		SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	}
+
+	// 무브먼트 모드를 걷기로 변경
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->SetMovementMode(MOVE_Walking);
+	}
+	IsLandToGround = false;
+}
+
 //매인로직 매니저(지금 처음에 데이터를 그냥받는바람에 무제한입력이됨)
 void AC_Player::RunningSystemManager()
 {
@@ -400,27 +433,71 @@ void AC_Player::Reset_Implementation(UCameraComponent* Camera)
 
 void AC_Player::SetPeriodInfo()
 {
-	FVector DirectionVector;
-	switch (DirectionSkillState)
+	FVector DirectionVector = GetActorForwardVector();
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	bool bIsAirborne = MoveComp && !MoveComp->IsMovingOnGround(); // 공중 체크 (Flying/Falling)
+	// Flying 상태일 때 공중 패링용 처리
+	if (bIsAirborne)
 	{
-	case E4WayDirectionPlayer::Foward:
-		DirectionVector = GetActorForwardVector();
-		break;
-	case E4WayDirectionPlayer::Back:
-		DirectionVector = -GetActorForwardVector();
-		break;
-	case E4WayDirectionPlayer::Left:
-		DirectionVector = -GetActorRightVector();
-		break;
-	case E4WayDirectionPlayer::Right:
-		DirectionVector = GetActorRightVector();
-		break;
-	case E4WayDirectionPlayer::Default:
-		DirectionVector = GetActorForwardVector();
-		break;
+		// 캐릭터 Forward 기준 아래 40도 방향 계산
+		FRotator DownRot = DirectionVector.Rotation();
+		DownRot.Pitch -= 45.f; // 아래로 40도
+		FVector TraceDir = DownRot.Vector();
+
+		// 라인트레이스
+		FVector Start = GetActorLocation();
+		FVector End = Start + TraceDir * 2000.f; // 충분히 아래
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+		{
+			// 히트 위치 + 캡슐 반높이
+			float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+			FVector TargetPos = HitResult.Location + FVector(0, 0, CapsuleHalfHeight);
+
+			// Parry 방향 설정
+			ParryDirection = (TargetPos - GetActorLocation()).GetSafeNormal();
+
+			// PeriodDist 계산 (히트 지점까지 거리)
+			PeriodDist = FVector::Dist(GetActorLocation(), TargetPos);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("FlyingPeriod"));
+		//else
+		//{
+		//	// 히트 못하면 기존 Forward
+		//	ParryDirection = DirectionVector;
+		//	PeriodDist = 300.f; // 기본값
+		//}
+
 	}
-	DirectionVector.Z = 0.0f;
-	ParryDirection = DirectionVector.GetSafeNormal();
+	else
+	{
+		// 일반 지상 패링 처리
+		switch (DirectionSkillState)
+		{
+		case E4WayDirectionPlayer::Foward:
+			DirectionVector = GetActorForwardVector();
+			break;
+		case E4WayDirectionPlayer::Back:
+			DirectionVector = -GetActorForwardVector();
+			break;
+		case E4WayDirectionPlayer::Left:
+			DirectionVector = -GetActorRightVector();
+			break;
+		case E4WayDirectionPlayer::Right:
+			DirectionVector = GetActorRightVector();
+			break;
+		case E4WayDirectionPlayer::Default:
+			DirectionVector = GetActorForwardVector();
+			break;
+		}
+		DirectionVector.Z = 0.0f;
+		ParryDirection = DirectionVector.GetSafeNormal();
+		UE_LOG(LogTemp, Warning, TEXT("WalkPeriod"));
+	}
 	IsPeriod = true;
 }
 
@@ -664,7 +741,7 @@ void AC_Player::Tick(float DeltaTime)
 	if (IsPeriod && !bRotate)//보간이끝나고 정면을 바라봤을떄 패링이 진행되도록
 	{
 		SetPeriodInfo();
-		
+
 		remainDist = 0.f;
 		if (PeriodDist < 0.2f)//도착
 		{
@@ -681,6 +758,7 @@ void AC_Player::Tick(float DeltaTime)
 			PeriodDist -= MoveVec.Length();
 			UE_LOG(LogTemp, Warning, TEXT("Period true"));
 		}
+		
 	}
 	if (DownRecive)
 	{
