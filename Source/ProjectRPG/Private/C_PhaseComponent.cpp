@@ -25,8 +25,17 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
 		return;
 
-	if (m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+	if (!m_pMonster || m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+	{
+		// 공격 중이면 예약
+		if (m_pMonster)
+		{
+			m_pMonster->bPendingPhaseChange = true;
+			m_pMonster->fPendingHp = fHp;
+			m_pMonster->fPendingMaxHp = fMaxHp;
+		}
 		return;
+	}
 
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 	
@@ -48,6 +57,8 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 		m_nCurrentPhaseIndex++;
 		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
 		m_onPhaseChange.Broadcast();
+
+		m_pMonster->tryTriggerPhaseChangeOrGimmick();
 		
 	}
 	else

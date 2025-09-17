@@ -60,14 +60,24 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 
 void UC_GimmickComponent::startGimmick()
 {
-
 	if (!m_pMonster || !m_pAnim)
 		return;
 
-	if (!canPlayGimmickMontage())
-		return;
-
 	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
+
+	m_pMonster->stopAi();
+
+	if (!canPlayGimmickMontage())
+	{
+		// 공격 중이면 예약
+		if (m_pMonster->getIsAttacking())
+		{
+			m_pMonster->bPendingGimmickStart = true;
+		}
+		return;
+	}
+
+	
 
 	if (m_pGimmickStartMontage)
 	{
@@ -102,6 +112,7 @@ void UC_GimmickComponent::playMontageWithCallBack(UAnimMontage* pMontage, FName 
 		FScriptDelegate onMontageEndDelegate;
 		onMontageEndDelegate.BindUFunction(this, strFunctionName);
 		m_pAnim->OnMontageEnded.Add(onMontageEndDelegate);
+
 	}
 	else
 	{
@@ -118,6 +129,10 @@ void UC_GimmickComponent::excuteGimmick()
 {
 	m_bGimmickPlaying = true;
 
+	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickExecute);
+
+	m_pAnim->Montage_Play(m_pGimmikPlayMontage);
+
 }
 
 void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -130,20 +145,7 @@ void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool
 		m_pAnim->OnMontageEnded.RemoveAll(this);
 	}
 
-	m_pMonster->SetActorLocation(m_vGimmickPos);
-	m_pMonster->SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
-	m_pMonster->stopAi();
-	//FTimerHandle sGimmickStartHandle;
-	//GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
-	//	FTimerDelegate::CreateLambda([this]()
-	//		{
-	//			
-
-	//			// 위치 이동 (TeleportTo 로 변경 가능)
-	//			
-
-	//		}), 0.5f, false);
-
+	m_pMonster->TeleportTo(m_vGimmickPos, FRotator::ZeroRotator);
 	
 
 	// 기믹 실행으로 넘어감

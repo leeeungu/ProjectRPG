@@ -114,5 +114,5 @@ void UC_StaggerGimmickComponent::endGimmick()
 UC_StaggerGimmickComponent::UC_StaggerGimmickComponent()
 {
 	m_fTriggerHp = 40.f;
-	m_fGimmickTime = 150.f;
+	m_fGimmickTime = 200.f;
 }

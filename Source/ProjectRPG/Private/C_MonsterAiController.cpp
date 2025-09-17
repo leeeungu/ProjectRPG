@@ -56,7 +56,20 @@ void AC_MonsterAiController::OnUnPossess()
 {
 }
 
-void AC_MonsterAiController::restartAi()
+void AC_MonsterAiController::stopAiCon()
+{
+	StopMovement();
+
+	m_pBT = Cast<UBehaviorTreeComponent>(BrainComponent);
+
+	if (m_pBT)
+	{
+		m_pBT->StopTree(EBTStopMode::Safe);
+	}
+
+}
+
+void AC_MonsterAiController::restartAiCon()
 {
 	if (m_pBbAsset && m_pBtAsset)
 	{

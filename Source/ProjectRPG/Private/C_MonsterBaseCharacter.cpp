@@ -36,11 +36,15 @@ void AC_MonsterBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	m_pAiCon = Cast<AC_MonsterAiController>(GetController());
+
 	if (m_eMonsterRank >= E_MonsterRank::Named)
 	{
 		m_pStaggerComp = FindComponentByClass<UC_StaggerComponent>();
 
 		m_pStaggerGimmickComp = FindComponentByClass<UC_StaggerGimmickComponent>();
+
+		m_pPhaseComponent = FindComponentByClass<UC_PhaseComponent>();
 
 
 		if (m_pStaggerGimmickComp)
@@ -90,7 +94,7 @@ void AC_MonsterBaseCharacter::playStaggerMontage()
 
 bool AC_MonsterBaseCharacter::getIsAttacking() const
 {
-	return m_bIsAttacking;
+	return m_eMonsterState == E_MonsterPhaseState::Attacking;
 }
 
 void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
@@ -102,22 +106,19 @@ void AC_MonsterBaseCharacter::takeStaggerEvent(float fStagger)
 
 void AC_MonsterBaseCharacter::stopAi()
 {
-	AAIController* pAiCon = Cast<AAIController>(GetController());
+	m_pAiCon->stopAiCon();
+}
 
-	if (pAiCon)
-	{
-		pAiCon->StopMovement();
-
-		if (UBehaviorTreeComponent* pBtComp = Cast<UBehaviorTreeComponent>(pAiCon->BrainComponent))
-		{
-			pBtComp->StopTree(EBTStopMode::Safe);
-		}
-	}
+void AC_MonsterBaseCharacter::reStartAi()
+{
+	m_pAiCon->restartAiCon();
 }
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
 {
 	AAIController* pAiCon = Cast<AAIController>(GetController());
+
+	setPhaseState(E_MonsterPhaseState::Stagger);
 
 	stopAi();
 
@@ -126,14 +127,14 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 
 void AC_MonsterBaseCharacter::onStaggerRecover()
 {
-	AC_MonsterAiController* pAiCon = Cast<AC_MonsterAiController>(GetController());
-
-	if (pAiCon)
-		pAiCon->restartAi();
+	if (m_pAiCon)
+		reStartAi();
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.15f, m_pStaggerMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+
+	tryTriggerPhaseChangeOrGimmick();
 
 	if (m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
 	{
@@ -244,13 +245,11 @@ int32 AC_MonsterBaseCharacter::selectPatternByWeight(const TArray<int32>& arrCan
 
 void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 {
-	if (m_eMonsterState == E_MonsterPhaseState::Attacking)
+	if (!(m_eMonsterState == E_MonsterPhaseState::Idle))
 		return;
 
 	setPhaseState(E_MonsterPhaseState::Attacking);
-	UE_LOG(C_MonsterBaseCharacte, Error, TEXT("%d"), (int32)m_eMonsterState);
-	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
-		return;
+
 
 	FS_PatternData& sPattern = m_arrPatternList[nPatternIndex];
 
@@ -263,7 +262,7 @@ void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 	PlayAnimMontage(sPattern.pAttackMontage);
 		
 	
-	float fAnimDuration = sPattern.pAttackMontage->GetPlayLength();
+	float fAnimDuration = sPattern.pAttackMontage->GetPlayLength() + 0.1f;
 
 	FTimerHandle sAttackEndHandle;
 	GetWorld()->GetTimerManager().SetTimer(sAttackEndHandle, this,
@@ -292,8 +291,37 @@ float AC_MonsterBaseCharacter::getDistanceToTarget() const
 
 void AC_MonsterBaseCharacter::onAttackEnd()
 {
+	tryTriggerPhaseChangeOrGimmick();
+}
+
+void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
+{
 	setPhaseState(E_MonsterPhaseState::Idle);
-	UE_LOG(C_MonsterBaseCharacte, Error, TEXT("%d"), (int32)m_eMonsterState);
+
+	if (bPendingPhaseChange)
+	{
+		bPendingPhaseChange = false;
+
+		if (m_pPhaseComponent)
+		{
+			m_pPhaseComponent->phaseChange(fPendingHp, fPendingMaxHp);
+
+			return;
+		}
+	}
+
+	// 기믹 예약 처리
+	if (bPendingGimmickStart)
+	{
+		bPendingGimmickStart = false;
+
+		if (m_pStaggerGimmickComp)
+		{
+			m_pStaggerGimmickComp->startGimmick();
+		}
+	}
+
+
 }
 
 

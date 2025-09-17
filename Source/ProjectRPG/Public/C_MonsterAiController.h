@@ -39,7 +39,9 @@ public:
 
 	virtual void OnUnPossess() override;
 
-	void restartAi();
+	void stopAiCon();
+
+	void restartAiCon();
 
 protected:
 	virtual void BeginPlay() override;

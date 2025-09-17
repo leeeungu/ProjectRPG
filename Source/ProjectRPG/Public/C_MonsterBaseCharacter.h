@@ -28,6 +28,7 @@ enum class E_MonsterPhaseState : uint8
 	GimmickReady,
 	GimmickExecute,
 	GimmickEnd,
+	Stagger,
 	Dead
 };
 
@@ -73,6 +74,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter Montage")
 	UAnimMontage* m_pCounterMontage;
 
+	UPROPERTY()
+	class AC_MonsterAiController* m_pAiCon;
+
 	/*
 	* 컴포넌트
 	*/
@@ -85,6 +89,11 @@ private:
 
 	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
+
+	UPROPERTY()
+	class UC_PhaseComponent* m_pPhaseComponent;
+
+	
 
 
 	bool m_bIsAttacking = false;
@@ -106,6 +115,13 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnMosterDied m_onMonsterDied;
 
+	bool bPendingPhaseChange = false;
+
+	float fPendingHp = 0.f;
+	float fPendingMaxHp = 0.f;
+
+	bool bPendingGimmickStart = false;
+
 	
 
 private:
@@ -113,8 +129,6 @@ private:
 
 	void onAttackEnd();
 
-	/*UFUNCTION()
-	void onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted);*/
 
 
 protected:
@@ -127,10 +141,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
+	void reStartAi();
+
+	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
-	/*UFUNCTION()
-	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);*/
+	UFUNCTION(BlueprintCallable)
+	void tryTriggerPhaseChangeOrGimmick();
 
 	UFUNCTION(BlueprintCallable)
 	void setPhaseState(E_MonsterPhaseState eState);
