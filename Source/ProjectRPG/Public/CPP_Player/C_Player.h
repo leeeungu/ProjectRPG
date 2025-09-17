@@ -120,8 +120,6 @@ private:
 	void ComboCountSetting(float DeltaTime);
 
 	//Skill UI_MGR
-	
-
 	UPROPERTY()
 	class UC_PlayerSKillMGR* SkillUiWidget;
 
@@ -185,6 +183,8 @@ public:
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
 	void SetCanMove() { bCanMove = true; }
+	void ForceLandToGround();
+	bool IsLandToGround = true;
 	//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화) 몽타주가끝나야지 호출됨
 	//중간에 몽타주가 선입력으로 끝까지 못가고 다른몽타주로 블랜딩되면 그냥 return시켜져서 해당함수호출이안됨.
 
