@@ -448,4 +448,41 @@ AC_PlayerController::AC_PlayerController()
     m_pQuestManagerComponent2 = CreateDefaultSubobject<UC_QuestManagerComponent>(TEXT("QuestManagerComponent"));
     m_pEquipComponent = CreateDefaultSubobject<UC_EquipComponent>(TEXT("EquipComponent"));
 
+
+    FString arString[8] = {
+        //Script/EnhancedInput.InputAction'/Game/RPG_Player/Input/Actions/Interaction/IA_Interaction.IA_Interaction'
+        TEXT("/Game/RPG_Player/Input/Actions/Interaction/IA_Interaction.IA_Interaction"),
+        // Script / EnhancedInput.InputAction'/Game/RPG_Player/Input/Actions/QuickSlot/IA_QuickSlot.IA_QuickSlot'
+        TEXT("/Game/RPG_Player/Input/Actions/QuickSlot/IA_QuickSlot1.IA_QuickSlot1"),
+        TEXT("/Game/RPG_Player/Input/Actions/QuickSlot/IA_QuickSlot2.IA_QuickSlot2"),
+        TEXT("/Game/RPG_Player/Input/Actions/QuickSlot/IA_QuickSlot3.IA_QuickSlot3"),
+        TEXT("/Game/RPG_Player/Input/Actions/QuickSlot/IA_QuickSlot4.IA_QuickSlot4"),
+        //Script/EnhancedInput.InputAction'/Game/RPG_Player/Input/Actions/Window/IA_InventoryWindow.IA_InventoryWindow'
+        TEXT("/Game/RPG_Player/Input/Actions/Window/IA_InventoryWindow.IA_InventoryWindow"),
+        TEXT("/Game/RPG_Player/Input/Actions/Window/IA_PlayerInfoWindow.IA_PlayerInfoWindow"),
+        TEXT("/Game/RPG_Player/Input/Actions/Window/IA_QuestWindow.IA_QuestWindow"),
+    };
+    UInputAction** arAction[8] = {
+    &m_pInteraction,
+    &m_pQuickSlot1,
+    &m_pQuickSlot2,
+    &m_pQuickSlot3,
+    &m_pQuickSlot4,
+    &m_pInventoryWidget,
+    &m_pPlayerInfoWidget,
+    &m_pQuestWidget
+    };
+
+    for (int i = 0; i < 8; i++)
+    {
+        ConstructorHelpers::FObjectFinder<UInputAction> Action(*arString[i]);
+        if (Action.Succeeded())
+        {
+            *(arAction[i]) = Action.Object;
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("CanFind InputAction index : %d"), i)
+        }
+    }
 }

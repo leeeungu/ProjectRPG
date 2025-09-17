@@ -7,17 +7,19 @@ UC_InteractionArrow::UC_InteractionArrow(const FObjectInitializer& ObjectInitial
 	PrimaryComponentTick.bStartWithTickEnabled= true;
 	SetComponentTickEnabled(true);
 	//Script/Engine.StaticMesh'/Game/Fab/InteractionArrow/SM_InteractionArrow.SM_InteractionArrow'
-	ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("Game/Fab/InteractionArrow/SM_InteractionArrow.SM_InteractionArrow"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("/Game/Fab/InteractionArrow/SM_InteractionArrow.SM_InteractionArrow"));
 	if (Mesh.Succeeded())
 	{
 		SetStaticMesh(Mesh.Object);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to load static mesh at path: %s"), TEXT("Game/Fab/InteractionArrow/SM_InteractionArrow.SM_InteractionArrow"));
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load static mesh at path: %s"), TEXT("/Game/Fab/InteractionArrow/SM_InteractionArrow.SM_InteractionArrow"));
 	}
 	SetCollisionProfileName(TEXT("NoCollision"));
 	SetGenerateOverlapEvents(false);
+	BodyInstance.bLockXRotation = true;
+	BodyInstance.bLockYRotation = true;
 }
 
 void UC_InteractionArrow::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
