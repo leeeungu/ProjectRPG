@@ -13,8 +13,8 @@
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
 #include "../Public/Monster/C_StaggerGimmickComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "../Public/Monster/C_GimmickStartPos.h"
+
+
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
@@ -66,23 +66,21 @@ void AC_MonsterBaseCharacter::BeginPlay()
 			m_pCounterComp->m_onCounterFailed.AddDynamic(this, &AC_MonsterBaseCharacter::onCounterFailed);
 		}
 
-		m_pPhaseComp = FindComponentByClass<UC_PhaseComponent>();
-
 	}
 
 	m_onDead.AddDynamic(this, &AC_MonsterBaseCharacter::onDead);
 
-	TArray<AActor*> arrFound{};
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+}
 
-	if (arrFound.Num() > 0)
-	{
-		AActor* pFoundActor = arrFound[0];
-		FVector vFoundPos = pFoundActor->GetActorLocation();
-		m_vGimmickPos = vFoundPos;
-	}
+void AC_MonsterBaseCharacter::setPhaseState(E_MonsterPhaseState eState)
+{
+	m_eMonsterState = eState;
+}
 
+E_MonsterPhaseState AC_MonsterBaseCharacter::getCurrentState() const
+{
+	return m_eMonsterState;
 }
 
 void AC_MonsterBaseCharacter::playStaggerMontage()
@@ -246,11 +244,11 @@ int32 AC_MonsterBaseCharacter::selectPatternByWeight(const TArray<int32>& arrCan
 
 void AC_MonsterBaseCharacter::playPattern(int32 nPatternIndex)
 {
-	if (m_bIsAttacking)
+	if (m_eMonsterState == E_MonsterPhaseState::Attacking)
 		return;
 
-	m_bIsAttacking = true;
-
+	setPhaseState(E_MonsterPhaseState::Attacking);
+	UE_LOG(C_MonsterBaseCharacte, Error, TEXT("%d"), (int32)m_eMonsterState);
 	if (!m_arrPatternList.IsValidIndex(nPatternIndex))
 		return;
 
@@ -294,106 +292,26 @@ float AC_MonsterBaseCharacter::getDistanceToTarget() const
 
 void AC_MonsterBaseCharacter::onAttackEnd()
 {
-	m_bIsAttacking = false;
+	setPhaseState(E_MonsterPhaseState::Idle);
+	UE_LOG(C_MonsterBaseCharacte, Error, TEXT("%d"), (int32)m_eMonsterState);
 }
 
-FVector AC_MonsterBaseCharacter::getGimmickPos() const
-{
-	return m_vGimmickPos;
-}
-
-void AC_MonsterBaseCharacter::moveToGimmick()
-{
-	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
-
-	if (!pAnim->IsAnyMontagePlaying())
-	{
-		float fMontageDuration = m_pGimmickStartMontage->GetPlayLength();
-		GetMesh()->GetAnimInstance()->Montage_Play(m_pGimmickStartMontage);
-
-		FTimerHandle sGimmickStartHandle;
-		GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
-			FTimerDelegate::CreateLambda([this]()
-				{
-					SetActorLocation(m_vGimmickPos);
-					SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
-					stopAi();
-					m_bIsGimmickReady = true;
-				}), fMontageDuration, false);
-	}
-	else
-	{
-		pAnim->OnMontageEnded.AddDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_GimmickStart);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("AnyMontagePlaying222222"));
-
-	}
-	
-}
-
-void AC_MonsterBaseCharacter::onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted)
-{
-	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_GimmickStart);
-
-	float fMontageDuration = m_pGimmickStartMontage->GetPlayLength();
-	GetMesh()->GetAnimInstance()->Montage_Play(m_pGimmickStartMontage);
-
-	FTimerHandle sGimmickStartHandle;
-	GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
-		FTimerDelegate::CreateLambda([this]()
-			{
-				SetActorLocation(m_vGimmickPos);
-				SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
-				stopAi();
-				m_bIsGimmickReady = true;
-			}), fMontageDuration, false);
-
-}
-
-void AC_MonsterBaseCharacter::startGimmick()
-{
-	UAnimInstance* pAnim = GetMesh()->GetAnimInstance();
-
-	if (pAnim->IsAnyMontagePlaying())
-	{
-		pAnim->OnMontageEnded.AddDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("AnyMontagePlaying!!!!!!!!!!"));
-	}
-	else
-	{
-		moveToGimmick();
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Stagger Gimmick Start!!!!!!!!!!"));
-	}
-
-}
-
-void AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted)
-{
-	GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &AC_MonsterBaseCharacter::onMontageEnded_moveToGimmick);
-
-	moveToGimmick();
-
-}
 
 void AC_MonsterBaseCharacter::playStaggerGimmick()
 {
-	startGimmick();
-
-	m_pStaggerGimmickComp->excuteGimmick();
-	/*
-	* 기믹 전용 무력화 수치와 그로기 시간을 지정
-	*/
-
-	if (m_pStaggerComp && m_pStaggerGimmickComp)
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("playStaggerGimmick Called"));
+	if (m_pStaggerGimmickComp)
 	{
-		m_pStaggerGimmickComp->applyGimmickStagger(m_pStaggerComp);
+		m_pStaggerGimmickComp->startGimmick();
 
 	}
+
 
 	/*
 	* 무력화를 방해시킬 공격
 	*/
 
-	FVector vFowardOffset = GetActorForwardVector() * 500.f;
+	/*FVector vFowardOffset = GetActorForwardVector() * 500.f;
 	FVector vRightOffset = GetActorRightVector() * 500.f;
 	FVector vDecalLocation = vFowardOffset + GetActorLocation();
 	FVector vDecalLocation2 = vRightOffset + GetActorLocation();
@@ -407,7 +325,7 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 
 		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation2,
 			FRotator(-90.f, 0.f, 0.f), 3.f, 800.f);
-	}
+	}*/
 	
 
 	

@@ -3,6 +3,7 @@
 
 #include "Monster/C_StaggerGimmickComponent.h"
 #include "C_StaggerComponent.h"
+#include "C_MonsterBaseCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_StaggerGimmickComponent, Log, All);
 
@@ -66,6 +67,20 @@ void UC_StaggerGimmickComponent::restoreStagger(UC_StaggerComponent* pStaggerCom
 	pStaggerCom->setMode(E_StaggerMode::Normal);
 }
 
+void UC_StaggerGimmickComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (m_pMonster)
+	{
+		m_pStaggerCom = m_pMonster->FindComponentByClass<UC_StaggerComponent>();
+		if (!m_pStaggerCom)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("StaggerComponent not found!"));
+		}
+	}
+}
+
 bool UC_StaggerGimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
 	if (!Super::canGimmickStart(fHp, fMaxHp))
@@ -80,6 +95,10 @@ void UC_StaggerGimmickComponent::excuteGimmick()
 	Super::excuteGimmick();
 
 	UE_LOG(C_StaggerGimmickComponent, Error, TEXT("excute Gimmick!!!!!"));
+
+	applyGimmickStagger(m_pStaggerCom);
+
+
 }
 
 void UC_StaggerGimmickComponent::endGimmick()

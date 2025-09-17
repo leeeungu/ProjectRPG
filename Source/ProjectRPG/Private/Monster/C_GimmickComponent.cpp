@@ -2,9 +2,39 @@
 
 
 #include "Monster/C_GimmickComponent.h"
-
+#include "C_MonsterBaseCharacter.h"
+#include "../Public/Monster/C_GimmickStartPos.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_GimmickGimmickComponent, Log, All);
+
+// Called when the game starts
+void UC_GimmickComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+
+	// ...
+
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
+
+	if (m_pMonster)
+	{
+		m_pAnim = m_pMonster->GetMesh()->GetAnimInstance();
+	}
+
+	TArray<AActor*> arrFound{};
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+
+	if (arrFound.Num() > 0)
+	{
+		AActor* pFoundActor = arrFound[0];
+		FVector vFoundPos = pFoundActor->GetActorLocation();
+		m_vGimmickPos = vFoundPos;
+	}
+
+}
 
 bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
@@ -28,6 +58,28 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	return false;
 }
 
+void UC_GimmickComponent::startGimmick()
+{
+
+	if (!m_pMonster || !m_pAnim)
+		return;
+
+	if (!canPlayGimmickMontage())
+		return;
+
+	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
+
+	if (m_pGimmickStartMontage)
+	{
+		playMontageWithCallBack(m_pGimmickStartMontage, TEXT("onStartGimmickMontageEnded"));
+	}
+	else
+	{
+		onStartGimmickMontageEnded(nullptr, false);
+	}
+
+}
+
 // Sets default values for this component's properties
 UC_GimmickComponent::UC_GimmickComponent()
 {
@@ -39,25 +91,88 @@ UC_GimmickComponent::UC_GimmickComponent()
 }
 
 
-// Called when the game starts
-void UC_GimmickComponent::BeginPlay()
+void UC_GimmickComponent::playMontageWithCallBack(UAnimMontage* pMontage, FName strFunctionName)
 {
-	Super::BeginPlay();
+	if (!m_pAnim || !pMontage)
+		return;
 
-	// ...
-	
+	if (m_pAnim->IsAnyMontagePlaying())
+	{
+		// 몽타주가 끝났을 때 특정 함수 호출
+		FScriptDelegate onMontageEndDelegate;
+		onMontageEndDelegate.BindUFunction(this, strFunctionName);
+		m_pAnim->OnMontageEnded.Add(onMontageEndDelegate);
+	}
+	else
+	{
+		m_pAnim->Montage_Play(pMontage);
+
+		// 바로 콜백 바인딩
+		FScriptDelegate onMontageEndDelegate;
+		onMontageEndDelegate.BindUFunction(this, strFunctionName);
+		m_pAnim->OnMontageEnded.Add(onMontageEndDelegate);
+	}
 }
 
 void UC_GimmickComponent::excuteGimmick()
 {
 	m_bGimmickPlaying = true;
 
+}
 
+void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!m_pMonster)
+		return;
+
+	if (m_pAnim)
+	{
+		m_pAnim->OnMontageEnded.RemoveAll(this);
+	}
+
+	m_pMonster->SetActorLocation(m_vGimmickPos);
+	m_pMonster->SetActorRelativeRotation(FRotator(0.f, 0.f, 0.f));
+	m_pMonster->stopAi();
+	//FTimerHandle sGimmickStartHandle;
+	//GetWorld()->GetTimerManager().SetTimer(sGimmickStartHandle,
+	//	FTimerDelegate::CreateLambda([this]()
+	//		{
+	//			
+
+	//			// 위치 이동 (TeleportTo 로 변경 가능)
+	//			
+
+	//		}), 0.5f, false);
+
+	
+
+	// 기믹 실행으로 넘어감
+	excuteGimmick();
 }
 
 float UC_GimmickComponent::getGimmickTime() const
 {
 	return m_fGimmickTime;
+}
+
+bool UC_GimmickComponent::isMonsterIdle() const
+{
+	if (m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+		return false;
+
+	return true;
+}
+
+bool UC_GimmickComponent::canPlayGimmickMontage() const
+{
+	if (!m_pAnim)
+		return false;
+
+	if (m_pMonster->getIsAttacking())
+		return false;
+
+
+	return isMonsterIdle();
 }
 
 bool UC_GimmickComponent::IsPlayingGimmick()

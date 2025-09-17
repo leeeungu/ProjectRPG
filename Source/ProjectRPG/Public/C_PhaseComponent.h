@@ -8,9 +8,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseChange);
 
-class AC_MonsterBaseCharacter;
-
-
 USTRUCT(BlueprintType)
 struct FS_PhaseData
 {
@@ -32,7 +29,7 @@ private:
 	int32 m_nCurrentPhaseIndex = 0;
 
 	UPROPERTY()
-	AC_MonsterBaseCharacter* m_pMonster;
+	class AC_MonsterBaseCharacter* m_pMonster;
 
 	UPROPERTY()
 	UAnimInstance* m_pAnim;

@@ -18,6 +18,19 @@ enum class E_MonsterRank : uint8
 	Boss	UMETA(DisplayName = "Boss")
 };
 
+UENUM(BlueprintType)
+enum class E_MonsterPhaseState : uint8
+{
+	Idle,
+	Attacking,
+	PhaseChanging,
+	PhaseChanged,
+	GimmickReady,
+	GimmickExecute,
+	GimmickEnd,
+	Dead
+};
+
 USTRUCT(BlueprintType)
 struct FS_PatternData
 {
@@ -60,20 +73,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter Montage")
 	UAnimMontage* m_pCounterMontage;
 
-	UPROPERTY(EditAnywhere, Category = "Gimmick Montage")
-	UAnimMontage* m_pGimmickStartMontage;
-
-	UPROPERTY(EditAnywhere, Category = "Gimmick Montage")
-	UAnimMontage* m_pGimmikPlayMontage;
-
-
-	/*
-	* 나이아가라
-	*/
-
-	UPROPERTY(EditAnywhere, Category = "Niagara")
-	UNiagaraSystem* m_pDangerPlace;
-
 	/*
 	* 컴포넌트
 	*/
@@ -85,20 +84,11 @@ private:
 	class UC_StaggerComponent* m_pStaggerComp;
 
 	UPROPERTY()
-	class UC_PhaseComponent* m_pPhaseComp;
-
-	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
 
 
-
-	UPROPERTY(EditAnywhere)
-	FVector m_vGimmickPos;
-
 	bool m_bIsAttacking = false;
-	bool m_bIsGimmickReady = false;
 
-	
 
 	FTimerHandle m_timeHandle;
 
@@ -109,6 +99,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Rank")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster State")
+	E_MonsterPhaseState m_eMonsterState = E_MonsterPhaseState::Idle;
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnMosterDied m_onMonsterDied;
+
 	
 
 private:
@@ -116,16 +113,13 @@ private:
 
 	void onAttackEnd();
 
-	UFUNCTION()
-	void onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted);
+	/*UFUNCTION()
+	void onMontageEnded_GimmickStart(UAnimMontage* Montage, bool bInterrupted);*/
 
 
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(BlueprintAssignable)
-	FOnMosterDied m_onMonsterDied;
 
 public:
 	AC_MonsterBaseCharacter();
@@ -135,8 +129,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
-	UFUNCTION()
-	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);
+	/*UFUNCTION()
+	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);*/
+
+	UFUNCTION(BlueprintCallable)
+	void setPhaseState(E_MonsterPhaseState eState);
+
+	UFUNCTION(BlueprintCallable)
+	E_MonsterPhaseState getCurrentState() const;
 
 	/*
 	* 전투 관련
@@ -191,20 +191,15 @@ public:
 	/*
 	*  기믹 관련
 	*/
-	FVector getGimmickPos() const;
 
-	void moveToGimmick();
+	//void moveToGimmick();
 
-	void startGimmick();
+	//void startGimmick();
 
 	UFUNCTION()
 	void playStaggerGimmick();
 
-
 	UFUNCTION()
 	void endStaggerGimmick();
-
-	
-
 	
 };

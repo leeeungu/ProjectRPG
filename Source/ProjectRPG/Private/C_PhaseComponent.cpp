@@ -25,6 +25,9 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
 		return;
 
+	if (m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+		return;
+
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 	
 
@@ -35,15 +38,16 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 		if (!m_pAnim)
 			return;
 
-		if (!m_pAnim->IsAnyMontagePlaying())
-		{
-			m_nCurrentPhaseIndex++;
-			m_onPhaseChange.Broadcast();
-		}
-		else
+		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanging);
+
+		if (m_pAnim->IsAnyMontagePlaying())
 		{
 			m_pAnim->OnMontageEnded.AddDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
+			return;	
 		}
+		m_nCurrentPhaseIndex++;
+		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
+		m_onPhaseChange.Broadcast();
 		
 	}
 	else
@@ -58,7 +62,13 @@ void UC_PhaseComponent::OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool b
 		m_pAnim->OnMontageEnded.RemoveDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
 	}
 
+	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
+
+	if (Montage == sPhase.pPhaseMontage)
+		return;
+
 	m_nCurrentPhaseIndex++;
+	m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
 	m_onPhaseChange.Broadcast();
 	
 }

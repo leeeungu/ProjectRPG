@@ -25,6 +25,9 @@ private:
 	float m_fSavedBreak{};
 	float m_fSavedCurStagger{};
 
+	UPROPERTY()
+	class UC_StaggerComponent* m_pStaggerCom;
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnStaggerGimmickStart m_onStaggerGimmickStart;
@@ -36,8 +39,9 @@ private:
 	virtual void endGimmick() override;
 
 protected:
+	virtual void BeginPlay() override;
+
 	virtual bool canGimmickStart(float fHp, float fMaxHp) override;
-	
 
 public:
 	UC_StaggerGimmickComponent();
