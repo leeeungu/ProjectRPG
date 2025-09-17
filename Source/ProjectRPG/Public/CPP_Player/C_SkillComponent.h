@@ -13,6 +13,32 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillCooldownStarted, FName, Skil
 
 struct FSkillData;
 
+UENUM(BlueprintType)
+enum class ESkillCollisionShapeType : uint8
+{
+	Sphere,
+	Box,
+	Capsule
+};
+
+USTRUCT(BlueprintType)
+struct FSkillCollisionData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESkillCollisionShapeType ShapeType = ESkillCollisionShapeType::Sphere;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Dimensions = FVector(100.f); // Sphere: X=radius, Box: XYZ, Capsule: X=radius, Z=half-height
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Duration = 0.1f; // 콜리전 유지 시간
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bApplyDamage = true;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_SkillComponent : public UActorComponent
 {
@@ -22,7 +48,8 @@ private:
 	TMap<FName, FSkillData> SkillMap;
 	TMap<FName, float> SkillCooldownEndTime;
 	FName CurrentSkillName = {};
-	void SpawnSkillCollision(const FSkillCollisionData& data, bool IsGetCounter);
+	void SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter);
+
 public:	
 	// Sets default values for this component's properties
 	UC_SkillComponent();
@@ -39,6 +66,9 @@ public:
 	//스킬쿨타임 반환함수
 	UFUNCTION(BlueprintCallable)
 	float GetskillCoolTime(FName skill_Key);
+	//컬리젼 데이터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+	TArray<FSkillCollisionData> SkillCollisionDataArray;
 
 protected:
 	// Called when the game starts
@@ -49,7 +79,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void InitializeComponent() override;
 	void UsingSkill(FName skill_Key, E4WayDirection Direction = E4WayDirection::Default);
-	void HandleSkillHit();
+	void HandleSkillHit(int32 SkillIndex, FVector SkillLocation, FRotator SkillRotation);
 
 	bool IsCooldownReady(FName SkillName) const;
 	void StartCooldown(FName SkillName);

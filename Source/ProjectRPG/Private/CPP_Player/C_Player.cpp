@@ -62,7 +62,7 @@ void AC_Player::SetEquipMode(bool IsEquip)
 {
 	IsEquipMode = IsEquip;
 	AttachWeaponToSocket(IsEquipMode);
-	UE_LOG(LogTemp, Warning, TEXT("EquipReady"));
+	AttachDualWeaponToSocket(IsEquipMode);
 }
 
 FName AC_Player::SetPlainAttack()
@@ -71,8 +71,7 @@ FName AC_Player::SetPlainAttack()
 	{
 	case 0: m_nComboCount = 1; return FName("PA_01");
 	case 1: m_nComboCount = 2; return FName("PA_02");
-	case 2: m_nComboCount = 3; return FName("PA_03");
-	case 3: m_nComboCount = 0; return FName("PA_04");
+	case 2: m_nComboCount = 0; return FName("PA_03");
 	default:
 		m_nComboCount = 0;
 		return FName("PA_01");

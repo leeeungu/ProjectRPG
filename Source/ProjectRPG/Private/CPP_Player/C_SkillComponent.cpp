@@ -9,23 +9,26 @@
 #include "GameFramework/Character.h"
 #include "C_GameAlertSubsystem.h"
 
-void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, bool IsGetCounter)
+void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter)
 {
-	FVector SpawnLocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorRotation().RotateVector(data.RelativeOffset);
-	FQuat Rotation = GetOwner()->GetActorQuat();
+	FVector SpawnLocation = skillLocation;
+	FQuat SpawnQuat = skillRotation.Quaternion();
 
 	FCollisionShape CollisionShape;
-	switch (data.ShapeType)
+	switch (CollisionData.ShapeType)
 	{
 	case ESkillCollisionShapeType::Sphere:
-		CollisionShape = FCollisionShape::MakeSphere(data.Dimensions.X);
+		CollisionShape = FCollisionShape::MakeSphere(CollisionData.Dimensions.X);
 		break;
 	case ESkillCollisionShapeType::Box:
-		CollisionShape = FCollisionShape::MakeBox(data.Dimensions);
+		CollisionShape = FCollisionShape::MakeBox(CollisionData.Dimensions * 0.5f);
 		break;
 	case ESkillCollisionShapeType::Capsule:
-		CollisionShape = FCollisionShape::MakeCapsule(data.Dimensions.X, data.Dimensions.Z);
+		CollisionShape = FCollisionShape::MakeCapsule(CollisionData.Dimensions.X, CollisionData.Dimensions.Z);
 		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Unknown Collision ShapeType"));
+		return;
 	}
 
 	// 데미지 적용 로직 예시
@@ -34,24 +37,22 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 		HitResults,
 		SpawnLocation,
 		SpawnLocation,
-		Rotation,
+		SpawnQuat,
 		ECC_Pawn,
 		CollisionShape
 	);
 
 #ifdef DEBUG_DRAW
-	switch (data.ShapeType)
+	switch (CollisionData.ShapeType)
 	{
 	case ESkillCollisionShapeType::Sphere:
-		DrawDebugSphere(GetWorld(), SpawnLocation, data.Dimensions.X, 16, FColor::Green, false, 2.f);
+		DrawDebugSphere(GetWorld(), SpawnLocation, CollisionData.Dimensions.X, 16, FColor::Green, false, 2.f);
 		break;
-
 	case ESkillCollisionShapeType::Box:
-		DrawDebugBox(GetWorld(), SpawnLocation, data.Dimensions * 0.5f, Rotation, FColor::Blue, false, 2.f);
+		DrawDebugBox(GetWorld(), SpawnLocation, CollisionData.Dimensions * 0.5f, SpawnQuat, FColor::Blue, false, 2.f);
 		break;
-
 	case ESkillCollisionShapeType::Capsule:
-		DrawDebugCapsule(GetWorld(), SpawnLocation, data.Dimensions.Z, data.Dimensions.X, Rotation, FColor::Red, false, 2.f);
+		DrawDebugCapsule(GetWorld(), SpawnLocation, CollisionData.Dimensions.Z, CollisionData.Dimensions.X, SpawnQuat, FColor::Red, false, 2.f);
 		break;
 	}
 #endif
@@ -89,11 +90,7 @@ UC_SkillComponent::UC_SkillComponent()
 	PlainAttack01.SkillName = "PA_01";
 	PlainAttack01.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack01.AttackPowerMultiplier = 200.f;
-	PlainAttack01.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
-	PlainAttack01.CollisionData.Dimensions = FVector(100.f, 100.f, 100.f);
-	PlainAttack01.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
-	PlainAttack01.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA1obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_1_Montage.Spear_Combo04_1_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA1obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain01_Montage.Dual_Plain01_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack01.DirectionMontages.Add(E4WayDirection::Default, PA1obj.Object);
 	SkillMap.Add(PlainAttack01.SkillName, PlainAttack01);
 
@@ -101,11 +98,7 @@ UC_SkillComponent::UC_SkillComponent()
 	PlainAttack02.SkillName = "PA_02";
 	PlainAttack02.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack02.AttackPowerMultiplier = 200.f;
-	PlainAttack02.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
-	PlainAttack02.CollisionData.Dimensions = FVector(70.f, 70.f, 200.f);
-	PlainAttack02.CollisionData.RelativeOffset = FVector::ForwardVector * 60.f;
-	PlainAttack02.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA2obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_2_Montage.Spear_Combo04_2_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA2obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain02_Montage.Dual_Plain02_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack02.DirectionMontages.Add(E4WayDirection::Default, PA2obj.Object);
 	SkillMap.Add(PlainAttack02.SkillName, PlainAttack02);
 
@@ -113,35 +106,15 @@ UC_SkillComponent::UC_SkillComponent()
 	PlainAttack03.SkillName = "PA_03";
 	PlainAttack03.Cooldown = 0.0f;//테스트용 0초
 	PlainAttack03.AttackPowerMultiplier = 200.f;
-	PlainAttack03.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
-	PlainAttack03.CollisionData.Dimensions = FVector(300.f, 100.f, 100.f);
-	PlainAttack03.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
-	PlainAttack03.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA3obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_3_Montage.Spear_Combo04_3_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA3obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain03_Montage.Dual_Plain03_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack03.DirectionMontages.Add(E4WayDirection::Default, PA3obj.Object);
 	SkillMap.Add(PlainAttack03.SkillName, PlainAttack03);
-
-	FSkillData PlainAttack04{};
-	PlainAttack04.SkillName = "PA_04";
-	PlainAttack04.Cooldown = 0.0f;//테스트용 0초
-	PlainAttack04.AttackPowerMultiplier = 200.f;
-	PlainAttack04.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
-	PlainAttack04.CollisionData.Dimensions = FVector(100.f, 100.f, 50.f);
-	PlainAttack04.CollisionData.RelativeOffset = FVector::ForwardVector * 150.f;
-	PlainAttack04.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA4obj(TEXT("/Game/RPG_Hero_Animation/SpearComboAttack/Spear_Combo04_4_Montage.Spear_Combo04_4_Montage"));
-	if (PA1obj.Succeeded()) PlainAttack04.DirectionMontages.Add(E4WayDirection::Default, PA4obj.Object);
-	SkillMap.Add(PlainAttack04.SkillName, PlainAttack04);
 
 	//Q스킬
 	FSkillData SkillNum01{};
 	SkillNum01.SkillName = "S_01";
 	SkillNum01.Cooldown = 0.0f;//테스트용 0초
 	SkillNum01.AttackPowerMultiplier = 200.f;
-	SkillNum01.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
-	SkillNum01.CollisionData.Dimensions = FVector(100.f, 100.f, 500.f);
-	SkillNum01.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
-	SkillNum01.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill01_Montage.Dual_Skill01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
@@ -150,10 +123,6 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum02.SkillName = "S_02";
 	SkillNum02.Cooldown = 0.0f;
 	SkillNum02.AttackPowerMultiplier = 200.f;
-	SkillNum02.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
-	SkillNum02.CollisionData.Dimensions = FVector(400.f, 400.f, 300.f);
-	SkillNum02.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
-	SkillNum02.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill02_Montage.Dual_Skill02_Montage"));
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
@@ -170,10 +139,6 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum04.SkillName = "S_04";
 	SkillNum04.Cooldown = 5.0f;
 	SkillNum04.AttackPowerMultiplier = 200.f;
-	SkillNum04.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
-	SkillNum04.CollisionData.Dimensions = FVector(250.f, 250.f, 150.f);
-	SkillNum04.CollisionData.RelativeOffset = FVector::ForwardVector * 50.f;
-	SkillNum04.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
@@ -199,10 +164,6 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum07.SkillName = "S_07";
 	SkillNum07.Cooldown = 0.0f;
 	SkillNum07.AttackPowerMultiplier = 200.f;
-	SkillNum07.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
-	SkillNum07.CollisionData.Dimensions = FVector(700.f, 100.f, 100.f);
-	SkillNum07.CollisionData.RelativeOffset = FVector::ForwardVector * 250.f;
-	SkillNum07.CollisionData.Duration = 0.3f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
@@ -223,12 +184,11 @@ UC_SkillComponent::UC_SkillComponent()
 	DownPering.SkillName = "Period";
 	DownPering.Cooldown = 5.0f;
 	DownPering.AttackPowerMultiplier = 0.f;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryDefault(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryF(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_F_Montage.SpearPeriod_D_F_Montage"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryB(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_B_Montage.SpearPeriod_D_B_Montage"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryL(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_L_Montage.SpearPeriod_D_L_Montage"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryR(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Down/SpearPeriod_D_R_Montage.SpearPeriod_D_R_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryDefault(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Dash_Montage.Dual_Dash_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryF(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_F_Montage.Dual_Period_F_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryB(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_B_Montage.Dual_Period_B_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryL(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_L_Montage.Dual_Period_L_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryR(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_R_Montage.Dual_Period_R_Montage"));
 	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Default, DownParryDefault.Object);
 	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Forward, DownParryF.Object);
 	if (DownParryB.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Back, DownParryB.Object);
@@ -242,10 +202,6 @@ UC_SkillComponent::UC_SkillComponent()
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 0.0f;
 	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
-	ChargingSkill_Start.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
-	ChargingSkill_Start.CollisionData.Dimensions = FVector(800.f, 100.f, 50.f);
-	ChargingSkill_Start.CollisionData.RelativeOffset = FVector::ForwardVector * 300.f;
-	ChargingSkill_Start.CollisionData.Duration = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill08_Montage.Dual_Skill08_Montage"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
@@ -285,6 +241,19 @@ UC_SkillComponent::UC_SkillComponent()
 		ChargingSkill_Complete.SkillMontage = Chargingobj_CP.Object;
 	}
 	SkillMap.Add(ChargingSkill_Complete.SkillName, ChargingSkill_Complete);
+
+	//Collision
+	FSkillCollisionData Sphere_A{};
+	Sphere_A.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_A.Dimensions = FVector(100.f, 100.f, 50.f);
+	Sphere_A.Duration = 1.f;
+	SkillCollisionDataArray.Add(Sphere_A);//0번
+
+	FSkillCollisionData Box_A{};
+	Box_A.ShapeType = ESkillCollisionShapeType::Box;
+	Box_A.Dimensions = FVector(200.f, 500.f, 200.f);
+	Box_A.Duration = 1.f;
+	SkillCollisionDataArray.Add(Box_A);//1번
 }
 
 
@@ -372,17 +341,25 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 	}
 }
 
-void UC_SkillComponent::HandleSkillHit()//애님노티파이(SkillHit)호출용
+void UC_SkillComponent::HandleSkillHit(int32 SkillIndex, FVector SkillLocation, FRotator SkillRotation)//애님노티파이(SkillHit)호출용
 {
 	UE_LOG(LogTemp, Warning, TEXT("SetCollision"));
-	const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
-	if (!SkillData)
+	//유효인덱스 값 검사
+	if (!SkillCollisionDataArray.IsValidIndex(SkillIndex))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NonePlayingSkill"));
+		UE_LOG(LogTemp, Warning, TEXT("Invalid SkillIndex %d"), SkillIndex);
 		return;
 	}
-	const FSkillCollisionData& CollisionData = SkillData->CollisionData;//스킬데이터의 컬리젼데이터를 참조하는 래퍼런스생성.
-	SpawnSkillCollision(CollisionData, SkillData->Counter);
+	const FSkillCollisionData& CollisionData = SkillCollisionDataArray[SkillIndex];
+	SpawnSkillCollision(CollisionData, SkillLocation, SkillRotation, false);
+	//const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
+	//if (!SkillData)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("NonePlayingSkill"));
+	//	return;
+	//}
+	//const FSkillCollisionData& CollisionData = SkillData->CollisionData;//스킬데이터의 컬리젼데이터를 참조하는 래퍼런스생성.
+	//SpawnSkillCollision(CollisionData, SkillData->Counter);
 
 }
 

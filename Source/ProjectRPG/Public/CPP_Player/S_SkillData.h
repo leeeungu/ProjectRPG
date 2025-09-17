@@ -8,13 +8,7 @@
 /**
  * 
  */
-UENUM(BlueprintType)
-enum class ESkillCollisionShapeType : uint8
-{
-    Sphere,
-    Box,
-    Capsule
-};
+
 
 UENUM(BlueprintType)
 enum class E4WayDirection : uint8
@@ -26,26 +20,6 @@ enum class E4WayDirection : uint8
     Default
 };
 
-USTRUCT(BlueprintType)
-struct FSkillCollisionData
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    ESkillCollisionShapeType ShapeType = ESkillCollisionShapeType::Sphere;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector Dimensions = FVector(100.f); // Sphere: X=radius, Box: XYZ, Capsule: X=radius, Z=half-height
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector RelativeOffset = FVector::ForwardVector * 200.f; // 캐릭터 기준 전방 200cm
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Duration = 0.1f; // 콜리전 유지 시간
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bApplyDamage = true;
-};
 
 USTRUCT(BlueprintType)
 struct FSkillData
@@ -76,7 +50,5 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     bool Counter = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
-    FSkillCollisionData CollisionData;
 
 };

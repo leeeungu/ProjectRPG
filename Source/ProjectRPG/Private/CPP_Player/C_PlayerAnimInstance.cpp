@@ -89,7 +89,7 @@ void UC_PlayerAnimInstance::NativeInitializeAnimation()
     OnRequestJumpSection.AddDynamic(this, &UC_PlayerAnimInstance::HandleJumpSection);//지금은 플레이어에서 직접호출하지만 컴포넌트로 옮겨야함 그래야 구조깔끔
     if (UnEquipMontage == nullptr)
     {
-        UnEquipMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Game/RPG_Hero_Animation/SpearUnequip_Montage.SpearUnequip_Montage"));
+        UnEquipMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Unequip_Montage.Dual_Unequip_Montage"));
         if (UnEquipMontage == nullptr)
         {
             UE_LOG(LogTemp, Warning, TEXT("Failed to load SpearUnequip_Montage in NativeInitializeAnimation"));
