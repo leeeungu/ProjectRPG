@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CPP_Player/C_SkillComponent.h"
@@ -7,6 +7,7 @@
 #include "C_MonsterBaseCharacter.h"
 #include "C_Basecharacter.h"
 #include "GameFramework/Character.h"
+#include "C_GameAlertSubsystem.h"
 
 void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, bool IsGetCounter)
 {
@@ -27,7 +28,7 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 		break;
 	}
 
-	// µ¥¹ÌÁö Àû¿ë ·ÎÁ÷ ¿¹½Ã
+	// ë°ë¯¸ì§€ ì ìš© ë¡œì§ ì˜ˆì‹œ
 	TArray<FHitResult> HitResults;
 	bool bHit = GetWorld()->SweepMultiByChannel(
 		HitResults,
@@ -54,7 +55,7 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 		break;
 	}
 #endif
-	//ºí·Ï?, ¿À¹ö·¦? 
+	//ë¸”ë¡?, ì˜¤ë²„ë©? 
 	if (bHit)
 	{
 		//get owner
@@ -64,11 +65,11 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 			if (HitActor && HitActor != GetOwner())
 			{
 				HitActor->takeDamageEvent(100);
-	          //takedamgeÈ£Ãâ, ³Ñ°ÜÁÙ µ¥¹ÌÁö °è»êÇØ¼­ ´ã¾Æ¼­ º¸³¿.
-	          //ÇÔ¼ö°¡ È£ÃâµÇ¸é ÀÌ µ¥¹ÌÁö¸¦ ¸Å°³º¯¼ö·Î ºê·ÎµåÄ³½ºÆ®ÇØ¼­ ¸ó½ºÅÍÀÇ receiveÇÔ¼öÈ£Ãâ
-	          //receive°¡ ºÒ¸®¸é ¹ÙÀÎµùµÈ ÀÚÃ¼ ÇÔ¼ö·Î µé¾î°¡¼­ µ¥¹ÌÁö¸¦ HP·ÎºÎÅÍ ±ïÀ½
+	          //takedamgeí˜¸ì¶œ, ë„˜ê²¨ì¤„ ë°ë¯¸ì§€ ê³„ì‚°í•´ì„œ ë‹´ì•„ì„œ ë³´ëƒ„.
+	          //í•¨ìˆ˜ê°€ í˜¸ì¶œë˜ë©´ ì´ ë°ë¯¸ì§€ë¥¼ ë§¤ê°œë³€ìˆ˜ë¡œ ë¸Œë¡œë“œìºìŠ¤íŠ¸í•´ì„œ ëª¬ìŠ¤í„°ì˜ receiveí•¨ìˆ˜í˜¸ì¶œ
+	          //receiveê°€ ë¶ˆë¦¬ë©´ ë°”ì¸ë”©ëœ ìì²´ í•¨ìˆ˜ë¡œ ë“¤ì–´ê°€ì„œ ë°ë¯¸ì§€ë¥¼ HPë¡œë¶€í„° ê¹ìŒ
 			}
-			//Ä«¿îÅÍ½ºÅ³¾²¸é Å©·¡½¬³²
+			//ì¹´ìš´í„°ìŠ¤í‚¬ì“°ë©´ í¬ë˜ì‰¬ë‚¨
 			/*if (IsGetCounter)
 			{
 				AC_MonsterBaseCharacter* BossMonster = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
@@ -83,10 +84,10 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& data, boo
 UC_SkillComponent::UC_SkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	//ÆòÅ¸
+	//í‰íƒ€
 	FSkillData PlainAttack01{};
 	PlainAttack01.SkillName = "PA_01";
-	PlainAttack01.Cooldown = 0.0f;//Å×½ºÆ®¿ë 0ÃÊ
+	PlainAttack01.Cooldown = 0.0f;//í…ŒìŠ¤íŠ¸ìš© 0ì´ˆ
 	PlainAttack01.AttackPowerMultiplier = 200.f;
 	PlainAttack01.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
 	PlainAttack01.CollisionData.Dimensions = FVector(100.f, 100.f, 100.f);
@@ -98,7 +99,7 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData PlainAttack02{};
 	PlainAttack02.SkillName = "PA_02";
-	PlainAttack02.Cooldown = 0.0f;//Å×½ºÆ®¿ë 0ÃÊ
+	PlainAttack02.Cooldown = 0.0f;//í…ŒìŠ¤íŠ¸ìš© 0ì´ˆ
 	PlainAttack02.AttackPowerMultiplier = 200.f;
 	PlainAttack02.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
 	PlainAttack02.CollisionData.Dimensions = FVector(70.f, 70.f, 200.f);
@@ -110,7 +111,7 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData PlainAttack03{};
 	PlainAttack03.SkillName = "PA_03";
-	PlainAttack03.Cooldown = 0.0f;//Å×½ºÆ®¿ë 0ÃÊ
+	PlainAttack03.Cooldown = 0.0f;//í…ŒìŠ¤íŠ¸ìš© 0ì´ˆ
 	PlainAttack03.AttackPowerMultiplier = 200.f;
 	PlainAttack03.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
 	PlainAttack03.CollisionData.Dimensions = FVector(300.f, 100.f, 100.f);
@@ -122,7 +123,7 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData PlainAttack04{};
 	PlainAttack04.SkillName = "PA_04";
-	PlainAttack04.Cooldown = 0.0f;//Å×½ºÆ®¿ë 0ÃÊ
+	PlainAttack04.Cooldown = 0.0f;//í…ŒìŠ¤íŠ¸ìš© 0ì´ˆ
 	PlainAttack04.AttackPowerMultiplier = 200.f;
 	PlainAttack04.CollisionData.ShapeType = ESkillCollisionShapeType::Sphere;
 	PlainAttack04.CollisionData.Dimensions = FVector(100.f, 100.f, 50.f);
@@ -132,10 +133,10 @@ UC_SkillComponent::UC_SkillComponent()
 	if (PA1obj.Succeeded()) PlainAttack04.DirectionMontages.Add(E4WayDirection::Default, PA4obj.Object);
 	SkillMap.Add(PlainAttack04.SkillName, PlainAttack04);
 
-	//Q½ºÅ³
+	//QìŠ¤í‚¬
 	FSkillData SkillNum01{};
 	SkillNum01.SkillName = "S_01";
-	SkillNum01.Cooldown = 0.0f;//Å×½ºÆ®¿ë 0ÃÊ
+	SkillNum01.Cooldown = 0.0f;//í…ŒìŠ¤íŠ¸ìš© 0ì´ˆ
 	SkillNum01.AttackPowerMultiplier = 200.f;
 	SkillNum01.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
 	SkillNum01.CollisionData.Dimensions = FVector(100.f, 100.f, 500.f);
@@ -206,7 +207,7 @@ UC_SkillComponent::UC_SkillComponent()
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
 
-	//ÆĞ¸µ
+	//íŒ¨ë§
 	//FSkillData Pering;
 	//Pering.SkillName = "1Period";
 	//Pering.Cooldown = 5.0f;
@@ -216,8 +217,8 @@ UC_SkillComponent::UC_SkillComponent()
 	//{
 	//	Pering.SkillMontage = Peringobj.Object;
 	//}
-	//SkillMap.Add(Pering.SkillName, Pering);//map¹è¿­0¹ø¿¡ key´Â skill_01ÀÓ Áï ÀÌ ÀÌ¸§À¸·Î Testskill1¿¡Á¢±Ù°¡´É
-	//´Ù¿îÆĞ¸µ
+	//SkillMap.Add(Pering.SkillName, Pering);//mapë°°ì—´0ë²ˆì— keyëŠ” skill_01ì„ ì¦‰ ì´ ì´ë¦„ìœ¼ë¡œ Testskill1ì—ì ‘ê·¼ê°€ëŠ¥
+	//ë‹¤ìš´íŒ¨ë§
 	FSkillData DownPering{};
 	DownPering.SkillName = "Period";
 	DownPering.Cooldown = 5.0f;
@@ -236,22 +237,22 @@ UC_SkillComponent::UC_SkillComponent()
 
 	SkillMap.Add(DownPering.SkillName, DownPering);
 
-	//FÂ÷Â¡½ºÅ³(start)
+	//Fì°¨ì§•ìŠ¤í‚¬(start)
 	FSkillData ChargingSkill_Start{};
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 0.0f;
-	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//½ºÅ¸Æ®¶ó¼­ ¾øÀ½ ¹èÀ²ÀÌ
+	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//ìŠ¤íƒ€íŠ¸ë¼ì„œ ì—†ìŒ ë°°ìœ¨ì´
 	ChargingSkill_Start.CollisionData.ShapeType = ESkillCollisionShapeType::Box;
 	ChargingSkill_Start.CollisionData.Dimensions = FVector(800.f, 100.f, 50.f);
 	ChargingSkill_Start.CollisionData.RelativeOffset = FVector::ForwardVector * 300.f;
 	ChargingSkill_Start.CollisionData.Duration = 2.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill08_Montage.Dual_Skill08_Montage"));//º¯°æ
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill08_Montage.Dual_Skill08_Montage"));//ë³€ê²½
 	if (Chargingobj_S.Succeeded())
 	{
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
 	}
 	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);
-	//FÂ÷Â¡½ºÅ³(Hold)
+	//Fì°¨ì§•ìŠ¤í‚¬(Hold)
 	FSkillData ChargingSkill_Hold{};
 	ChargingSkill_Hold.SkillName = "ChargingHoldingSkill";
 	ChargingSkill_Hold.Cooldown = 0.0f;
@@ -262,22 +263,22 @@ UC_SkillComponent::UC_SkillComponent()
 		ChargingSkill_Hold.SkillMontage = Chargingobj_H.Object;
 	}
 	SkillMap.Add(ChargingSkill_Hold.SkillName, ChargingSkill_Hold);
-	//FÂ÷Â¡½ºÅ³(Cancel)
+	//Fì°¨ì§•ìŠ¤í‚¬(Cancel)
 	FSkillData ChargingSkill_Cancel{};
 	ChargingSkill_Cancel.SkillName = "ChargingEndCancelSkill";
 	ChargingSkill_Cancel.Cooldown = 0.0f;
-	ChargingSkill_Cancel.AttackPowerMultiplier = 100.f;//¸·Å¸ + ½ÇÆĞ ¹èÀ²
+	ChargingSkill_Cancel.AttackPowerMultiplier = 100.f;//ë§‰íƒ€ + ì‹¤íŒ¨ ë°°ìœ¨
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CC(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndCancel.SpearSkill_08_EndCancel"));
 	if (Chargingobj_CC.Succeeded())
 	{
 		ChargingSkill_Cancel.SkillMontage = Chargingobj_CC.Object;
 	}
 	SkillMap.Add(ChargingSkill_Cancel.SkillName, ChargingSkill_Cancel);
-	//FÂ÷Â¡½ºÅ³(Complete)
+	//Fì°¨ì§•ìŠ¤í‚¬(Complete)
 	FSkillData ChargingSkill_Complete{};
 	ChargingSkill_Complete.SkillName = "ChargingEndCompleteSkill";
 	ChargingSkill_Complete.Cooldown = 0.0f;
-	ChargingSkill_Complete.AttackPowerMultiplier = 200.f;//¸·Å¸ + ¼º°ø ¹èÀ²
+	ChargingSkill_Complete.AttackPowerMultiplier = 200.f;//ë§‰íƒ€ + ì„±ê³µ ë°°ìœ¨
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CP(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndComplete.SpearSkill_08_EndComplete"));
 	if (Chargingobj_CP.Succeeded())
 	{
@@ -338,12 +339,12 @@ void UC_SkillComponent::InitializeComponent()
 
 void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 {
-	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//½ºÅ³¸Ê¿¡ °°ÀºÀÌ¸§À»°¡Áø°ÔÀÖ´Ù¸é ªO¾Æ¼­ Skillº¯¼ö¿¡ ÀúÀå->ÀÌ°Ô ¼º°øÇÏ¸é true
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//ìŠ¤í‚¬ë§µì— ê°™ì€ì´ë¦„ì„ê°€ì§„ê²Œìˆë‹¤ë©´ ì°¿ì•„ì„œ Skillë³€ìˆ˜ì— ì €ì¥->ì´ê²Œ ì„±ê³µí•˜ë©´ true
 	{
-		UAnimMontage* MontageToPlay = nullptr;//½ÇÇàÇÒ¸ùÅ¸ÁÖ ¹é¾÷¿ë
+		UAnimMontage* MontageToPlay = nullptr;//ì‹¤í–‰í• ëª½íƒ€ì£¼ ë°±ì—…ìš©
 		CurrentSkillName = skill_Key;
-		// 4¹æÇâ Àü¿ë ½ºÅ³ÀÌ¶ó¸é
-		if (Skill->DirectionMontages.Num() > 0)//SkillÀÌ ¹æÇâÀ» °¡Áö°íÀÖ´Â µ¥ÀÌÅÍ¶ó¸é?
+		// 4ë°©í–¥ ì „ìš© ìŠ¤í‚¬ì´ë¼ë©´
+		if (Skill->DirectionMontages.Num() > 0)//Skillì´ ë°©í–¥ì„ ê°€ì§€ê³ ìˆëŠ” ë°ì´í„°ë¼ë©´?
 		{
 			UE_LOG(LogTemp, Warning, TEXT("4wayMontage"));
 			if (UAnimMontage*const* FoundMontage = Skill->DirectionMontages.Find(Direction))
@@ -357,21 +358,21 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 		}
 		else
 		{
-			// ±âÁ¸ ½ºÅ³ (¹æÇâ ¾ø´Â)
+			// ê¸°ì¡´ ìŠ¤í‚¬ (ë°©í–¥ ì—†ëŠ”)
 			MontageToPlay = Skill->SkillMontage;
 		}
-		//½ºÅ³Àº Á¸ÀçÇÏÁö¸¸, `SkillMontage`°¡ ¼³Á¤µÇ¾î ÀÖÁö ¾ÊÀº °æ¿ì ½ÇÇà Áß´Ü
-		//Áï, **¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ¼³Á¤µÇÁö ¾ÊÀº ½ºÅ³Àº ½ÇÇàÇÏÁö ¾ÊÀ½**
+		//ìŠ¤í‚¬ì€ ì¡´ì¬í•˜ì§€ë§Œ, `SkillMontage`ê°€ ì„¤ì •ë˜ì–´ ìˆì§€ ì•Šì€ ê²½ìš° ì‹¤í–‰ ì¤‘ë‹¨
+		//ì¦‰, **ì• ë‹ˆë©”ì´ì…˜ì´ ì„¤ì •ë˜ì§€ ì•Šì€ ìŠ¤í‚¬ì€ ì‹¤í–‰í•˜ì§€ ì•ŠìŒ**
 		if (!MontageToPlay)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("NoMontage"));
 			return;
 		}
-		OnSkillMontageRequested.Broadcast(MontageToPlay);//¸ùÅ¸ÁÖ½ÇÇàÆÄÆ®
+		OnSkillMontageRequested.Broadcast(MontageToPlay);//ëª½íƒ€ì£¼ì‹¤í–‰íŒŒíŠ¸
 	}
 }
 
-void UC_SkillComponent::HandleSkillHit()//¾Ö´Ô³ëÆ¼ÆÄÀÌ(SkillHit)È£Ãâ¿ë
+void UC_SkillComponent::HandleSkillHit()//ì• ë‹˜ë…¸í‹°íŒŒì´(SkillHit)í˜¸ì¶œìš©
 {
 	UE_LOG(LogTemp, Warning, TEXT("SetCollision"));
 	const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
@@ -380,18 +381,18 @@ void UC_SkillComponent::HandleSkillHit()//¾Ö´Ô³ëÆ¼ÆÄÀÌ(SkillHit)È£Ãâ¿ë
 		UE_LOG(LogTemp, Warning, TEXT("NonePlayingSkill"));
 		return;
 	}
-	const FSkillCollisionData& CollisionData = SkillData->CollisionData;//½ºÅ³µ¥ÀÌÅÍÀÇ ÄÃ¸®Á¯µ¥ÀÌÅÍ¸¦ ÂüÁ¶ÇÏ´Â ·¡ÆÛ·±½º»ı¼º.
+	const FSkillCollisionData& CollisionData = SkillData->CollisionData;//ìŠ¤í‚¬ë°ì´í„°ì˜ ì»¬ë¦¬ì ¼ë°ì´í„°ë¥¼ ì°¸ì¡°í•˜ëŠ” ë˜í¼ëŸ°ìŠ¤ìƒì„±.
 	SpawnSkillCollision(CollisionData, SkillData->Counter);
 
 }
 
 bool UC_SkillComponent::IsCooldownReady(FName SkillName) const
 {
-	//SkillÄğÅ¸ÀÓ ¸Ê¿¡ ÇØ´ç ½ºÅ³µ¥ÀÌÅÍ°¡¾øÀ¸¸é ¾ÆÁ÷ ´­¸®Áö¾Ê¾ÒÀ¸´Ï ture·Î ¸®ÅÏ
+	//Skillì¿¨íƒ€ì„ ë§µì— í•´ë‹¹ ìŠ¤í‚¬ë°ì´í„°ê°€ì—†ìœ¼ë©´ ì•„ì§ ëˆŒë¦¬ì§€ì•Šì•˜ìœ¼ë‹ˆ tureë¡œ ë¦¬í„´
 	if (!SkillCooldownEndTime.Contains(SkillName)) return true;
 	return GetWorld()->GetTimeSeconds() >= SkillCooldownEndTime[SkillName];
-	//ÇöÁ¦½Ã°£ >= endTime = false¸é ¿£µåÅ¸ÀÓÀÌ ´õÅ©¹Ç·Î ¾ÆÁ÷ ÄğÅ¸ÀÓ¾ÈÁö³²
-	//ÇöÁ¦½Ã°£ >= endTime = true¸é ¿£µåÅ¸ÀÓº¸´Ù ÇöÁ¦½Ã°£ÀÌ Áö³µÀ¸¹Ç·Î ÄğÅ¸ÀÓ³¡³²
+	//í˜„ì œì‹œê°„ >= endTime = falseë©´ ì—”ë“œíƒ€ì„ì´ ë”í¬ë¯€ë¡œ ì•„ì§ ì¿¨íƒ€ì„ì•ˆì§€ë‚¨
+	//í˜„ì œì‹œê°„ >= endTime = trueë©´ ì—”ë“œíƒ€ì„ë³´ë‹¤ í˜„ì œì‹œê°„ì´ ì§€ë‚¬ìœ¼ë¯€ë¡œ ì¿¨íƒ€ì„ëë‚¨
 }
 
 void UC_SkillComponent::StartCooldown(FName SkillName)
@@ -406,20 +407,32 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 		UE_LOG(LogTemp, Error, TEXT("StartCooldown: GetWorld() is nullptr!"));
 		return;
 	}
-	// ½ºÅ³ µ¥ÀÌÅÍ¿¡¼­ ÄğÅ¸ÀÓ °ª °¡Á®¿À±â
+	// ìŠ¤í‚¬ ë°ì´í„°ì—ì„œ ì¿¨íƒ€ì„ ê°’ ê°€ì ¸ì˜¤ê¸°
 	float CooldownDuration = SkillMap[SkillName].Cooldown;
-	//********½ºÅ³ÄğÅ¸ÀÓÀÌ ½ÃÀÛµÇ´Â½ÃÁ¡ÀÌ ÀÌºÎºĞ -> ¿©±â¼­ µ¨¸®°ÔÀÌÆ®·Î ¾Ë·ÁÁÜ ½ºÅ³Å°¸¦ °¡Á®¿Í¼­,***********
-	// ÄğÅ¸ÀÓ Á¾·á ½Ã°£ °è»ê ÈÄ TMap¿¡ ±â·Ï
+	//********ìŠ¤í‚¬ì¿¨íƒ€ì„ì´ ì‹œì‘ë˜ëŠ”ì‹œì ì´ ì´ë¶€ë¶„ -> ì—¬ê¸°ì„œ ë¸ë¦¬ê²Œì´íŠ¸ë¡œ ì•Œë ¤ì¤Œ ìŠ¤í‚¬í‚¤ë¥¼ ê°€ì ¸ì™€ì„œ,***********
+	// ì¿¨íƒ€ì„ ì¢…ë£Œ ì‹œê°„ ê³„ì‚° í›„ TMapì— ê¸°ë¡
 	float EndTime = GetWorld()->GetTimeSeconds() + CooldownDuration;
 	SkillCooldownEndTime.Add(SkillName, EndTime);
 
-	// UI µ¿±âÈ­¸¦ À§ÇÑ ºê·ÎµåÄ³½ºÆ®
+	// UI ë™ê¸°í™”ë¥¼ ìœ„í•œ ë¸Œë¡œë“œìºìŠ¤íŠ¸
 	OnSkillCooldownStarted.Broadcast(SkillName);
 }
 
 float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const
 {
-	if (!SkillCooldownEndTime.Contains(SkillName)) return 0.0f;//ÄğÅ¸ÀÓ¸®ÅÏ(´­¸°ÀûÀÌ¾øÀ¸¸é)
-	return FMath::Max(SkillCooldownEndTime[SkillName] - GetWorld()->GetTimeSeconds(), 0.0f);//³²ÀºÄğÅ¸ÀÓ ¸®ÅÏ
+	if (!SkillCooldownEndTime.Contains(SkillName)) return 0.0f;//ì¿¨íƒ€ì„ë¦¬í„´(ëˆŒë¦°ì ì´ì—†ìœ¼ë©´)
+	return FMath::Max(SkillCooldownEndTime[SkillName] - GetWorld()->GetTimeSeconds(), 0.0f);//ë‚¨ì€ì¿¨íƒ€ì„ ë¦¬í„´
+}
+
+void UC_SkillComponent::skillCoolTimeTriggered(FName SkillName)
+{
+	float Remain = GetRemainingCooldown(SkillName);
+	UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), Remain);
+	FS_GameAlertSubsystemConfig MessageConfig{};
+	MessageConfig.fDefaultAlertDuration = 0.3f;
+	MessageConfig.strDefaultAlertMessage = FText::FromString( TEXT("ìŠ¤í‚¬ì´ ì¿¨íƒ€ì„ ì¤‘ ì…ë‹ˆë‹¤."));
+	UC_GameAlertSubsystem::pushAlertMessage_Cpp(MessageConfig);
+	//if (m_OnSkillCoolTimeTriggered.IsBound())
+	//	m_OnSkillCoolTimeTriggered.Broadcast(SkillName, Remain);
 }
 

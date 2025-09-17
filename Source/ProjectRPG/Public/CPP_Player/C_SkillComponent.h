@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,13 +30,13 @@ public:
 	FOnSkillMontageRequested OnSkillMontageRequested;
 	UPROPERTY(BlueprintAssignable, Category = "Skill")
 	FOnSkillCooldownStarted OnSkillCooldownStarted;
-	//½ºÅ³ÄÄÆ÷³ÍÆ®¿¡¼­ ¾Ö´ÔÀÎ½ºÅÏ½º ÂüÁ¶¿ë Æ÷ÀÎÅÍ
+	//ìŠ¤í‚¬ì»´í¬ë„ŒíŠ¸ì—ì„œ ì• ë‹˜ì¸ìŠ¤í„´ìŠ¤ ì°¸ì¡°ìš© í¬ì¸í„°
 	UPROPERTY()
     class UC_PlayerAnimInstance* CachedAnimInstance;
 	UFUNCTION()
 	void RequestJumpToSection(FName SectionName);
 
-	//½ºÅ³ÄğÅ¸ÀÓ ¹İÈ¯ÇÔ¼ö
+	//ìŠ¤í‚¬ì¿¨íƒ€ì„ ë°˜í™˜í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable)
 	float GetskillCoolTime(FName skill_Key);
 
@@ -55,5 +55,5 @@ public:
 	void StartCooldown(FName SkillName);
 	float GetRemainingCooldown(FName SkillName) const;
 
-		
+	void skillCoolTimeTriggered(FName SkillName);
 };

@@ -260,8 +260,7 @@ void AC_Player::RunningSystemManager()
 		else
 		{
 			// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
-			float remainTime = m_skillCom->GetRemainingCooldown(PriorityInputData.ActionName);
-			UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+			m_skillCom->skillCoolTimeTriggered(PriorityInputData.ActionName);
 			return;
 		}
 		
@@ -271,6 +270,8 @@ void AC_Player::RunningSystemManager()
 		FInputActionData CurrentInputData{};//비어있는 초기값.
 		if (m_inputQueue->GetLastInputData(CurrentInputData))//인풋에 뭔가 들어온다면
 		{
+			PriorityInputData.TargetPoint;
+
 			m_inputQueue->ClearQueueList();//그냥 마지막인덱스를 가져온거기때문에 끝나고 다시 큐에서 가져옴 그렇기떄문에 가져오고나서 리스트를비워줘야 끝나고 자동으로 가져오지않음.
 			switch (CurrentInputData.InputType)
 			{
@@ -303,8 +304,7 @@ void AC_Player::RunningSystemManager()
 				else
 				{
 					// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
-					float remainTime = m_skillCom->GetRemainingCooldown(CurrentInputData.ActionName);
-					UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+					m_skillCom->skillCoolTimeTriggered(PriorityInputData.ActionName);
 					return;
 				}
 				break;
@@ -337,8 +337,7 @@ void AC_Player::RunningSystemManager()
 				else
 				{
 					// 쿨타임 중  입력 무시 or UI에 알려줄 수 있음
-					float remainTime = m_skillCom->GetRemainingCooldown(CurrentInputData.ActionName);
-					UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), remainTime);
+					m_skillCom->skillCoolTimeTriggered(PriorityInputData.ActionName);
 					return;
 				}
 				break;
