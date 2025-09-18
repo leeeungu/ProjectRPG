@@ -61,8 +61,6 @@ private:
 	UPROPERTY()
 	TScriptInterface<II_PlayerToAnimInstance> myAnimInterface;
 	
-	UPROPERTY(VisibleAnywhere, Category = "PlayerInfoCaptureComponent", meta = (DisplayName = "PlayerInfoCaptureComponent"), BlueprintGetter = getPlayerInfoCaptureComponent)
-	USceneCaptureComponent2D* m_pPlayerInfoCaptureComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "InteractionDetectComponent", meta = (DisplayName = "InteractionDetectComponent"), BlueprintGetter = getInteractionDetectComponent)
 	UC_InteractionDetectorComponent* m_pInteractionDetectComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
@@ -208,8 +206,8 @@ public:
 	
 	void SetPeriodInfo();
 
-	UFUNCTION(BlueprintPure, Category = "PlayerInfoCaptureComponent")
-	USceneCaptureComponent2D*  getPlayerInfoCaptureComponent() { return m_pPlayerInfoCaptureComponent; }
+	//UFUNCTION(BlueprintPure, Category = "PlayerInfoCaptureComponent")
+	//USceneCaptureComponent2D*  getPlayerInfoCaptureComponent() { return m_pPlayerInfoCaptureComponent; }
 	UFUNCTION(BlueprintPure, Category = "InteractionDetectComponent")
 	UC_InteractionDetectorComponent* getInteractionDetectComponent() { return m_pInteractionDetectComponent; }
 	UFUNCTION(BlueprintPure, Category = "TravelComponent")

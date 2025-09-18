@@ -17,7 +17,6 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
-#include "Engine/TextureRenderTarget2D.h"
 #include "NiagaraComponent.h"
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
 
@@ -146,8 +145,8 @@ void AC_Player::HandleChangeRunningState()
 
 void AC_Player::deadPlayer()
 {
-	if (GetController())
-		GetController()->SetActorTickEnabled(false);
+	//if (GetController())
+	//	GetController()->SetActorTickEnabled(false);
 	SetActorTickEnabled(false);
 	SetCanBeDamaged(false);
 	SetRunningSystemState(ERunningSystemState::Busy);
@@ -157,16 +156,19 @@ void AC_Player::deadPlayer()
 	{
 		m_onDead.Broadcast();
 	}
+	ClearMoveState();
 }
 
 void AC_Player::restartPlayer()
 {
-	if (GetController())
-		GetController()->SetActorTickEnabled(true);
+	//if (GetController())
+	//	GetController()->SetActorTickEnabled(true);
 	SetCanBeDamaged(true);
 	SetActorTickEnabled(true);
+	ClearMoveState();
 	SetRunningSystemState(ERunningSystemState::Idle);
 	setHp(getMaxHp());
+	//OnMoveToPosPlayer(GetActorLocation());
 }
 
 void AC_Player::CalMoveData()
@@ -590,20 +592,20 @@ AC_Player::AC_Player()
 	m_camCom->SetupAttachment(m_springCom);
 	m_camCom->bUsePawnControlRotation = false;
 	{
-		m_pPlayerInfoCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PlayerInfoCaptureComponent"));
+		//m_pPlayerInfoCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PlayerInfoCaptureComponent"));
+		//m_pPlayerInfoCaptureComponent->SetupAttachment(GetRootComponent());
+		//m_pPlayerInfoCaptureComponent->SetRelativeLocation(FVector{ 180,0,20 });
+		//m_pPlayerInfoCaptureComponent->SetRelativeRotation(FRotator{ -4,180,0 });
+		//m_pPlayerInfoCaptureComponent->FOVAngle = 75.0f;
 		m_pInteractionDetectComponent = CreateDefaultSubobject<UC_InteractionDetectorComponent>(TEXT("InteractionDetectComponent"));
 		m_pTravelComponent = CreateDefaultSubobject<UC_TravelManagerComponent>(TEXT("TravelComponent"));
-		m_pPlayerInfoCaptureComponent->SetupAttachment(GetRootComponent());
-		m_pPlayerInfoCaptureComponent->SetRelativeLocation(FVector{ 180,0,20 });
-		m_pPlayerInfoCaptureComponent->SetRelativeRotation(FRotator{ -4,180,0 });
-		m_pPlayerInfoCaptureComponent->FOVAngle = 75.0f;
 		//Script/Engine.TextureRenderTarget2D'/Game/UI/PlayerInfo/Texture/T_PlayerInfo.T_PlayerInfo'
-		static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RenderTarget(TEXT("/Game/UI/PlayerInfo/Texture/T_PlayerInfo.T_PlayerInfo"));
-		if (RenderTarget.Succeeded())
-		{
-			m_pPlayerInfoCaptureComponent->TextureTarget = RenderTarget.Object;
-		}
-		m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+		//static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RenderTarget(TEXT("/Game/UI/PlayerInfo/Texture/T_PlayerInfo.T_PlayerInfo"));
+		//if (RenderTarget.Succeeded())
+		//{
+		//	m_pPlayerInfoCaptureComponent->TextureTarget = RenderTarget.Object;
+		//}
+		//m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
 	}
 	
@@ -612,9 +614,7 @@ AC_Player::AC_Player()
 void AC_Player::BeginPlay()
 {
 	Super::BeginPlay();
-	m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
-	
-
+	//m_pPlayerInfoCaptureComponent->ShowOnlyActorComponents(this);
 	
 	if (USkeletalMeshComponent* myMesh = GetMesh())
 	{

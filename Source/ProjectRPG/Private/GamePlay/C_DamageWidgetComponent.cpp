@@ -31,7 +31,7 @@ void UC_DamageWidgetComponent::changeHp(float fPre, float fCurrent)
 	{
 		if (fPre - fCurrent > 0)
 			m_pDamageWidget->drawDamage(fPre - fCurrent);
-		else 
+		else if (fCurrent - fPre > 0)
 			m_pDamageWidget->drawDamage(fCurrent - fPre , FColor::Green);
 	}
 }
