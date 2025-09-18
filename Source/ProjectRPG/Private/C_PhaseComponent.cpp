@@ -16,6 +16,10 @@ UC_PhaseComponent::UC_PhaseComponent()
 
 void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 {
+	UE_LOG(LogTemp, Warning, TEXT("PhaseChange called! Hp=%f, MaxHp=%f, Index=%d, State=%d"),
+		fHp, fMaxHp, m_nCurrentPhaseIndex,
+		m_pMonster ? (int32)m_pMonster->getCurrentState() : -1);
+
 	if (fHp <= 0 || fMaxHp <= 0)
 		return;
 
@@ -33,9 +37,15 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 			m_pMonster->bPendingPhaseChange = true;
 			m_pMonster->fPendingHp = fHp;
 			m_pMonster->fPendingMaxHp = fMaxHp;
+
+			UE_LOG(LogTemp, Warning, TEXT("PhaseChange called! fPendingHp=%f, fPendingMaxHp=%f, Index=%d, State=%d"),
+				m_pMonster->fPendingHp, m_pMonster->fPendingMaxHp, m_nCurrentPhaseIndex,
+				m_pMonster ? (int32)m_pMonster->getCurrentState() : -1);
 		}
 		return;
 	}
+
+	
 
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 	
@@ -81,6 +91,8 @@ void UC_PhaseComponent::OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool b
 	m_nCurrentPhaseIndex++;
 	m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
 	m_onPhaseChange.Broadcast();
+
+	m_pMonster->tryTriggerPhaseChangeOrGimmick();
 	
 }
 

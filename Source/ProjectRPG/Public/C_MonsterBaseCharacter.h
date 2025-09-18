@@ -210,6 +210,13 @@ public:
 	virtual void Destroyed() override;
 
 	/*
+	* 페이즈 관련
+	*/
+
+	UFUNCTION()
+	void onPhaseChangeFinished();
+
+	/*
 	*  기믹 관련
 	*/
 

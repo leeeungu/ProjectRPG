@@ -65,7 +65,8 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 			AC_BaseCharacter* HitActor = Cast<AC_BaseCharacter>(Hit.GetActor());
 			if (HitActor && HitActor != GetOwner())
 			{
-				HitActor->takeDamageEvent(100);
+				float Amount = DamageAmount(CurrentSkillName);
+				HitActor->takeDamageEvent(Amount);
 	          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
 	          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
 	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음
@@ -81,6 +82,22 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 	}
 }
 
+float UC_SkillComponent::DamageAmount(FName SkillName)
+{
+	float Amount{};
+	if (const FSkillData* Skill = SkillMap.Find(SkillName))
+	{
+		// Owner 가져오기
+		if (AC_BaseCharacter* OwnerChar = Cast<AC_BaseCharacter>(GetOwner()))
+		{
+			// 캐릭터 클래스에 GetAtk() 함수가 있다고 가정
+			float BaseAtk = OwnerChar->getAtk();
+			Amount = BaseAtk * Skill->AttackPowerMultiplier;
+		}
+	}
+	return Amount;
+}
+
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
 {
@@ -89,7 +106,7 @@ UC_SkillComponent::UC_SkillComponent()
 	FSkillData PlainAttack01{};
 	PlainAttack01.SkillName = "PA_01";
 	PlainAttack01.Cooldown = 0.0f;//테스트용 0초
-	PlainAttack01.AttackPowerMultiplier = 200.f;
+	PlainAttack01.AttackPowerMultiplier = 2.1f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA1obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain01_Montage.Dual_Plain01_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack01.DirectionMontages.Add(E4WayDirection::Default, PA1obj.Object);
 	SkillMap.Add(PlainAttack01.SkillName, PlainAttack01);
@@ -97,7 +114,7 @@ UC_SkillComponent::UC_SkillComponent()
 	FSkillData PlainAttack02{};
 	PlainAttack02.SkillName = "PA_02";
 	PlainAttack02.Cooldown = 0.0f;//테스트용 0초
-	PlainAttack02.AttackPowerMultiplier = 200.f;
+	PlainAttack02.AttackPowerMultiplier = 2.1f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA2obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain02_Montage.Dual_Plain02_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack02.DirectionMontages.Add(E4WayDirection::Default, PA2obj.Object);
 	SkillMap.Add(PlainAttack02.SkillName, PlainAttack02);
@@ -105,7 +122,7 @@ UC_SkillComponent::UC_SkillComponent()
 	FSkillData PlainAttack03{};
 	PlainAttack03.SkillName = "PA_03";
 	PlainAttack03.Cooldown = 0.0f;//테스트용 0초
-	PlainAttack03.AttackPowerMultiplier = 200.f;
+	PlainAttack03.AttackPowerMultiplier = 2.1f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA3obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain03_Montage.Dual_Plain03_Montage"));
 	if (PA1obj.Succeeded()) PlainAttack03.DirectionMontages.Add(E4WayDirection::Default, PA3obj.Object);
 	SkillMap.Add(PlainAttack03.SkillName, PlainAttack03);
@@ -113,16 +130,16 @@ UC_SkillComponent::UC_SkillComponent()
 	//Q스킬
 	FSkillData SkillNum01{};
 	SkillNum01.SkillName = "S_01";
-	SkillNum01.Cooldown = 0.0f;//테스트용 0초
-	SkillNum01.AttackPowerMultiplier = 200.f;
+	SkillNum01.Cooldown = 2.0f;//테스트용 0초
+	SkillNum01.AttackPowerMultiplier = 3.3f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill01_Montage.Dual_Skill01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
 	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
 
 	FSkillData SkillNum02{};
 	SkillNum02.SkillName = "S_02";
-	SkillNum02.Cooldown = 0.0f;
-	SkillNum02.AttackPowerMultiplier = 200.f;
+	SkillNum02.Cooldown = 5.0f;
+	SkillNum02.AttackPowerMultiplier = 4.5f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill02_Montage.Dual_Skill02_Montage"));
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
@@ -130,7 +147,7 @@ UC_SkillComponent::UC_SkillComponent()
 	FSkillData SkillNum03{};
 	SkillNum03.SkillName = "S_03";
 	SkillNum03.Cooldown = 5.0f;
-	SkillNum03.AttackPowerMultiplier = 200.f;
+	SkillNum03.AttackPowerMultiplier = 5.6f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill03_Montage.Dual_Skill03_Montage"));
 	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
 	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
@@ -138,23 +155,23 @@ UC_SkillComponent::UC_SkillComponent()
 	FSkillData SkillNum04{};
 	SkillNum04.SkillName = "S_04";
 	SkillNum04.Cooldown = 5.0f;
-	SkillNum04.AttackPowerMultiplier = 200.f;
+	SkillNum04.AttackPowerMultiplier = 7.2f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
 
 	FSkillData SkillNum05{};
 	SkillNum05.SkillName = "S_05";
-	SkillNum05.Cooldown = 5.0f;
-	SkillNum05.AttackPowerMultiplier = 200.f;
+	SkillNum05.Cooldown = 3.0f;
+	SkillNum05.AttackPowerMultiplier = 1.5f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill05_Montage.Dual_Skill05_Montage"));
 	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
 	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
 
 	FSkillData SkillNum06{};
 	SkillNum06.SkillName = "S_06";
-	SkillNum06.Cooldown = 5.0f;
-	SkillNum06.AttackPowerMultiplier = 200.f;
+	SkillNum06.Cooldown = 4.0f;
+	SkillNum06.AttackPowerMultiplier = 1.5f;
 	SkillNum06.Counter = true;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill06_Montage.Dual_Skill06_Montage"));
 	if (skill6obj.Succeeded()) SkillNum06.DirectionMontages.Add(E4WayDirection::Default, skill6obj.Object);
@@ -162,27 +179,15 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData SkillNum07{};
 	SkillNum07.SkillName = "S_07";
-	SkillNum07.Cooldown = 0.0f;
-	SkillNum07.AttackPowerMultiplier = 200.f;
+	SkillNum07.Cooldown = 4.0f;
+	SkillNum07.AttackPowerMultiplier = 6.4f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
 
-	//패링
-	//FSkillData Pering;
-	//Pering.SkillName = "1Period";
-	//Pering.Cooldown = 5.0f;
-	//Pering.AttackPowerMultiplier = 0.f;
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
-	//if (skill1obj.Succeeded())
-	//{
-	//	Pering.SkillMontage = Peringobj.Object;
-	//}
-	//SkillMap.Add(Pering.SkillName, Pering);//map배열0번에 key는 skill_01임 즉 이 이름으로 Testskill1에접근가능
-	//다운패링
 	FSkillData DownPering{};
 	DownPering.SkillName = "Period";
-	DownPering.Cooldown = 5.0f;
+	DownPering.Cooldown = 3.0f;
 	DownPering.AttackPowerMultiplier = 0.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryDefault(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Dash_Montage.Dual_Dash_Montage"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryF(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_F_Montage.Dual_Period_F_Montage"));
@@ -200,60 +205,58 @@ UC_SkillComponent::UC_SkillComponent()
 	//F차징스킬(start)
 	FSkillData ChargingSkill_Start{};
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
-	ChargingSkill_Start.Cooldown = 0.0f;
-	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//스타트라서 없음 배율이
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill08_Montage.Dual_Skill08_Montage"));//변경
+	ChargingSkill_Start.Cooldown = 8.0f;
+	ChargingSkill_Start.AttackPowerMultiplier = 10.0f;//스타트라서 없음 배율이
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_SKill08_02_Montage.Dual_SKill08_02_Montage"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
 	}
 	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);
-	//F차징스킬(Hold)
-	FSkillData ChargingSkill_Hold{};
-	ChargingSkill_Hold.SkillName = "ChargingHoldingSkill";
-	ChargingSkill_Hold.Cooldown = 0.0f;
-	ChargingSkill_Hold.AttackPowerMultiplier = 0.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_H(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Hold.SpearSkill_08_Hold"));
-	if (Chargingobj_H.Succeeded())
-	{
-		ChargingSkill_Hold.SkillMontage = Chargingobj_H.Object;
-	}
-	SkillMap.Add(ChargingSkill_Hold.SkillName, ChargingSkill_Hold);
-	//F차징스킬(Cancel)
-	FSkillData ChargingSkill_Cancel{};
-	ChargingSkill_Cancel.SkillName = "ChargingEndCancelSkill";
-	ChargingSkill_Cancel.Cooldown = 0.0f;
-	ChargingSkill_Cancel.AttackPowerMultiplier = 100.f;//막타 + 실패 배율
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CC(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndCancel.SpearSkill_08_EndCancel"));
-	if (Chargingobj_CC.Succeeded())
-	{
-		ChargingSkill_Cancel.SkillMontage = Chargingobj_CC.Object;
-	}
-	SkillMap.Add(ChargingSkill_Cancel.SkillName, ChargingSkill_Cancel);
-	//F차징스킬(Complete)
-	FSkillData ChargingSkill_Complete{};
-	ChargingSkill_Complete.SkillName = "ChargingEndCompleteSkill";
-	ChargingSkill_Complete.Cooldown = 0.0f;
-	ChargingSkill_Complete.AttackPowerMultiplier = 200.f;//막타 + 성공 배율
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CP(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndComplete.SpearSkill_08_EndComplete"));
-	if (Chargingobj_CP.Succeeded())
-	{
-		ChargingSkill_Complete.SkillMontage = Chargingobj_CP.Object;
-	}
-	SkillMap.Add(ChargingSkill_Complete.SkillName, ChargingSkill_Complete);
-
+	
 	//Collision
 	FSkillCollisionData Sphere_A{};
 	Sphere_A.ShapeType = ESkillCollisionShapeType::Sphere;
-	Sphere_A.Dimensions = FVector(100.f, 100.f, 50.f);
-	Sphere_A.Duration = 1.f;
+	Sphere_A.Dimensions = FVector(200.f, 200.f, 50.f);
+	Sphere_A.Duration = 0.5f;
 	SkillCollisionDataArray.Add(Sphere_A);//0번
+
+	//Collision
+	FSkillCollisionData Sphere_B{};
+	Sphere_B.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_B.Dimensions = FVector(400.f, 400.f, 50.f);
+	Sphere_B.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Sphere_B);
 
 	FSkillCollisionData Box_A{};
 	Box_A.ShapeType = ESkillCollisionShapeType::Box;
-	Box_A.Dimensions = FVector(200.f, 500.f, 200.f);
-	Box_A.Duration = 1.f;
-	SkillCollisionDataArray.Add(Box_A);//1번
+	Box_A.Dimensions = FVector(500.f, 400.f, 100.f);
+	Box_A.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_A);
+
+	FSkillCollisionData Box_B{};
+	Box_B.ShapeType = ESkillCollisionShapeType::Box;
+	Box_B.Dimensions = FVector(700.f, 600.f, 100.f);
+	Box_B.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_B);
+
+	FSkillCollisionData Box_C{};
+	Box_C.ShapeType = ESkillCollisionShapeType::Box;
+	Box_C.Dimensions = FVector(300.f, 300.f, 600.f);
+	Box_C.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_C);
+
+	FSkillCollisionData Sphere_C{};
+	Sphere_C.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_C.Dimensions = FVector(600.f, 600.f, 50.f);
+	Sphere_C.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Sphere_C);
+
+	FSkillCollisionData Box_D{};
+	Box_D.ShapeType = ESkillCollisionShapeType::Box;
+	Box_D.Dimensions = FVector(800.f, 700.f, 300.f);
+	Box_D.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_D);
 }
 
 

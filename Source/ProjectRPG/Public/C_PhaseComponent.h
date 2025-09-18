@@ -7,6 +7,7 @@
 #include "C_PhaseComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseChange);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseFinished);
 
 USTRUCT(BlueprintType)
 struct FS_PhaseData
@@ -38,6 +39,9 @@ private:
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Phase")
 	FOnPhaseChange m_onPhaseChange;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Phase")
+	FOnPhaseFinished m_onPhaseFinished;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phase")
 	TArray<FS_PhaseData> m_arrPhase;
