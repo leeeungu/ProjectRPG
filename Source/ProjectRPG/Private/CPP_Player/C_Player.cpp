@@ -120,8 +120,15 @@ void AC_Player::OnMonsterDownAttack(const FHitResult& Hit)
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
 {
 	setHp(getHp() - fDamage);
+	if (getHp() <= 0)
+	{
+		deadPlayer();
+	}
 	return false;
 }
+//float NextHp = getHp() - fDamage;
+//if (NextHp <= 0.0f)
+//	fDamage = getHp();
 
 void AC_Player::HandleChangeRunningState()
 {
@@ -135,6 +142,31 @@ void AC_Player::HandleChangeRunningState()
 		myAnimInterface->SetDownPeriodState(false);
 	}
 	
+}
+
+void AC_Player::deadPlayer()
+{
+	if (GetController())
+		GetController()->SetActorTickEnabled(false);
+	SetActorTickEnabled(false);
+	SetCanBeDamaged(false);
+	SetRunningSystemState(ERunningSystemState::Busy);
+	if (getHp() >= 0.1f)
+		setHp(0);
+	if(m_onDead.IsBound())
+	{
+		m_onDead.Broadcast();
+	}
+}
+
+void AC_Player::restartPlayer()
+{
+	if (GetController())
+		GetController()->SetActorTickEnabled(true);
+	SetCanBeDamaged(true);
+	SetActorTickEnabled(true);
+	SetRunningSystemState(ERunningSystemState::Idle);
+	setHp(getMaxHp());
 }
 
 void AC_Player::CalMoveData()

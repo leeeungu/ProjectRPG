@@ -152,6 +152,11 @@ public:
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();
+
+	UFUNCTION(BlueprintCallable)
+	void deadPlayer();
+	UFUNCTION(BlueprintCallable)
+	void restartPlayer();
 private:
 	void CalMoveData();
 	void RunningSystemManager();
