@@ -50,6 +50,11 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 		m_pPhaseComponent = FindComponentByClass<UC_PhaseComponent>();
 
+		if (m_pPhaseComponent)
+		{
+			m_pPhaseComponent->m_onPhaseFinished.AddDynamic(this, &AC_MonsterBaseCharacter::onPhaseChangeFinished);
+		}
+
 
 		if (m_pStaggerGimmickComp)
 		{
@@ -134,13 +139,16 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	if (m_pAiCon)
 		reStartAi();
 
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.15f, m_pStaggerMontage);
 
-	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
 
 	tryTriggerPhaseChangeOrGimmick();
 
-	if (m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
+	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+
+	
+
+	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute && m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
 	{
 		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
 		
@@ -295,12 +303,12 @@ float AC_MonsterBaseCharacter::getDistanceToTarget() const
 
 void AC_MonsterBaseCharacter::onAttackEnd()
 {
+	setPhaseState(E_MonsterPhaseState::Idle);
 	tryTriggerPhaseChangeOrGimmick();
 }
 
 void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 {
-	setPhaseState(E_MonsterPhaseState::Idle);
 
 	if (bPendingPhaseChange)
 	{
@@ -308,6 +316,7 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 
 		if (m_pPhaseComponent)
 		{
+
 			m_pPhaseComponent->phaseChange(fPendingHp, fPendingMaxHp);
 
 			return;
@@ -325,7 +334,7 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 		}
 	}
 
-
+	
 }
 
 
@@ -385,4 +394,13 @@ void AC_MonsterBaseCharacter::Destroyed()
 {
 	Super::Destroyed();
 	m_onMonsterDied.Broadcast();
+}
+
+void AC_MonsterBaseCharacter::onPhaseChangeFinished()
+{
+	if (bPendingGimmickStart && m_pStaggerGimmickComp)
+	{
+		bPendingGimmickStart = false;
+		m_pStaggerGimmickComp->startGimmick();
+	}
 }

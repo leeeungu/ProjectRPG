@@ -63,9 +63,6 @@ void UC_GimmickComponent::startGimmick()
 	if (!m_pMonster || !m_pAnim)
 		return;
 
-	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
-
-	m_pMonster->stopAi();
 
 	if (!canPlayGimmickMontage())
 	{
@@ -76,6 +73,10 @@ void UC_GimmickComponent::startGimmick()
 		}
 		return;
 	}
+
+	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
+
+	m_pMonster->stopAi();
 
 	
 
