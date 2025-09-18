@@ -9,6 +9,7 @@
 #include "C_MonsterBaseCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
+class UC_DamageWidgetComponent;
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -93,7 +94,10 @@ private:
 	UPROPERTY()
 	class UC_PhaseComponent* m_pPhaseComponent;
 
-	
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DamageWidget")
+	UC_DamageWidgetComponent* m_pDamageWidget{};
+private:
 
 
 	bool m_bIsAttacking = false;

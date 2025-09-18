@@ -2,19 +2,22 @@
 
 
 #include "C_BaseCharacter.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AC_BaseCharacter::AC_BaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 }
 
 // Called when the game starts or when spawned
 void AC_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (GetCapsuleComponent())
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 // Called every frame
@@ -41,8 +44,7 @@ bool AC_BaseCharacter::takeDamageEvent_Implementation(float fDamage)
 		return false;
 	}
 
-	m_fHp -= fDamage;
-
+	setHp(m_fHp - fDamage);
 	if (m_fHp > 0.f)
 		return true;
 

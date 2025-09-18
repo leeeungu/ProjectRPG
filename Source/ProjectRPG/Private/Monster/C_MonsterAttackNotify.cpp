@@ -3,6 +3,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Debug/DebugDrawService.h"
+#include "CPP_Player/C_Player.h"
 
 void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -13,9 +14,8 @@ void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 	if (m_bDrawDebug)
 	{
 		const FTransform MeshTransform = MeshComp->GetSocketTransform(m_SocketName);
-		DrawDebugSphere(MeshComp->GetWorld(), MeshTransform.TransformPosition(m_sRelativePosition), m_Radius, 0, FColor::Purple, false, 1.0f);
+		DrawDebugSphere(MeshComp->GetWorld(), MeshTransform.TransformPosition(m_sRelativePosition), m_Radius, 30, FColor::Purple, false, 1.0f);
 	}
-	//}
 	AC_BaseCharacter* Character = Cast<AC_BaseCharacter>(MeshComp->GetOwner());
 	if (!Character)
 	{
@@ -33,15 +33,15 @@ void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 	Params.AddIgnoredActor(Character);
 	//UE_LOG(AttackBFL, Error, TEXT("UC_AttackRayCasting::attackSphereTrace : AC_BaseCharacter"));
 
-	Character->GetWorld()->SweepMultiByChannel(OutHits, Position, Position, FQuat::Identity, ECollisionChannel::ECC_Visibility
+	Character->GetWorld()->SweepMultiByChannel(OutHits, Position, Position, FQuat::Identity, ECollisionChannel::ECC_Pawn
 		, CollisionShape, Params);
-	bool bResult{};
 	for (FHitResult& Hit : OutHits)
 	{
-		AC_BaseCharacter* pCharacter = Cast< AC_BaseCharacter>(Hit.GetActor());
+		UE_LOG(LogTemp, Error, TEXT("Check"));
+		AC_Player* pCharacter = Cast< AC_Player>(Hit.GetActor());
 		if (pCharacter)
 		{
-			bResult = true;
+			UE_LOG(LogTemp, Error, TEXT("Attack"));
 			pCharacter->takeDamageEvent(m_Damage* pCharacter->getAtk());
 		}
 	}

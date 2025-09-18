@@ -13,16 +13,20 @@
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
 #include "../Public/Monster/C_StaggerGimmickComponent.h"
+#include "GamePlay/C_DamageWidgetComponent.h"
 
 
 
 DEFINE_LOG_CATEGORY_STATIC(C_MonsterBaseCharacte, Log, All);
 
-AC_MonsterBaseCharacter::AC_MonsterBaseCharacter()
+AC_MonsterBaseCharacter::AC_MonsterBaseCharacter() : AC_BaseCharacter{}
 {
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AC_MonsterAiController::StaticClass();
 	SetActorTickEnabled(false);
+
+	m_pDamageWidget = CreateDefaultSubobject< UC_DamageWidgetComponent>(TEXT("DamageWidget"));
+	m_pDamageWidget->SetupAttachment(RootComponent);
 
 }
 
