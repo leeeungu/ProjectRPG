@@ -51,9 +51,9 @@ void UC_DamageWidget::NativeDestruct()
 UTextBlock* UC_DamageWidget::createDataTextBlock()
 {
 	UTextBlock* pTextBlock = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-	UCanvasPanelSlot* Slot = Cast< UCanvasPanelSlot>(m_pCanvasPanel->AddChild(pTextBlock));
-	if (Slot)
-		Slot->SetAnchors(FAnchors(0.5f, 0.5f));
+	UCanvasPanelSlot* CanvasSlot = Cast< UCanvasPanelSlot>(m_pCanvasPanel->AddChild(pTextBlock));
+	if (CanvasSlot)
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
 	pTextBlock->SetJustification(ETextJustify::Center);
 	return pTextBlock;
 }
