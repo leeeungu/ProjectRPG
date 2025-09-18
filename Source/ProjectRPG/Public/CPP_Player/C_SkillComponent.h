@@ -49,6 +49,7 @@ private:
 	TMap<FName, float> SkillCooldownEndTime;
 	FName CurrentSkillName = {};
 	void SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter);
+	float DamageAmount(FName SkillName);
 
 public:	
 	// Sets default values for this component's properties
