@@ -319,7 +319,7 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 
 			m_pPhaseComponent->phaseChange(fPendingHp, fPendingMaxHp);
 
-			return;
+			//return;
 		}
 	}
 
