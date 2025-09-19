@@ -4,6 +4,10 @@
 #include "Components/ActorComponent.h"
 #include "C_StoreComponent.generated.h"
 
+class UC_CurrencyComponent;
+class UC_InventoryComponent;
+class APlayerController;
+
 USTRUCT(BlueprintType)
 struct FS_ItemStoreData
 {
@@ -17,6 +21,10 @@ public:
 	int nBuyItemID{};
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FS_ItemStoreData")
 	int nBuyItemCount{};
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FS_ItemStoreData")
+	bool bBuyOnce{};
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "FS_ItemStoreData")
+	bool bAlreadyBuy{};
 };
 
 
@@ -30,6 +38,13 @@ protected:
 public:	
 	UC_StoreComponent();
 
+	UFUNCTION(BlueprintCallable)
+	bool buyItem(UC_CurrencyComponent* pCurrency , UC_InventoryComponent* pInventroy, int nIndex);
+	
+	UFUNCTION(BlueprintPure)
+	bool getStoreData(int nIndex, FS_ItemStoreData& rData) const;
+	UFUNCTION(BlueprintCallable)
+	bool checkAlreadyHave(int nIndex, APlayerController* Player);
 protected:
 	virtual void BeginPlay() override;
 };

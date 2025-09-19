@@ -7,7 +7,7 @@
 UC_NPCQuestComponent::UC_NPCQuestComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	
+
 }
 
 FText UC_NPCQuestComponent::getQuestText() const
@@ -111,7 +111,14 @@ bool UC_NPCQuestComponent::getResponeSize(int& nIndex) const
 
 void UC_NPCQuestComponent::BeginPlay()
 {
+	m_nQuestAssetIndex = 0;
+	while (!m_CurrentQuestAsset && m_arrQuestAsset.IsValidIndex(m_nQuestAssetIndex))
+	{
+		m_CurrentQuestAsset = m_arrQuestAsset[m_nQuestAssetIndex];
+		m_nQuestAssetIndex++;
+		if (m_CurrentQuestAsset && m_CurrentQuestAsset->GetFinishQuest() && !m_CurrentQuestAsset->GetQuestAccept())
+			m_CurrentQuestAsset = nullptr;
+	}
 	Super::BeginPlay();
-
 }
 
