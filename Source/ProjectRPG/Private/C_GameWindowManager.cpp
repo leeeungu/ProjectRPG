@@ -21,6 +21,10 @@ UC_GameWindowManager::UC_GameWindowManager()
 	{
 		m_pExitButton = IA_FAction.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("NOne"));
+	}
 }
 
 bool UC_GameWindowManager::toggleWidget(E_WindowType eType)
@@ -86,7 +90,10 @@ void UC_GameWindowManager::BeginPlay()
 	{
 		UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(m_pPlayer->InputComponent);
 		if (EnhancedInput)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Toggle"));
 			EnhancedInput->BindAction(m_pExitButton, ETriggerEvent::Completed, this, &UC_GameWindowManager::toggleWindow, E_WindowType::E_ExitWidget);
+		}
 	}
 }
 
