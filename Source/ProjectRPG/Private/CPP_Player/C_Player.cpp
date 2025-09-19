@@ -19,6 +19,7 @@
 #include "C_TravelManagerComponent.h"
 #include "NiagaraComponent.h"
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
+#include "GamePlay/C_DamageWidgetComponent.h"
 
 void AC_Player::PlayerDownTest()
 {
@@ -607,6 +608,9 @@ AC_Player::AC_Player()
 		//}
 		//m_pPlayerInfoCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 		m_pInteractionDetectComponent->SetupAttachment(GetRootComponent());
+
+		m_pDamageWidget = CreateDefaultSubobject< UC_DamageWidgetComponent>(TEXT("DamageWidget"));
+		m_pDamageWidget->SetupAttachment(GetRootComponent());
 	}
 	
 }

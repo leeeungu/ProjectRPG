@@ -23,6 +23,7 @@ class UC_SkillComponent;
 class USceneCaptureComponent2D;
 class UC_InteractionDetectorComponent;
 class UC_TravelManagerComponent;
+class UC_DamageWidgetComponent;
 
 UENUM(BlueprintType)
 enum class ERunningSystemState : uint8
@@ -65,6 +66,9 @@ private:
 	UC_InteractionDetectorComponent* m_pInteractionDetectComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
 	UC_TravelManagerComponent* m_pTravelComponent{};
+
+	UPROPERTY(VisibleAnywhere, Category = "DamageWidget", meta = (DisplayName = "DamageWidget"))
+	UC_DamageWidgetComponent* m_pDamageWidget{};
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TSubclassOf<AActor> WeaponClass;  // 블루프린트 무기 클래스 지정
