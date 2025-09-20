@@ -16,9 +16,7 @@ UC_PhaseComponent::UC_PhaseComponent()
 
 void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhaseChange called! Hp=%f, MaxHp=%f, Index=%d, State=%d"),
-		fHp, fMaxHp, m_nCurrentPhaseIndex,
-		m_pMonster ? (int32)m_pMonster->getCurrentState() : -1);
+	UE_LOG(LogTemp, Warning, TEXT("[PhaseChange] CurrentHp: %.1f / %.1f, Index: %d"), fHp, fMaxHp, m_nCurrentPhaseIndex);
 
 	if (fHp <= 0 || fMaxHp <= 0)
 		return;
@@ -29,28 +27,26 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
 		return;
 
-	if (!m_pMonster || m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
-	{
-		// 공격 중이면 예약
-		if (m_pMonster)
-		{
-			m_pMonster->bPendingPhaseChange = true;
-			m_pMonster->fPendingHp = fHp;
-			m_pMonster->fPendingMaxHp = fMaxHp;
+	//if (!m_pMonster || m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+	//{
+	//	// 공격 중이면 예약
+	//	if (m_pMonster)
+	//	{
+	//		m_pMonster->bPendingPhaseChange = true;
+	//		m_pMonster->m_fPendingHp = fHp;
+	//		m_pMonster->m_fPendingMaxHp = fMaxHp;
 
-			UE_LOG(LogTemp, Warning, TEXT("PhaseChange called! fPendingHp=%f, fPendingMaxHp=%f, Index=%d, State=%d"),
-				m_pMonster->fPendingHp, m_pMonster->fPendingMaxHp, m_nCurrentPhaseIndex,
-				m_pMonster ? (int32)m_pMonster->getCurrentState() : -1);
-		}
-		return;
-	}
+	//		UE_LOG(LogTemp, Warning, TEXT("PhaseChange called! fPendingHp=%f, fPendingMaxHp=%f, Index=%d, State=%d"),
+	//			m_pMonster->m_fPendingHp, m_pMonster->m_fPendingMaxHp, m_nCurrentPhaseIndex,
+	//			m_pMonster ? (int32)m_pMonster->getCurrentState() : -1);
+	//	}
+	//	return;
+	//}
 
-	
+	float fCurrentHpPercent = (fHp / fMaxHp) * 100.f;
 
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 	
-
-	float fCurrentHpPercent = (fHp / fMaxHp ) * 100.f;
 
 	if (fCurrentHpPercent <= sPhase.fChangePercentHp)
 	{
@@ -64,11 +60,12 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 			m_pAnim->OnMontageEnded.AddDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
 			return;	
 		}
-		m_nCurrentPhaseIndex++;
+		
 		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
 		m_onPhaseChange.Broadcast();
 
-		m_pMonster->tryTriggerPhaseChangeOrGimmick();
+		m_pMonster->reservePhaseChange(fHp, fMaxHp);
+
 		
 	}
 	else
@@ -83,16 +80,25 @@ void UC_PhaseComponent::OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool b
 		m_pAnim->OnMontageEnded.RemoveDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
 	}
 
+	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnMontageEnded_PhaseChange called but index out of range. Index=%d, Num=%d"),
+			m_nCurrentPhaseIndex, m_arrPhase.Num());
+		return;
+	}
+
 	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
 
-	if (Montage == sPhase.pPhaseMontage)
-		return;
+	if (m_nCurrentPhaseIndex < m_arrPhase.Num())
+	{
+		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
+		m_onPhaseChange.Broadcast();
+
+		m_pMonster->tryTriggerPhaseChangeOrGimmick();
+	}
+
 
 	m_nCurrentPhaseIndex++;
-	m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
-	m_onPhaseChange.Broadcast();
-
-	m_pMonster->tryTriggerPhaseChangeOrGimmick();
 	
 }
 

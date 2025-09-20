@@ -142,6 +142,8 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
 
+	setPhaseState(E_MonsterPhaseState::Idle);
+
 	tryTriggerPhaseChangeOrGimmick();
 
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
@@ -307,32 +309,95 @@ void AC_MonsterBaseCharacter::onAttackEnd()
 	tryTriggerPhaseChangeOrGimmick();
 }
 
+void AC_MonsterBaseCharacter::reservePhaseChange(float fHp, float fMaxHp)
+{
+	FS_MonsterAction Action{ E_MonsterDeferredAction::PhaseChange, fHp, fMaxHp };
+	m_quePendingActions.Enqueue(Action);
+}
+
+void AC_MonsterBaseCharacter::reserveGimmick(float fHp, float fMaxHp)
+{
+	FS_MonsterAction Action{ E_MonsterDeferredAction::Gimmick, fHp, fMaxHp };
+	m_quePendingActions.Enqueue(Action);
+}
+
 void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 {
+	if (getCurrentState() != E_MonsterPhaseState::Idle)
+		return;
 
-	if (bPendingPhaseChange)
+	if (m_quePendingActions.IsEmpty())
+		return;
+
+	TArray<FS_MonsterAction> arrPendingActions;
+	while (!m_quePendingActions.IsEmpty())
 	{
-		bPendingPhaseChange = false;
+		FS_MonsterAction sDequeued;
+		m_quePendingActions.Dequeue(sDequeued);
+		arrPendingActions.Add(sDequeued);
+	}
 
-		if (m_pPhaseComponent)
+	arrPendingActions.Sort([](const FS_MonsterAction& sFirst, const FS_MonsterAction& sSecond)
 		{
+			return (int32)sFirst.eType < (int32)sSecond.eType;
+		});
 
-			m_pPhaseComponent->phaseChange(fPendingHp, fPendingMaxHp);
+	for (const FS_MonsterAction& sAction : arrPendingActions)
+	{
+		switch (sAction.eType)
+		{
+		case E_MonsterDeferredAction::PhaseChange:
+			if (m_pPhaseComponent)
+			{
+				m_pPhaseComponent->phaseChange(sAction.fHp, sAction.fMaxHp);
+			}
+			break;
 
-			//return;
+		case E_MonsterDeferredAction::Gimmick:
+			if (m_pStaggerGimmickComp)
+			{
+				m_pStaggerGimmickComp->startGimmick();
+			}
+			break;
+
+		default:
+			break;
 		}
 	}
 
-	// 기믹 예약 처리
-	if (bPendingGimmickStart)
-	{
-		bPendingGimmickStart = false;
 
-		if (m_pStaggerGimmickComp)
-		{
-			m_pStaggerGimmickComp->startGimmick();
-		}
-	}
+		
+	
+
+
+	//if (bPendingPhaseChange)
+	//{
+	//	bPendingPhaseChange = false;
+
+	//	if (m_pPhaseComponent)
+	//	{
+
+	//		m_pPhaseComponent->phaseChange(m_fPendingHp, m_fPendingMaxHp);
+
+	//		return;
+	//	}
+	//}
+
+	//if (getCurrentState() == E_MonsterPhaseState::PhaseChanging)
+	//{
+	//	return;
+	//}
+
+	//// 기믹 예약 처리
+	//if (bPendingGimmickStart)
+	//{
+	//	bPendingGimmickStart = false;
+
+	//	if (m_pStaggerGimmickComp)
+	//	{
+	//		m_pStaggerGimmickComp->startGimmick();
+	//	}
+	//}
 
 	
 }
@@ -378,6 +443,7 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
 		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
+
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("End Gimmick failed!!!!!!!!!!"));

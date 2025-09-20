@@ -45,6 +45,7 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	
 	if (fHpRatio <= m_fTriggerHp)
 	{
+		
 		UE_LOG(C_GimmickGimmickComponent, Error, TEXT("HP: [%s] %.1f / %.1f , Trigger: %.1f"),*this->GetName(), fHp, fMaxHp, m_fTriggerHp);
 		return true;
 	}
@@ -69,7 +70,8 @@ void UC_GimmickComponent::startGimmick()
 		// 공격 중이면 예약
 		if (m_pMonster->getIsAttacking())
 		{
-			m_pMonster->bPendingGimmickStart = true;
+			m_pMonster->reserveGimmick(m_pMonster->getHp(), m_pMonster->getMaxHp());
+			UE_LOG(LogTemp, Warning, TEXT("[Gimmick] CurrentHp: %.1f / %.1f"), m_pMonster->getHp(), m_pMonster->getMaxHp());
 		}
 		return;
 	}
@@ -186,6 +188,10 @@ bool UC_GimmickComponent::IsPlayingGimmick()
 void UC_GimmickComponent::endGimmick()
 {
 	m_bGimmickPlaying = false;
+
+	m_pAnim->Montage_Stop(0.1f);
+
+	m_pAnim->Montage_Play(m_pGimmikEndMontage);
 
 }
 

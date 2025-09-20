@@ -33,6 +33,24 @@ enum class E_MonsterPhaseState : uint8
 	Dead
 };
 
+UENUM(BlueprintType)
+enum class E_MonsterDeferredAction : uint8
+{
+	None,
+	PhaseChange,
+	Gimmick
+};
+
+USTRUCT(BlueprintType)
+struct FS_MonsterAction
+{
+	GENERATED_BODY()
+
+	E_MonsterDeferredAction eType;
+	float fHp;
+	float fMaxHp;
+};
+
 USTRUCT(BlueprintType)
 struct FS_PatternData
 {
@@ -98,7 +116,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DamageWidget")
 	UC_DamageWidgetComponent* m_pDamageWidget{};
 private:
-
+	TQueue<FS_MonsterAction> m_quePendingActions;
 
 	bool m_bIsAttacking = false;
 
@@ -121,8 +139,8 @@ public:
 
 	bool bPendingPhaseChange = false;
 
-	float fPendingHp = 0.f;
-	float fPendingMaxHp = 0.f;
+	float m_fPendingHp = 0.f;
+	float m_fPendingMaxHp = 0.f;
 
 	bool bPendingGimmickStart = false;
 
@@ -132,6 +150,8 @@ private:
 	float getDistanceToTarget() const;
 
 	void onAttackEnd();
+
+	
 
 
 
@@ -158,6 +178,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	E_MonsterPhaseState getCurrentState() const;
+
+	UFUNCTION(BlueprintCallable)
+	void reservePhaseChange(float fHp, float fMaxHp);
+
+	UFUNCTION(BlueprintCallable)
+	void reserveGimmick(float fHp, float fMaxHp);
 
 	/*
 	* 전투 관련

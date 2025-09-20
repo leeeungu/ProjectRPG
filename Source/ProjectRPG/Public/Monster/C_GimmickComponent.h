@@ -31,6 +31,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gimmick | Animation")
 	UAnimMontage* m_pGimmikPlayMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Gimmick | Animation")
+	UAnimMontage* m_pGimmikEndMontage;
+
 	UPROPERTY()
 	FVector m_vGimmickPos;
 
