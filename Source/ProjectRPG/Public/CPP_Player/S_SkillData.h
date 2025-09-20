@@ -50,5 +50,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     bool Counter = false;
 
+    // 무력화수치
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+    float StaggerAmount = 0.f;
+
 
 };

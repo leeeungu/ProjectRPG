@@ -30,17 +30,20 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 		UE_LOG(LogTemp, Warning, TEXT("Unknown Collision ShapeType"));
 		return;
 	}
-
+	FVector Start = SpawnLocation;
+	FVector End = SpawnLocation + FVector(0.1f, 0, 0); // 아주 작은 이동
 	// 데미지 적용 로직 예시
 	TArray<FHitResult> HitResults;
 	bool bHit = GetWorld()->SweepMultiByChannel(
 		HitResults,
-		SpawnLocation,
-		SpawnLocation,
+		Start,
+		End,
 		SpawnQuat,
 		ECC_Pawn,
 		CollisionShape
 	);
+
+
 
 #ifdef DEBUG_DRAW
 	switch (CollisionData.ShapeType)
@@ -62,21 +65,22 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 		//get owner
 		for (const FHitResult& Hit : HitResults)
 		{
-			AC_BaseCharacter* HitActor = Cast<AC_BaseCharacter>(Hit.GetActor());
+			AC_MonsterBaseCharacter* HitActor = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
 			if (HitActor && HitActor != GetOwner())
 			{
 				float Amount = DamageAmount(CurrentSkillName);
+				float Stagger = StaggerAmount(CurrentSkillName);
 				HitActor->takeDamageEvent(Amount);
-	          //takedamge호출, 넘겨줄 데미지 계산해서 담아서 보냄.
-	          //함수가 호출되면 이 데미지를 매개변수로 브로드캐스트해서 몬스터의 receive함수호출
-	          //receive가 불리면 바인딩된 자체 함수로 들어가서 데미지를 HP로부터 깍음
+				HitActor->takeStaggerEvent(Stagger);
 			}
-			//카운터스킬쓰면 크래쉬남
-			/*if (IsGetCounter)
+			if (IsGetCounter)
 			{
 				AC_MonsterBaseCharacter* BossMonster = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
-				BossMonster->tryCounter();
-			}*/
+				if (BossMonster)
+				{
+					BossMonster->tryCounter();
+				}
+			}
 			
 		}
 	}
@@ -97,6 +101,22 @@ float UC_SkillComponent::DamageAmount(FName SkillName)
 	}
 	return Amount;
 }
+
+float UC_SkillComponent::StaggerAmount(FName SkillName)
+{
+	float Amount{};
+	if (const FSkillData* Skill = SkillMap.Find(SkillName))
+	{
+		// Owner 가져오기
+		if (AC_BaseCharacter* OwnerChar = Cast<AC_BaseCharacter>(GetOwner()))
+		{
+			Amount = Skill->AttackPowerMultiplier;//무력화값으로 변경
+		}
+	}
+	return Amount;
+}
+
+
 
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
@@ -156,6 +176,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum04.SkillName = "S_04";
 	SkillNum04.Cooldown = 5.0f;
 	SkillNum04.AttackPowerMultiplier = 7.2f;
+	SkillNum04.StaggerAmount = 2.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
@@ -181,6 +202,7 @@ UC_SkillComponent::UC_SkillComponent()
 	SkillNum07.SkillName = "S_07";
 	SkillNum07.Cooldown = 4.0f;
 	SkillNum07.AttackPowerMultiplier = 6.4f;
+	SkillNum07.StaggerAmount = 1.5f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
@@ -207,6 +229,7 @@ UC_SkillComponent::UC_SkillComponent()
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 8.0f;
 	ChargingSkill_Start.AttackPowerMultiplier = 10.0f;//스타트라서 없음 배율이
+	ChargingSkill_Start.StaggerAmount = 20.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_SKill08_02_Montage.Dual_SKill08_02_Montage"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
@@ -230,13 +253,13 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillCollisionData Box_A{};
 	Box_A.ShapeType = ESkillCollisionShapeType::Box;
-	Box_A.Dimensions = FVector(500.f, 400.f, 100.f);
+	Box_A.Dimensions = FVector(500.f, 400.f, 300.f);
 	Box_A.Duration = 0.5f;
 	SkillCollisionDataArray.Add(Box_A);
 
 	FSkillCollisionData Box_B{};
 	Box_B.ShapeType = ESkillCollisionShapeType::Box;
-	Box_B.Dimensions = FVector(700.f, 600.f, 100.f);
+	Box_B.Dimensions = FVector(700.f, 600.f, 300.f);
 	Box_B.Duration = 0.5f;
 	SkillCollisionDataArray.Add(Box_B);
 
@@ -353,8 +376,13 @@ void UC_SkillComponent::HandleSkillHit(int32 SkillIndex, FVector SkillLocation, 
 		UE_LOG(LogTemp, Warning, TEXT("Invalid SkillIndex %d"), SkillIndex);
 		return;
 	}
+	bool IsCounter = false;
+	if (const FSkillData* Skill = SkillMap.Find(CurrentSkillName))
+	{
+		IsCounter = Skill->Counter;
+	}
 	const FSkillCollisionData& CollisionData = SkillCollisionDataArray[SkillIndex];
-	SpawnSkillCollision(CollisionData, SkillLocation, SkillRotation, false);
+	SpawnSkillCollision(CollisionData, SkillLocation, SkillRotation, IsCounter);
 	//const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
 	//if (!SkillData)
 	//{

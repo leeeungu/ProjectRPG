@@ -50,6 +50,7 @@ private:
 	FName CurrentSkillName = {};
 	void SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter);
 	float DamageAmount(FName SkillName);
+	float StaggerAmount(FName SkillName);
 
 public:	
 	// Sets default values for this component's properties
