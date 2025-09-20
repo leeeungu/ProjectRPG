@@ -45,8 +45,29 @@ void AC_PlayerController::UpdateMouseHit()
         return;
     }
 
-    // Hit이 없을 때
-    CachedMouseHit = FHitResult();
+    // 3. 실패했을 때도 fallback 좌표 생성
+    FVector WorldOrigin, WorldDirection;
+    if (DeprojectMousePositionToWorld(WorldOrigin, WorldDirection))
+    {
+        // 땅(Z=0)과의 교차 좌표 구하기
+        if (FMath::Abs(WorldDirection.Z) > KINDA_SMALL_NUMBER)
+        {
+            float t = -WorldOrigin.Z / WorldDirection.Z; // Z=0 평면까지 도달하는 비율
+            FVector GroundPos = WorldOrigin + WorldDirection * t;
+
+            CachedMouseHit.Location = GroundPos;
+            CachedMouseHit.ImpactPoint = GroundPos;
+        }
+        else
+        {
+            // 혹시 Z가 평행해서 교차 못할 때는 그냥 fallback
+            FVector FallbackLocation = WorldOrigin + WorldDirection * 3000.f;
+            CachedMouseHit.Location = FallbackLocation;
+            CachedMouseHit.ImpactPoint = FallbackLocation;
+        }
+
+        CachedHitType = EMouseHitType::Ground;
+    }
 }
 
 void AC_PlayerController::BeginPlay()

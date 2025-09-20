@@ -821,15 +821,44 @@ void AC_Player::Tick(float DeltaTime)
 void AC_Player::OnMoveToPosPlayer(FVector pos)
 {
 	if (!bCanMove) return;//idle스테이트가 아니면 리턴시킴(마우스포인터로 찍히지만 실제이동은되지않도록)
-	//길찾기 패스 구하기
-	UNavigationPath* Path =
-		UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), pos);
-	if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//네브메시볼륨에 찍혔고, 유효하고, 패스포인트가 2개이상인경우
+
+	FVector FinalPos = pos;
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+
+	bool bOnNavmesh = false;
+	if (NavSys)
 	{
-		pathList = Path->PathPoints;//리스트에 포인팅된 path정보를 담음(장애물이없다면 리스트에 2개가담김->[현재위치][찍은위치]
-		curPathPos = 1;//if문을 넘겼다면 일단 이동해야하기떄문에 curPathPos를 1로 설정
+		FNavLocation ProjectedLocation;
+		if (NavSys->ProjectPointToNavigation(pos, ProjectedLocation, FVector(200.f, 200.f, 500.f)))
+		{
+			FinalPos = ProjectedLocation.Location;
+			bOnNavmesh = true;
+		}
+	}
+	if (bOnNavmesh)
+	{
+		//길찾기 패스 구하기
+		UNavigationPath* Path =
+			UNavigationSystemV1::FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), FinalPos);
+		if (Path != nullptr && Path->IsValid() && Path->PathPoints.Num() > 1)//네브메시볼륨에 찍혔고, 유효하고, 패스포인트가 2개이상인경우
+		{
+			pathList = Path->PathPoints;//리스트에 포인팅된 path정보를 담음(장애물이없다면 리스트에 2개가담김->[현재위치][찍은위치]
+			curPathPos = 1;//if문을 넘겼다면 일단 이동해야하기떄문에 curPathPos를 1로 설정
+		}
+	}
+
+	else
+	{
+		{
+			// 네브메시에 없는 경우 → 그냥 직선 이동
+			pathList.Empty();
+			pathList.Add(GetActorLocation()); // 시작점
+			pathList.Add(FinalPos);           // 목적지
+			curPathPos = 1;
+		}
 	}
 	CalMoveData();
+	
 }
 
 FVector AC_Player::GetMousePointDir()
