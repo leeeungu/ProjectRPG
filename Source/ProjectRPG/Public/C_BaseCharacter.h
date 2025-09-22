@@ -28,6 +28,7 @@ public:
 	FOnStatChange m_onChangeHP{};
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stat")
 	FOnStatChange m_onChangeAtk{};
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly ,Category = "AC_BaseCharacter")
 	float m_fMaxHp = 100.0f;
@@ -71,6 +72,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool getIsDead() const;
+
 
 private:
 

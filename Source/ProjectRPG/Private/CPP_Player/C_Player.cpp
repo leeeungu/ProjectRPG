@@ -18,6 +18,8 @@
 #include "C_InteractionDetectorComponent.h"
 #include "C_TravelManagerComponent.h"
 #include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
 #include "GamePlay/C_DamageWidgetComponent.h"
 
@@ -106,29 +108,42 @@ void AC_Player::HandleResult(bool result)
 
 void AC_Player::OnMonsterDownAttack(const FHitResult& Hit)
 {
+	IsDownFlying = true;
 	FVector HitLocation = Hit.ImpactPoint;
 	FVector MyLocation = GetActorLocation();
 
 	// 맞은 방향 (내 위치에서 충돌지점 반대로)
 	FVector KnockbackDir = (MyLocation - HitLocation).GetSafeNormal();
 	KnockbackDir.Z = 0.f;
-
-	
-
-
-	//DownDirection = KnockbackDir;
+	DownDirection = KnockbackDir;
 	Down();
-	//DownRecive = true;
+	DownRecive = true;
 }
 
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
 {
 	setHp(getHp() - fDamage);
+	PlayHitEffect();
 	if (getHp() <= 0)
 	{
 		deadPlayer();
 	}
 	return false;
+}
+void AC_Player::PlayHitEffect()
+{
+	const FVector ActorLocation = GetActorLocation();
+	// Niagara VFX
+	if (HitVFX)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitVFX, ActorLocation);
+	}
+
+	// Hit Sound
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, ActorLocation);
+	}
 }
 //float NextHp = getHp() - fDamage;
 //if (NextHp <= 0.0f)
@@ -290,7 +305,7 @@ void AC_Player::RunningSystemManager()
 	FInputActionData PriorityInputData{};
 	if (!m_inputQueue->GetLastInputData(PriorityInputData) && !m_inputQueue->GetLastChargingInputData(PriorityInputData)) return;//이부분에서 idle메인러닝시스템으로 넘어가기전에 한번 검사하는 로직
 	//1. 패링 입력 최우선 처리
-	if (PriorityInputData.InputType == EInputType::Period)
+	if (PriorityInputData.InputType == EInputType::Period && !IsDownFlying)
 	{
 		if (m_skillCom->IsCooldownReady(PriorityInputData.ActionName))
 		{
@@ -511,7 +526,6 @@ void AC_Player::SetPeriodInfo()
 			// PeriodDist 계산 (히트 지점까지 거리)
 			PeriodDist = FVector::Dist(GetActorLocation(), TargetPos);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("FlyingPeriod"));
 		//else
 		//{
 		//	// 히트 못하면 기존 Forward
@@ -804,7 +818,6 @@ void AC_Player::Tick(float DeltaTime)
 			FVector MoveVec = ParryDirection * speed;
 			AddActorWorldOffset(MoveVec, true);
 			PeriodDist -= MoveVec.Length();
-			UE_LOG(LogTemp, Warning, TEXT("Period true"));
 		}
 		
 	}
@@ -813,18 +826,18 @@ void AC_Player::Tick(float DeltaTime)
 		ClearMoveState();
 		if (DownDist < 0.2f)//도착
 		{
-			DownDist = 300.f;
+			DownDist = 700.f;
+			IsDownFlying = false;
 			DownRecive = false;
 		}
 		else
 		{
-			float speed = 20.f;
+			float speed = 30.f;
 			FVector MoveVec = DownDirection * speed;
 			AddActorWorldOffset(MoveVec, true);
-			PeriodDist -= MoveVec.Length();
-			UE_LOG(LogTemp, Warning, TEXT("Down true"));
+			DownDist -= MoveVec.Length();
 		}
-		
+		UE_LOG(LogTemp, Warning, TEXT("DownDist %f"), DownDist);
 	}
 	RunningSystemManager();
 

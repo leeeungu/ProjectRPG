@@ -106,6 +106,7 @@ private:
 	bool IsPeriod = false;
 	float PeriodDist = 300.f;
 	FVector ParryDirection;
+	bool IsDownFlying = false;
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
@@ -138,6 +139,13 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "PerfectZone")
 	FOnResultOpen OnResultOpen;
 
+	//HIT VFX
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class UNiagaraSystem* HitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class USoundBase* HitSound;
+
 	void HandleChargeInputStart();
 	void HandleChargeInputEnd();
 
@@ -151,6 +159,9 @@ public:
 	float DownDist = 300.f;
 
 	bool takeDamageEvent_Implementation(float fDamage) override;
+	//Hit VFX
+	UFUNCTION(BlueprintCallable, Category = "Hit Effect")
+	void PlayHitEffect();
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();

@@ -2,6 +2,10 @@
 
 
 #include "C_BaseCharacter.h"
+#include "Kismet/GameplayStatics.h"   // UGameplayStatics
+#include "Sound/SoundBase.h"          // USoundBase
+#include "NiagaraFunctionLibrary.h"   // 나이아가라 이펙트용
+#include "NiagaraSystem.h"            // UNiagaraSystem
 #include "Components/CapsuleComponent.h"
 
 // Sets default values
@@ -103,3 +107,5 @@ void AC_BaseCharacter::brodcastStatChange(FOnStatChange& Delegate, float PreValu
 	}
 
 }
+
+
