@@ -5,7 +5,7 @@
 #include "C_MiniMapActor.generated.h"
 
 class USceneCaptureComponent2D;
-class UMaterial;
+class UMaterialInstanceConstant;
 
 UCLASS()
 class PROJECTRPG_API AC_MiniMapActor : public AActor
@@ -16,11 +16,11 @@ protected:
 	USceneCaptureComponent2D* m_CapCom{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UMaterial* m_pMapMaterial{};
+	UMaterialInstanceConstant* m_pMapMaterial{};
 public:
 	AC_MiniMapActor();
 	float getOrthoWidth();
-	UMaterial* getMapMaterial() { return m_pMapMaterial; }
+	UMaterialInstanceConstant* getMapMaterial() { return m_pMapMaterial; }
 protected:
 	virtual void BeginPlay() override;
 };

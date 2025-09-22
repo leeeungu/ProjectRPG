@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widget/Actor/C_MiniMapActor.h"
+#include "Materials/MaterialInstanceConstant.h"
 
 void UC_MinimapWidget::NativeOnInitialized()
 {
