@@ -10,6 +10,11 @@ UC_StoreComponent::UC_StoreComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+bool UC_StoreComponent::getIsStroeOpen() const
+{
+	return m_bIsStroeOpen;
+}
+
 void UC_StoreComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -78,4 +83,9 @@ bool UC_StoreComponent::checkAlreadyHave(int nIndex, APlayerController* Player)
 		return true;
 	}
 	return false;
+}
+
+void UC_StoreComponent::setIsStroeOpen(bool Value)
+{
+	m_bIsStroeOpen = Value;
 }

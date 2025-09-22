@@ -16,7 +16,6 @@ void UC_EquipComponent::bindEquipTypeDelegate(E_EquipEffectType EquipType, FOnEq
 	FS_EquipEventBinding Binding{};
 	Binding.Delegate = Delegate;
 	m_arrEquipEvent[(uint8)EquipType].Add(Binding);
-	//m_arrEquipEvent[]
 }
 
 void UC_EquipComponent::registerEquip(AC_EquipItem* pItemBase)
@@ -114,6 +113,8 @@ TArray<uint8> UC_EquipComponent::getBinaryData()
 			Equip.Value = UC_ItemDataSubsystem::getUnValidItemID_CPP();
 		Data.arrEquip[(uint8)Equip.Key] = Equip.Value;
 	}
+	Data.MaxHpValue = m_fTotalMaxHp;	
+	Data.AttackValue = m_fTotalAttack;
 	UC_DataMangerSubsystem::saveBinaryFile< SEquipData>(result, &Data);
 	return result;
 }
@@ -128,6 +129,19 @@ bool UC_EquipComponent::getEquipItemID(E_EquipEffectType ItemType, int& ItemID)
 	return pValue != nullptr;
 }
 
+void UC_EquipComponent::upgradeMaxHP(float fValue)
+{
+	m_fTotalMaxHp += fValue;
+	m_pPlayer->setMaxHp(m_pPlayer->getMaxHp() + fValue);
+	m_pPlayer->setHp(m_pPlayer->getHp() + fValue);
+}
+
+void UC_EquipComponent::upgradeAttack(float fValue)
+{
+	m_fTotalAttack += fValue;
+	m_pPlayer->setAtk(m_pPlayer->getAtk() + fValue);
+}
+
 void UC_EquipComponent::BeginPlay()
 {
 	UActorComponent::BeginPlay();
@@ -136,6 +150,8 @@ void UC_EquipComponent::BeginPlay()
 	{
 		m_pPlayer = Cast<AC_BaseCharacter>(Controller->AcknowledgedPawn);
 		UC_DataMangerSubsystem::loadData(this);
+		m_pPlayer->setMaxHp(m_pPlayer->getMaxHp() + m_fTotalMaxHp);
+		m_pPlayer->setAtk(m_pPlayer->getAtk() + m_fTotalAttack);
 	}
 }
 

@@ -35,6 +35,7 @@ class PROJECTRPG_API UC_StoreComponent : public UActorComponent
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AC_NPCBase")
 	TArray<FS_ItemStoreData> m_arrStoreList{};
+	bool m_bIsStroeOpen{};
 public:	
 	UC_StoreComponent();
 
@@ -45,6 +46,10 @@ public:
 	bool getStoreData(int nIndex, FS_ItemStoreData& rData) const;
 	UFUNCTION(BlueprintCallable)
 	bool checkAlreadyHave(int nIndex, APlayerController* Player);
+	UFUNCTION(BlueprintCallable)
+	void setIsStroeOpen(bool Value);
+	UFUNCTION(BlueprintPure)
+	bool getIsStroeOpen() const;
 protected:
 	virtual void BeginPlay() override;
 };

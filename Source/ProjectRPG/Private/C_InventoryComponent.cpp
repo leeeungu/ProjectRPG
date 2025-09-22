@@ -293,6 +293,7 @@ bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
 	if (pSlotData == &m_sDummyItemData)
 		return false;
 	AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+	
 	if (pItem && pItem->useItemActor())
 	{
 		return removeItemAtSlot(nY, nX, nCount);

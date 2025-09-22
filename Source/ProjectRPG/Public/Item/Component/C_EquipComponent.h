@@ -40,6 +40,8 @@ class PROJECTRPG_API UC_EquipComponent : public UActorComponent, public IC_DataM
 	struct SEquipData
 	{
 		int arrEquip[(uint8)E_EquipEffectType::E_EquipTypeMax]{};
+		float MaxHpValue{};
+		float AttackValue{};
 
 		friend FArchive& operator<<(FArchive& Ar, SEquipData* Data)
 		{
@@ -47,6 +49,8 @@ class PROJECTRPG_API UC_EquipComponent : public UActorComponent, public IC_DataM
 			{
 				Ar << Data->arrEquip[i];
 			}
+			Ar << Data->MaxHpValue;
+			Ar << Data->AttackValue;
 			return Ar;
 		}
 	};
@@ -61,6 +65,8 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "EquipComponent")
 	TMap<E_EquipEffectType, int> m_setEquipData{};
+	float m_fTotalMaxHp{};
+	float m_fTotalAttack{};
 private:
 	UPROPERTY()
 	AC_BaseCharacter* m_pPlayer{};
@@ -83,6 +89,11 @@ public:
 
 
 	bool getEquipItemID(E_EquipEffectType ItemType, int& ItemID);
+
+	UFUNCTION(BlueprintCallable)
+	void upgradeMaxHP(float fValue);
+	UFUNCTION(BlueprintCallable)
+	void upgradeAttack(float fValue);
 protected:
 	virtual void BeginPlay() override;
 
