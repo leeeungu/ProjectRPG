@@ -58,6 +58,8 @@ bool UC_GameWindowManager::isWidgetOpened(E_WindowType eType) const
 
 UC_GameWindowWidget* UC_GameWindowManager::getGameWindowWidget(E_WindowType eType)
 {
+	if (!m_pMainWidget)
+		return nullptr;
 	return m_pMainWidget->getGameWindowWidget(eType);
 }
 
@@ -81,20 +83,24 @@ void UC_GameWindowManager::BeginPlay()
 	m_pPlayer = Cast< APlayerController>(GetOwner());
 	if (!m_pPlayer)
 		return;
-
-	m_pMainWidget = CreateWidget<UC_MainWidget>(m_pPlayer, m_cMainWidget,TEXT("MainWidget"));
+	m_pMainWidget = CreateWidget<UC_MainWidget>(m_pPlayer, m_cMainWidget, TEXT("MainWidget"));
 	if (!m_pMainWidget)
 		return;
 	m_pMainWidget->AddToViewport();
+	UE_LOG(LogTemp, Log, TEXT("Toggle"));
 	if (m_pPlayer && m_pExitButton)
 	{
 		UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(m_pPlayer->InputComponent);
 		if (EnhancedInput)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Toggle"));
 			EnhancedInput->BindAction(m_pExitButton, ETriggerEvent::Completed, this, &UC_GameWindowManager::toggleWindow, E_WindowType::E_ExitWidget);
 		}
 	}
+}
+
+void UC_GameWindowManager::OnRegister()
+{
+	UActorComponent::OnRegister();
 }
 
 void UC_GameWindowManager::runWidgetFunc(std::initializer_list<E_WindowType> arrWidget, bool(UC_GameWindowManager::* pFunc)(E_WindowType))

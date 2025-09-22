@@ -47,7 +47,7 @@ public:
 	void setStoreMode(bool bSetStoreMode);
 protected:
 	virtual void BeginPlay() override;
-		
+	virtual void OnRegister() override; 
 private:
 	void runWidgetFunc(std::initializer_list< E_WindowType> arrWidget, bool (UC_GameWindowManager::* pFunc)(E_WindowType));
 };
