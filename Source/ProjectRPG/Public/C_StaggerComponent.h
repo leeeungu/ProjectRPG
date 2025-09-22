@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRecover);
 enum class E_StaggerMode
 {
 	Normal,
-	Gimick
+	Gimmick
 };
 
 
@@ -72,6 +72,7 @@ public:
 	float getCurrentBreakPoint() const;
 
 	void setMode(E_StaggerMode eMode);
+	E_StaggerMode getStaggerMode() const;
 
 public:	
 	// Called every frame

@@ -61,8 +61,11 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 
 void UC_GimmickComponent::startGimmick()
 {
+
 	if (!m_pMonster || !m_pAnim)
 		return;
+
+	m_pMonster->setActivePower(true);
 
 
 	if (!canPlayGimmickMontage())
@@ -192,6 +195,11 @@ void UC_GimmickComponent::endGimmick()
 	m_pAnim->Montage_Stop(0.1f);
 
 	m_pAnim->Montage_Play(m_pGimmikEndMontage);
+
+	m_pMonster->setActivePower(false);
+
+	if (m_pMonster->getIsPower() == false)
+		m_pMonster->setPhaseState(E_MonsterPhaseState::Idle);
 
 }
 

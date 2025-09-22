@@ -120,6 +120,8 @@ private:
 
 	bool m_bIsAttacking = false;
 
+	bool m_bIsPower = false;
+
 
 	FTimerHandle m_timeHandle;
 
@@ -184,6 +186,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void reserveGimmick(float fHp, float fMaxHp);
+
+	UFUNCTION(BlueprintCallable)
+	void setActivePower(bool bActive);
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsPower() const;
 
 	/*
 	* 전투 관련

@@ -127,11 +127,16 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 {
 	AAIController* pAiCon = Cast<AAIController>(GetController());
 
-	setPhaseState(E_MonsterPhaseState::Stagger);
+	if (getCurrentState() != E_MonsterPhaseState::Stagger)
+	{
+		stopAi();
 
-	stopAi();
+		playStaggerMontage();
 
-	playStaggerMontage();
+		setPhaseState(E_MonsterPhaseState::Stagger);
+	}
+
+	
 }
 
 void AC_MonsterBaseCharacter::onStaggerRecover()
@@ -319,6 +324,16 @@ void AC_MonsterBaseCharacter::reserveGimmick(float fHp, float fMaxHp)
 {
 	FS_MonsterAction Action{ E_MonsterDeferredAction::Gimmick, fHp, fMaxHp };
 	m_quePendingActions.Enqueue(Action);
+}
+
+void AC_MonsterBaseCharacter::setActivePower(bool bActive)
+{
+	m_bIsPower = bActive;
+}
+
+bool AC_MonsterBaseCharacter::getIsPower() const
+{
+	return m_bIsPower;
 }
 
 void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()

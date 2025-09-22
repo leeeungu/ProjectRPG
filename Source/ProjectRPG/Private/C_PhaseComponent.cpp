@@ -16,6 +16,7 @@ UC_PhaseComponent::UC_PhaseComponent()
 
 void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 {
+
 	UE_LOG(LogTemp, Warning, TEXT("[PhaseChange] CurrentHp: %.1f / %.1f, Index: %d"), fHp, fMaxHp, m_nCurrentPhaseIndex);
 
 	if (fHp <= 0 || fMaxHp <= 0)
