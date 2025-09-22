@@ -37,10 +37,16 @@ public:
     void UpdateSecondText(float TimeValue);
 
 private:
-    bool IsTick = false;
+    //bool IsTick = false;
     float CurrentTime = 0.f;
-    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+    //virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
     virtual void NativeConstruct() override;
+
+    FTimerHandle ProgressTimerHandle;
+
+    FWidgetTransform InitialBackupTransform;
+
+    
 
 protected:
     
@@ -52,6 +58,7 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* Second;
 
-    FWidgetTransform InitialBackupTransform;
+    
 	
+    void UpdateProgressTimer();
 };

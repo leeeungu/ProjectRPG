@@ -16,7 +16,7 @@ void UC_PlayerSKillMGR::ShowPerfectZone()
 {
     if (!PerfectZoneWidget || !PerfectZoneWidget->Start) return;
     PerfectZoneWidget->SetVisibility(ESlateVisibility::Visible);
-    StopAnimation(PerfectZoneWidget->Show);
+    //StopAnimation(PerfectZoneWidget->Show);
     PerfectZoneWidget->PlayAnimation(PerfectZoneWidget->Show);
     EndPerfectZone = false;
 }

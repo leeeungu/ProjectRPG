@@ -37,6 +37,8 @@ public:
 	void ClearQueueList();
 	UFUNCTION(BlueprintCallable)
 	void ClearChargingQueueList();
+	UFUNCTION(BlueprintCallable)
+	void StartChargingSet();
 
 protected:
 	// Called when the game starts

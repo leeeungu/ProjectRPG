@@ -11,7 +11,7 @@ void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
     //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
     if (MontageToPlay)
     {
-        StopAllMontages(0.1f);
+        StopAllMontages(0.0f);
         Montage_Play(MontageToPlay);
         CurrentActiveMontage = MontageToPlay;//몽타주 백업용
         //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));

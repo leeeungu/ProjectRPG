@@ -112,9 +112,13 @@ void AC_Player::OnMonsterDownAttack(const FHitResult& Hit)
 	// 맞은 방향 (내 위치에서 충돌지점 반대로)
 	FVector KnockbackDir = (MyLocation - HitLocation).GetSafeNormal();
 	KnockbackDir.Z = 0.f;
-	DownDirection = KnockbackDir;
+
+	
+
+
+	//DownDirection = KnockbackDir;
 	Down();
-	DownRecive = true;
+	//DownRecive = true;
 }
 
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
@@ -170,11 +174,13 @@ void AC_Player::restartPlayer()
 	SetRunningSystemState(ERunningSystemState::Idle);
 	setHp(getMaxHp());
 	//OnMoveToPosPlayer(GetActorLocation());
+	//리스타트위치?
 }
 
 void AC_Player::CalMoveData()
 {
-	if (curPathPos >= pathList.Num())//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
+	
+	if (curPathPos >= pathList.Num() || !bCanMove)//아무것도찍히지않으면 리스트의 원소개수는 1개임(현재위치)// 
 	{
 		Cast<UC_PlayerAnimInstance>(GetMesh()->GetAnimInstance())->IsMove = false;
 		//가야할곳이없는데 혹시 remainDist,remainAngle이 남아있다면 초기화
@@ -293,6 +299,7 @@ void AC_Player::RunningSystemManager()
 			{
 				RunningState = ERunningSystemState::Busy;
 				bCanMove = false;
+				ClearMoveState();
 				if (IsAttackMode)
 				{
 					AttackMode();
@@ -313,6 +320,7 @@ void AC_Player::RunningSystemManager()
 			RunningState = ERunningSystemState::Busy;//이 분기문을 넘어서면 바로 busy상태이므로 return반환
 			DeactivateAllNiagaraEffects();
 			bCanMove = false;
+			ClearMoveState();
 			if (IsAttackMode)
 			{
 				AttackMode();
@@ -350,6 +358,7 @@ void AC_Player::RunningSystemManager()
 					myAnimInterface->SetAttackMode(true);
 				}
 				bCanMove = false;
+				ClearMoveState();
 				CalRotateData(CurrentInputData.TargetPoint);
 				m_skillCom->UsingSkill(SetPlainAttack());
 				break;
@@ -363,6 +372,7 @@ void AC_Player::RunningSystemManager()
 						myAnimInterface->SetAttackMode(true);
 					}
 					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
+					ClearMoveState();
 					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
 					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 					//쿨타임 시작
@@ -390,12 +400,14 @@ void AC_Player::RunningSystemManager()
 						myAnimInterface->SetAttackMode(true);
 					}
 					bCanMove = false;//움직임 제어(애니메이션이 끝날때 다시 트루로 바꿔주는 함수호출)
+					ClearMoveState();
 					CalRotateData(CurrentInputData.TargetPoint);//보간함수->틱보간
 					if (SkillUiWidget)
 					{
 						SkillUiWidget->ShowPerfectZone();
 					}
 					m_inputQueue->ClearChargingQueueList();//혹시 이전에쓰고 아직안비워져있을수있으니
+					m_inputQueue->StartChargingSet();
 					m_skillCom->UsingSkill(CurrentInputData.ActionName);//컨트롤러에서 만들어진 name과 구조체안 스킬name이 같아야함.
 					//쿨타임 시작
 					m_skillCom->StartCooldown(CurrentInputData.ActionName);

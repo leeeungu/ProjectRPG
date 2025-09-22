@@ -14,7 +14,18 @@ void UC_PerfectZone::PlayProgressAnimation()
             // 에디터에서 잡아둔 초기 상태로 복원
             BarBackup->SetRenderTransform(InitialBackupTransform);
         }
-        IsTick = true;
+        CurrentTime = 0.0f;
+        UpdateSecondText(CurrentTime);
+
+        // 타이머 시작: 0.05초마다 호출
+        GetWorld()->GetTimerManager().SetTimer(
+            ProgressTimerHandle,
+            this,
+            &UC_PerfectZone::UpdateProgressTimer,
+            0.05f,
+            true
+        );
+        //IsTick = true;
         PlayAnimation(Start);
         UE_LOG(LogTemp, Warning, TEXT("Start"));
     }
@@ -22,7 +33,8 @@ void UC_PerfectZone::PlayProgressAnimation()
 
 void UC_PerfectZone::StopProgressAnimation()
 {
-    IsTick = false;
+    //IsTick = false;
+    GetWorld()->GetTimerManager().ClearTimer(ProgressTimerHandle);
     if (Start && IsAnimationPlaying(Start))
     {
         // Stop 직전에 현재 Bar Transform을 백업에 복사
@@ -41,6 +53,8 @@ void UC_PerfectZone::StopProgressAnimation()
         StopAnimation(Start);
         UE_LOG(LogTemp, Warning, TEXT("End"));
     }
+    CurrentTime = 0.0f;
+    UpdateSecondText(CurrentTime); // 정지 시 0초로 리셋
     
 }
 
@@ -72,22 +86,35 @@ void UC_PerfectZone::NativeConstruct()
     }
 }
 
-void UC_PerfectZone::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UC_PerfectZone::UpdateProgressTimer()
 {
-    Super::NativeTick(MyGeometry, InDeltaTime);
-    if (!IsTick)
-    {
-        CurrentTime = 0;
-        UE_LOG(LogTemp, Warning, TEXT("TickENd"));
-        return;
-    }
-    CurrentTime += InDeltaTime;
+    CurrentTime += 0.05f;
     UpdateSecondText(CurrentTime);
-    if (CurrentTime > 0.8f)
-    {
-        CurrentTime = 0;
-        IsTick = false;
-    }
 
-    UE_LOG(LogTemp, Warning, TEXT("Ticking..."));
+    if (CurrentTime >= 0.8f)
+    {
+        // 자동으로 타이머 중지
+        GetWorld()->GetTimerManager().ClearTimer(ProgressTimerHandle);
+        CurrentTime = 0.0f;
+    }
 }
+
+//void UC_PerfectZone::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+//{
+//    Super::NativeTick(MyGeometry, InDeltaTime);
+//    if (!IsTick)
+//    {
+//        CurrentTime = 0;
+//        //UE_LOG(LogTemp, Warning, TEXT("TickENd"));
+//        return;
+//    }
+//    CurrentTime += InDeltaTime;
+//    UpdateSecondText(CurrentTime);
+//    if (CurrentTime > 0.8f)
+//    {
+//        CurrentTime = 0;
+//        IsTick = false;
+//    }
+//
+//    //UE_LOG(LogTemp, Warning, TEXT("Ticking..."));
+//}

@@ -28,11 +28,11 @@ void UC_InputQueueComponent::PushInput(const FInputActionData& NewInput)
 	//들어온 데이터의 시간을 기록
 	FInputActionData TimedInput = NewInput;
 	TimedInput.Timestamp = GetWorld()->GetTimeSeconds();
-	if (TimedInput.InputType == EInputType::ChargeSkill)
+	/*if (TimedInput.InputType == EInputType::ChargeSkill)
 	{
 		CurrentChargingData = TimedInput;
 		ChargingStratTime = TimedInput.Timestamp;
-	}
+	}*/
 	InputQueue.Add(TimedInput);
 	SetComponentTickEnabled(true);
 }
@@ -93,6 +93,12 @@ void UC_InputQueueComponent::ClearQueueList()
 void UC_InputQueueComponent::ClearChargingQueueList()
 {
 	ChargingQueue.Empty();
+}
+
+void UC_InputQueueComponent::StartChargingSet()
+{
+	ChargingStratTime = GetWorld()->GetTimeSeconds();
+	ClearChargingQueueList();
 }
 
 

@@ -41,6 +41,4 @@ void UC_AnimNotify_AOE::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
         true,
         true
     );
-    UE_LOG(LogTemp, Warning, TEXT("NS_AOE Notify Triggered! Effect=%s"), *GetNameSafe(NiagaraEffect));
-    UE_LOG(LogTemp, Warning, TEXT("NS_AOE Notify Triggered at %s"), *SpawnLocation.ToString());
 }
