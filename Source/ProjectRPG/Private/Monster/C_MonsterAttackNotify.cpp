@@ -43,6 +43,7 @@ void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 		{
 			UE_LOG(LogTemp, Error, TEXT("Attack"));
 			pCharacter->takeDamageEvent(m_Damage* pCharacter->getAtk());
+			pCharacter->OnMonsterDownAttack(Hit);
 		}
 	}
 	//const FTransform MeshTransform = MeshComp->GetSocketTransform(SocketName);

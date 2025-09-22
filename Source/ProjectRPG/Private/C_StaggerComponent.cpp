@@ -21,15 +21,19 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 	if (m_bIsBroken)
 		return;
 
-	m_fCurrentStagger += fStagger;
-
-	if (m_fCurrentStagger >= m_fMaxStagger)
+	if (getStaggerMode() == E_StaggerMode::Normal)
 	{
-		m_bIsBroken = true;
-		m_fBreakTimer = m_fBrokenDuration;
+		m_fCurrentStagger += fStagger;
 
-		m_onBroken.Broadcast();
+		if (m_fCurrentStagger >= m_fMaxStagger)
+		{
+			m_bIsBroken = true;
+			m_fBreakTimer = m_fBrokenDuration;
+
+			m_onBroken.Broadcast();
+		}
 	}
+	
 }
 
 bool UC_StaggerComponent::isBroken()
@@ -70,6 +74,11 @@ float UC_StaggerComponent::getCurrentBreakPoint() const
 void UC_StaggerComponent::setMode(E_StaggerMode eMode)
 {
 	m_eCurrentMode = eMode;
+}
+
+E_StaggerMode UC_StaggerComponent::getStaggerMode() const
+{
+	return m_eCurrentMode;
 }
 
 void UC_StaggerComponent::recover()
