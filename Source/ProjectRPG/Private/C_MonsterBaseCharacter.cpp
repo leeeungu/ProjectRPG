@@ -151,6 +151,9 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 	tryTriggerPhaseChangeOrGimmick();
 
+	if (getIsBlockStagger() == true)
+		setBlockStagger(false);
+
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 
 	
@@ -334,6 +337,16 @@ void AC_MonsterBaseCharacter::setActivePower(bool bActive)
 bool AC_MonsterBaseCharacter::getIsPower() const
 {
 	return m_bIsPower;
+}
+
+void AC_MonsterBaseCharacter::setBlockStagger(bool bActive)
+{
+	m_bStaggerBlock = bActive;
+}
+
+bool AC_MonsterBaseCharacter::getIsBlockStagger() const
+{
+	return m_bStaggerBlock;
 }
 
 void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()

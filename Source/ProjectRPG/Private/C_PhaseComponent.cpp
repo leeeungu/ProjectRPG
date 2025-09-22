@@ -76,10 +76,15 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 
 void UC_PhaseComponent::OnMontageEnded_PhaseChange(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (m_pAnim && m_pAnim->GetCurrentActiveMontage() == Montage)
+		return;
+
+
 	if (m_pAnim)
 	{
 		m_pAnim->OnMontageEnded.RemoveDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
 	}
+
 
 	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
 	{

@@ -35,6 +35,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Stagger")
 	bool m_bIsBroken = false;
 
+	UPROPERTY()
+	class UC_CounterComponent* m_pCounterCom;
+
+	UPROPERTY()
+	class AC_MonsterBaseCharacter* m_pMonster;
+
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stagger")

@@ -122,6 +122,8 @@ private:
 
 	bool m_bIsPower = false;
 
+	bool m_bStaggerBlock = false;
+
 
 	FTimerHandle m_timeHandle;
 
@@ -192,6 +194,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool getIsPower() const;
+
+	UFUNCTION(BlueprintCallable)
+	void setBlockStagger(bool bActive);
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsBlockStagger() const;
 
 	/*
 	* 전투 관련
