@@ -2,6 +2,7 @@
 
 
 #include "C_StaggerComponent.h"
+#include "C_MonsterBaseCharacter.h"
 
 
 
@@ -21,7 +22,7 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 	if (m_bIsBroken)
 		return;
 
-	if (getStaggerMode() == E_StaggerMode::Normal)
+	if (getStaggerMode() == E_StaggerMode::Normal && m_pMonster->getIsBlockStagger() == false)
 	{
 		m_fCurrentStagger += fStagger;
 
@@ -95,7 +96,10 @@ void UC_StaggerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	m_pCounterCom = GetOwner()->GetComponentByClass<UC_CounterComponent>();
+
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
+
 }
 
 
