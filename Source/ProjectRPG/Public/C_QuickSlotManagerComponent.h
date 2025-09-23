@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuickSlotNone);
 UDELEGATE()
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnQuickSlotChange, int, ItemID);
 
+
 UENUM(BlueprintType)
 enum class E_QuickSlotType : uint8
 {
@@ -24,6 +25,8 @@ enum class E_QuickSlotType : uint8
 	E_QuickSlot_MAX UMETA(Hidden, DisplayName = "Max Quick Slot")
 };
 
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuickSlotUsed, E_QuickSlotType, SlotType);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTRPG_API UC_QuickSlotManagerComponent : public UActorComponent, public IC_DataManagerInterface
@@ -50,8 +53,13 @@ public:
 	FOnQuickSlotNone m_onQuickSlotNoneDelegate{};
 	UPROPERTY()
 	FOnQuickSlotChange m_onQuickSlotChange[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
+
+	UPROPERTY(BlueprintAssignable, BlueprintReadWrite)
+	FOnQuickSlotUsed m_onQuickSlotUsed{};
 private:
 	int m_arrQuickSlotItem[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
+	float m_arrQuickSlotCoolTime[(uint8)E_QuickSlotType::E_QuickSlot_MAX]{};
+	float m_fCoolTime = 5.0f;
 	UC_InventoryComponent* m_pInventoryComponent{};
 public:
 	UC_QuickSlotManagerComponent();
@@ -78,6 +86,12 @@ public:
 	UFUNCTION()
 	void useQuickSlotItemID(E_QuickSlotType QuickSlotType) ;
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(BlueprintPure)
+	float getCoolTime() const { return m_fCoolTime; }
+
+	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
+	bool swapSlot(E_QuickSlotType eSrc, E_QuickSlotType eDst);
 protected:
 	virtual void BeginPlay() override;
 

@@ -86,6 +86,9 @@ void UC_EquipComponent::loadBinaryData(TArray<uint8>& arData)
 	SEquipData Data{};
 	if (!UC_DataMangerSubsystem::readBinaryFile(arData, &Data))
 		return;
+	m_fTotalMaxHp = Data.MaxHpValue;
+	m_fTotalAttack = Data.AttackValue;
+
 	for (auto& Equip : Data.arrEquip)
 	{
 		if (Equip <= 0)

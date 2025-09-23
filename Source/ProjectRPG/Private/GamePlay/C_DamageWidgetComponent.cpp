@@ -29,9 +29,9 @@ void UC_DamageWidgetComponent::changeHp(float fPre, float fCurrent)
 {
 	if (m_pDamageWidget)
 	{
-		if (fPre - fCurrent > 0)
+		if (fPre - fCurrent > 0 && fCurrent >= 0) // 감소
 			m_pDamageWidget->drawDamage(fPre - fCurrent);
-		else if (fCurrent - fPre > 0)
+		else if (fCurrent - fPre > 0) // 회복
 			m_pDamageWidget->drawDamage(fCurrent - fPre , FColor::Green);
 	}
 }
