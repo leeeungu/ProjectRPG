@@ -15,6 +15,7 @@
 #include "../Public/Monster/C_StaggerGimmickComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GamePlay/C_DamageWidgetComponent.h"
+#include "NiagaraComponent.h"
 
 
 
@@ -323,6 +324,17 @@ void AC_MonsterBaseCharacter::onAttackEnd()
 	tryTriggerPhaseChangeOrGimmick();
 }
 
+void AC_MonsterBaseCharacter::setNiagaraComponent(UNiagaraComponent* NiagaraCom)
+{
+	m_NiagaraGimmickPlay = NiagaraCom;
+}
+
+void AC_MonsterBaseCharacter::setDeleteNiagaraGimmick()
+{
+	if (m_NiagaraGimmickPlay)
+		m_NiagaraGimmickPlay->DeactivateImmediate();
+}
+
 void AC_MonsterBaseCharacter::reservePhaseChange(float fHp, float fMaxHp)
 {
 	FS_MonsterAction Action{ E_MonsterDeferredAction::PhaseChange, fHp, fMaxHp };
@@ -477,6 +489,7 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
 		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
+		setDeleteNiagaraGimmick();
 		setPhaseState(E_MonsterPhaseState::Idle);
 		setActivePower(false);
 		setBlockStagger(false);

@@ -83,6 +83,12 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY()
+	class AC_MonsterAiController* m_pAiCon;
+
+	UPROPERTY()
+	class UNiagaraComponent* m_NiagaraGimmickPlay;
+
 	/*
 	* 애님몽타주
 	*/
@@ -93,8 +99,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter Montage")
 	UAnimMontage* m_pCounterMontage;
 
-	UPROPERTY()
-	class AC_MonsterAiController* m_pAiCon;
+	
 
 	/*
 	* 컴포넌트
@@ -155,9 +160,7 @@ private:
 
 	void onAttackEnd();
 
-	
-
-
+	void setDeleteNiagaraGimmick();	
 
 protected:
 	virtual void BeginPlay() override;
@@ -167,6 +170,8 @@ public:
 	AC_MonsterBaseCharacter();
 
 	virtual void Tick(float DeltaTime) override;
+
+	void setNiagaraComponent(UNiagaraComponent* NiagaraCom);
 
 	UFUNCTION(BlueprintCallable)
 	void reStartAi();
