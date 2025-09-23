@@ -241,7 +241,7 @@ UC_SkillComponent::UC_SkillComponent()
 	Dead.SkillName = "Dead";
 	Dead.Cooldown = 0.0f;
 	Dead.AttackPowerMultiplier = 0.0f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> deadobj(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> deadobj(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Die_Montage.Dual_Die_Montage"));
 	if (deadobj.Succeeded()) Dead.DirectionMontages.Add(E4WayDirection::Default, deadobj.Object);
 	SkillMap.Add(Dead.SkillName, Dead);
 	//Restart애니메이션
@@ -249,7 +249,7 @@ UC_SkillComponent::UC_SkillComponent()
 	Restart.SkillName = "Restart";
 	Restart.Cooldown = 0.0f;
 	Restart.AttackPowerMultiplier = 0.0f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> restartobj(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> restartobj(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Restart_Montage.Dual_Restart_Montage"));
 	if (restartobj.Succeeded()) Restart.DirectionMontages.Add(E4WayDirection::Default, restartobj.Object);
 	SkillMap.Add(Restart.SkillName, Restart);
 	

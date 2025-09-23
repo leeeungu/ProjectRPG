@@ -192,7 +192,6 @@ void AC_Player::deadPlayer()
 	{
 		m_onDead.Broadcast();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Dead"));
 }
 
 void AC_Player::restartPlayer()
