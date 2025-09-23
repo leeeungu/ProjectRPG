@@ -89,7 +89,8 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 void AC_MonsterBaseCharacter::setPhaseState(E_MonsterPhaseState eState)
 {
-	m_eMonsterState = eState;
+	if (m_eMonsterState != eState)
+		m_eMonsterState = eState;
 }
 
 E_MonsterPhaseState AC_MonsterBaseCharacter::getCurrentState() const
@@ -128,6 +129,12 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 {
 	AAIController* pAiCon = Cast<AAIController>(GetController());
 
+	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute && m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() > 0.1f)
+	{
+		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
+
+	}
+
 	if (getCurrentState() != E_MonsterPhaseState::Stagger)
 	{
 		stopAi();
@@ -136,6 +143,8 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 
 		setPhaseState(E_MonsterPhaseState::Stagger);
 	}
+
+	
 
 	
 }
@@ -159,11 +168,7 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 	
 
-	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute && m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() >= 0.01f)
-	{
-		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
-		
-	}
+	
 	
 	UE_LOG(LogTemp, Warning, TEXT("MaxStagger : %.f"), m_pStaggerComp->getMaxStaggerPoint());
 }
@@ -472,7 +477,9 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
 		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
-
+		setPhaseState(E_MonsterPhaseState::Idle);
+		setActivePower(false);
+		setBlockStagger(false);
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("End Gimmick failed!!!!!!!!!!"));

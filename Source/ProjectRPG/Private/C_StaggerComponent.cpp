@@ -22,17 +22,37 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 	if (m_bIsBroken)
 		return;
 
-	if (getStaggerMode() == E_StaggerMode::Normal && m_pMonster->getIsBlockStagger() == false)
+	switch (getStaggerMode())
 	{
-		m_fCurrentStagger += fStagger;
+	case E_StaggerMode::Normal:
+		if (m_pMonster->getIsBlockStagger() == false)
+		{
+			m_fCurrentStagger += fStagger;
 
-		if (m_fCurrentStagger >= m_fMaxStagger)
+			if (m_fCurrentStagger >= m_fMaxStagger)
+			{
+				m_bIsBroken = true;
+				m_fBreakTimer = m_fBrokenDuration;
+
+				m_onBroken.Broadcast();
+			}
+		}
+		break;
+
+	case E_StaggerMode::Gimmick:
+		m_fGimmickCurrentStagger += fStagger;
+
+		if (m_fGimmickCurrentStagger >= m_fGimmickMaxStagger)
 		{
 			m_bIsBroken = true;
-			m_fBreakTimer = m_fBrokenDuration;
+			m_fBreakTimer = m_fGimmickBreakDuration;
 
 			m_onBroken.Broadcast();
 		}
+		break;
+
+	default:
+		break;
 	}
 	
 }
@@ -40,6 +60,31 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 bool UC_StaggerComponent::isBroken()
 {
 	return m_bIsBroken;
+}
+
+void UC_StaggerComponent::setGimmickMaxStaggerPoint(float fStagger)
+{
+	m_fGimmickMaxStagger = fStagger;
+}
+
+void UC_StaggerComponent::setGimmickStaggerPoint(float fStagger)
+{
+	m_fGimmickCurrentStagger = fStagger;
+}
+
+void UC_StaggerComponent::setGimmickBreakDuration(float fDuration)
+{
+	m_fGimmickBreakDuration = fDuration;
+}
+
+float UC_StaggerComponent::getGimmickMaxStaggerPoint() const
+{
+	return m_fGimmickMaxStagger;
+}
+
+float UC_StaggerComponent::getGimmickCurrentStaggerPoint() const
+{
+	return m_fGimmickCurrentStagger;
 }
 
 void UC_StaggerComponent::setMaxStaggerPoint(float fStagger)
@@ -74,7 +119,13 @@ float UC_StaggerComponent::getCurrentBreakPoint() const
 
 void UC_StaggerComponent::setMode(E_StaggerMode eMode)
 {
-	m_eCurrentMode = eMode;
+	if (m_eCurrentMode != eMode)
+	{
+		m_eCurrentMode = eMode;
+		m_onStaggerModeChange.Broadcast(eMode);
+	}
+
+	
 }
 
 E_StaggerMode UC_StaggerComponent::getStaggerMode() const

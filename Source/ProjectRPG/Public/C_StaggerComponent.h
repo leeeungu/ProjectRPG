@@ -6,14 +6,19 @@
 #include "Components/ActorComponent.h"
 #include "C_StaggerComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class E_StaggerMode : uint8
+{
+	Normal		UMETA(DisplayName = "Normal"),
+	Gimmick		UMETA(DisplayName = "Gimmick")
+};
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBroken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRecover);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaggerModeChange, E_StaggerMode, eNewMode);
 
-enum class E_StaggerMode
-{
-	Normal,
-	Gimmick
-};
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -41,6 +46,10 @@ private:
 	UPROPERTY()
 	class AC_MonsterBaseCharacter* m_pMonster;
 
+	float m_fGimmickMaxStagger = 0.f;
+	float m_fGimmickCurrentStagger = 0.f;
+	float m_fGimmickBreakDuration = 0.f;
+
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stagger")
@@ -48,6 +57,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stagger")
 	FOnRecover m_onRecover;
+
+	UPROPERTY(BlueprintAssignable, Category = "Stagger")
+	FOnStaggerModeChange m_onStaggerModeChange;
 
 private:
 	void recover();
@@ -66,6 +78,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Stagger")
 	bool isBroken();
+
+	void setGimmickMaxStaggerPoint(float fStagger);
+	void setGimmickStaggerPoint(float fStagger);
+	void setGimmickBreakDuration(float fDuration);
+
+	UFUNCTION(BlueprintCallable)
+	float getGimmickMaxStaggerPoint() const;
+	UFUNCTION(BlueprintCallable)
+	float getGimmickCurrentStaggerPoint() const;
 
 	void setMaxStaggerPoint(float fStagger);
 	void setStaggerPoint(float fStagger);

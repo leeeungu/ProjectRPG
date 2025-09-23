@@ -38,8 +38,8 @@ void UC_StaggerGimmickComponent::applyGimmickStagger(UC_StaggerComponent* pStagg
 
 	
 
-	pStaggerCom->setMaxStaggerPoint(m_fGoalStagger);
-	pStaggerCom->setBreakDuration(m_fBrokenDuration);
+	pStaggerCom->setGimmickMaxStaggerPoint(m_fGoalStagger);
+	pStaggerCom->setGimmickBreakDuration(m_fBrokenDuration);
 	pStaggerCom->setMode(E_StaggerMode::Gimmick);
 }
 
