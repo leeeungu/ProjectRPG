@@ -388,21 +388,23 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 			return (int32)sFirst.eType < (int32)sSecond.eType;
 		});
 
+
+
 	for (const FS_MonsterAction& sAction : arrPendingActions)
 	{
 		switch (sAction.eType)
 		{
 		case E_MonsterDeferredAction::PhaseChange:
-			if (m_pPhaseComponent)
+			if (m_pPhaseComponent && getCurrentState() != E_MonsterPhaseState::PhaseChanged)
 			{
 				m_pPhaseComponent->phaseChange(sAction.fHp, sAction.fMaxHp);
 			}
 			break;
 
 		case E_MonsterDeferredAction::Gimmick:
-			if (m_pStaggerGimmickComp)
+			if (getCurrentState() != E_MonsterPhaseState::GimmickReady)
 			{
-				m_pStaggerGimmickComp->startGimmick();
+				playStaggerGimmick();
 			}
 			break;
 
@@ -410,6 +412,7 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 			break;
 		}
 	}
+	
 
 
 		
@@ -452,10 +455,10 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 void AC_MonsterBaseCharacter::playStaggerGimmick()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("playStaggerGimmick Called"));
+
 	if (m_pStaggerGimmickComp)
 	{
 		m_pStaggerGimmickComp->startGimmick();
-
 	}
 
 

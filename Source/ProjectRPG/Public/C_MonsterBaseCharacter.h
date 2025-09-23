@@ -162,6 +162,8 @@ private:
 
 	void setDeleteNiagaraGimmick();	
 
+	
+
 protected:
 	virtual void BeginPlay() override;
 

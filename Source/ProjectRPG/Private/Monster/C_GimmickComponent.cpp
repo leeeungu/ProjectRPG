@@ -45,8 +45,11 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	
 	if (fHpRatio <= m_fTriggerHp)
 	{
-		
-		UE_LOG(C_GimmickGimmickComponent, Error, TEXT("HP: [%s] %.1f / %.1f , Trigger: %.1f"),*this->GetName(), fHp, fMaxHp, m_fTriggerHp);
+		if (!canPlayGimmickMontage())
+		{
+			m_pMonster->reserveGimmick(m_pMonster->getHp(), m_pMonster->getMaxHp());
+			return false;
+		}
 		return true;
 	}
 		
@@ -68,17 +71,6 @@ void UC_GimmickComponent::startGimmick()
 	m_pMonster->setActivePower(true);
 
 
-	if (!canPlayGimmickMontage())
-	{
-		// 공격 중이면 예약
-		if (m_pMonster->getIsAttacking())
-		{
-			m_pMonster->reserveGimmick(m_pMonster->getHp(), m_pMonster->getMaxHp());
-			UE_LOG(LogTemp, Warning, TEXT("[Gimmick] CurrentHp: %.1f / %.1f"), m_pMonster->getHp(), m_pMonster->getMaxHp());
-		}
-		return;
-	}
-
 	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
 
 	m_pMonster->stopAi();
@@ -94,6 +86,23 @@ void UC_GimmickComponent::startGimmick()
 		onStartGimmickMontageEnded(nullptr, false);
 	}
 
+}
+
+void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!m_pMonster)
+		return;
+
+	if (m_pAnim)
+	{
+		m_pAnim->OnMontageEnded.RemoveAll(this);
+	}
+
+	m_pMonster->TeleportTo(m_vGimmickPos, FRotator::ZeroRotator);
+
+
+	// 기믹 실행으로 넘어감
+	excuteGimmick();
 }
 
 // Sets default values for this component's properties
@@ -141,22 +150,6 @@ void UC_GimmickComponent::excuteGimmick()
 
 }
 
-void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	if (!m_pMonster)
-		return;
-
-	if (m_pAnim)
-	{
-		m_pAnim->OnMontageEnded.RemoveAll(this);
-	}
-
-	m_pMonster->TeleportTo(m_vGimmickPos, FRotator::ZeroRotator);
-	
-
-	// 기믹 실행으로 넘어감
-	excuteGimmick();
-}
 
 float UC_GimmickComponent::getGimmickTime() const
 {
@@ -177,6 +170,9 @@ bool UC_GimmickComponent::canPlayGimmickMontage() const
 		return false;
 
 	if (m_pMonster->getIsAttacking())
+		return false;
+
+	if (m_pMonster->getCurrentState() == E_MonsterPhaseState::Stagger)
 		return false;
 
 

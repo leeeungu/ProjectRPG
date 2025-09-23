@@ -28,6 +28,39 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 	if (m_nCurrentPhaseIndex >= m_arrPhase.Num())
 		return;
 
+	
+
+	float fCurrentHpPercent = (fHp / fMaxHp) * 100.f;
+
+	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
+	
+
+	if (fCurrentHpPercent <= sPhase.fChangePercentHp)
+	{
+		if (!m_pAnim)
+			return;
+
+		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanging);
+
+		if (m_pAnim->IsAnyMontagePlaying() || m_pMonster->getCurrentState() == E_MonsterPhaseState::Stagger)
+		{
+			m_pAnim->OnMontageEnded.AddDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
+			return;	
+		}
+		
+		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
+		m_onPhaseChange.Broadcast();
+
+		m_pMonster->reservePhaseChange(fHp, fMaxHp);
+
+		
+	}
+	else
+		return;
+
+
+
+
 	//if (!m_pMonster || m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
 	//{
 	//	// 공격 중이면 예약
@@ -43,34 +76,6 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 	//	}
 	//	return;
 	//}
-
-	float fCurrentHpPercent = (fHp / fMaxHp) * 100.f;
-
-	const FS_PhaseData& sPhase = m_arrPhase[m_nCurrentPhaseIndex];
-	
-
-	if (fCurrentHpPercent <= sPhase.fChangePercentHp)
-	{
-		if (!m_pAnim)
-			return;
-
-		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanging);
-
-		if (m_pAnim->IsAnyMontagePlaying())
-		{
-			m_pAnim->OnMontageEnded.AddDynamic(this, &UC_PhaseComponent::OnMontageEnded_PhaseChange);
-			return;	
-		}
-		
-		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
-		m_onPhaseChange.Broadcast();
-
-		m_pMonster->reservePhaseChange(fHp, fMaxHp);
-
-		
-	}
-	else
-		return;
 	
 }
 
