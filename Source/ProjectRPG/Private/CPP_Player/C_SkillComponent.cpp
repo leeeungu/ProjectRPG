@@ -236,6 +236,22 @@ UC_SkillComponent::UC_SkillComponent()
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
 	}
 	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);
+	//Dead 애니메이션
+	FSkillData Dead{};
+	Dead.SkillName = "Dead";
+	Dead.Cooldown = 0.0f;
+	Dead.AttackPowerMultiplier = 0.0f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> deadobj(TEXT(""));
+	if (deadobj.Succeeded()) Dead.DirectionMontages.Add(E4WayDirection::Default, deadobj.Object);
+	SkillMap.Add(Dead.SkillName, Dead);
+	//Restart애니메이션
+	FSkillData Restart{};
+	Restart.SkillName = "Restart";
+	Restart.Cooldown = 0.0f;
+	Restart.AttackPowerMultiplier = 0.0f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> restartobj(TEXT(""));
+	if (restartobj.Succeeded()) Restart.DirectionMontages.Add(E4WayDirection::Default, restartobj.Object);
+	SkillMap.Add(Restart.SkillName, Restart);
 	
 	//Collision
 	FSkillCollisionData Sphere_A{};
@@ -267,7 +283,7 @@ UC_SkillComponent::UC_SkillComponent()
 	Box_C.ShapeType = ESkillCollisionShapeType::Box;
 	Box_C.Dimensions = FVector(300.f, 300.f, 600.f);
 	Box_C.Duration = 0.5f;
-	SkillCollisionDataArray.Add(Box_C);
+	SkillCollisionDataArray.Add(Box_C);//4번
 
 	FSkillCollisionData Sphere_C{};
 	Sphere_C.ShapeType = ESkillCollisionShapeType::Sphere;
@@ -280,6 +296,12 @@ UC_SkillComponent::UC_SkillComponent()
 	Box_D.Dimensions = FVector(800.f, 700.f, 300.f);
 	Box_D.Duration = 0.5f;
 	SkillCollisionDataArray.Add(Box_D);
+
+	FSkillCollisionData Box_E{};
+	Box_E.ShapeType = ESkillCollisionShapeType::Box;
+	Box_E.Dimensions = FVector(300.f, 1000.f, 300.f);
+	Box_E.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_E);//7번
 }
 
 

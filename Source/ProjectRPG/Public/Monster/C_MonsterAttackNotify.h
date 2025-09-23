@@ -19,6 +19,8 @@ protected:
 	float m_Damage = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool m_bDrawDebug{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool m_bSetInstigator{};
 private:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

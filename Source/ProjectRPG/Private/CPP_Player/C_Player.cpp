@@ -21,22 +21,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
+#include "CPP_Player/UI/C_PlayerStateMGR.h"
 #include "GamePlay/C_DamageWidgetComponent.h"
 
-void AC_Player::PlayerDownTest()
-{
-	float damage = 5.f;
-	ReceiveDamage(damage);
-}
 
-void AC_Player::ReceiveDamage(float damageAmount)
-{
-	//hp에서 캐릭터 피깍음
-	//만약에 공격형형태가 다운형태면
-	ClearMoveState();
-	Down();
-
-}
 void AC_Player::Down()
 {
 	RunningState = ERunningSystemState::Down;
@@ -106,19 +94,43 @@ void AC_Player::HandleResult(bool result)
 }
 
 
-void AC_Player::OnMonsterDownAttack(const FHitResult& Hit)
+void AC_Player::OnMonsterDownAttack(const FHitResult& Hit, AC_BaseCharacter* pInstigator)
 {
+	if (RunningState == ERunningSystemState::Down) return;
 	IsDownFlying = true;
-	FVector HitLocation = Hit.ImpactPoint;
+	FVector HitLocation = Hit.TraceStart;
+	if (pInstigator)
+		HitLocation = pInstigator->GetActorLocation();
 	FVector MyLocation = GetActorLocation();
 
 	// 맞은 방향 (내 위치에서 충돌지점 반대로)
 	FVector KnockbackDir = (MyLocation - HitLocation).GetSafeNormal();
 	KnockbackDir.Z = 0.f;
 	DownDirection = KnockbackDir;
-	Down();
+	if (m_fHp > 0)
+	{
+		Down();
+	}
 	DownRecive = true;
 }
+//void AC_Player::OnMonsterDownAttackFrom(FVector SourceLocation)
+//{
+//	if (RunningState == ERunningSystemState::Down) return;
+//
+//	IsDownFlying = true;
+//
+//	FVector MyLocation = GetActorLocation();
+//
+//	// 중앙 기준점을 내 Z 위치에 맞춰서 수평선상 계산
+//	SourceLocation.Z = MyLocation.Z;
+//
+//	FVector KnockbackDir = (MyLocation - SourceLocation).GetSafeNormal();
+//	KnockbackDir.Z = 0.f;
+//
+//	DownDirection = KnockbackDir;
+//	Down();
+//	DownRecive = true;
+//}
 
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
 {
@@ -169,24 +181,31 @@ void AC_Player::deadPlayer()
 	//	GetController()->SetActorTickEnabled(false);
 	SetActorTickEnabled(false);
 	SetCanBeDamaged(false);
+	ClearMoveState();
+	bCanMove = false;
+	DownDist = 0.f;
 	SetRunningSystemState(ERunningSystemState::Busy);
+	m_skillCom->UsingSkill(FName("Dead"));
 	if (getHp() >= 0.1f)
 		setHp(0);
 	if(m_onDead.IsBound())
 	{
 		m_onDead.Broadcast();
 	}
-	ClearMoveState();
+	UE_LOG(LogTemp, Warning, TEXT("Dead"));
 }
 
 void AC_Player::restartPlayer()
 {
 	//if (GetController())
 	//	GetController()->SetActorTickEnabled(true);
+	//SetActorLocation("월드상 액터위치")
 	SetCanBeDamaged(true);
 	SetActorTickEnabled(true);
 	ClearMoveState();
-	SetRunningSystemState(ERunningSystemState::Idle);
+	DownDist = 0.f;
+	m_skillCom->UsingSkill(FName("Restart"));//bCanMove는 애니메이션노티파이에서 Enabled활성화
+	SetRunningSystemState(ERunningSystemState::Idle);//idle도 몽타주가 끝나면 자동호출됨.
 	setHp(getMaxHp());
 	//OnMoveToPosPlayer(GetActorLocation());
 	//리스타트위치?
@@ -460,13 +479,11 @@ void AC_Player::RunningSystemManager()
 				{
 					HandleResult(ChargeInput.Timing);
 					//실패! 브로드캐스트( 몽타주[실패이펙트,사운드], UI실패)
-					UE_LOG(LogTemp, Warning, TEXT("Fail"));
 				}
 				else 
 				{
 					HandleResult(ChargeInput.Timing);
-					//성공! 
-					UE_LOG(LogTemp, Warning, TEXT("Succed"));
+					//성공!
 				}
 				m_skillCom->RequestJumpToSection(FName("Released"));
 				break;
@@ -670,6 +687,8 @@ void AC_Player::BeginPlay()
 			//플레이어는 바인딩된 'HandleChangeRunningState' 실핼
 		}
 	}
+
+
 	if (WeaponClass)
 	{
 		// 무기 스폰
@@ -832,7 +851,7 @@ void AC_Player::Tick(float DeltaTime)
 		}
 		else
 		{
-			float speed = 30.f;
+			float speed = 50.f;
 			FVector MoveVec = DownDirection * speed;
 			AddActorWorldOffset(MoveVec, true);
 			DownDist -= MoveVec.Length();

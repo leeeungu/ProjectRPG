@@ -106,7 +106,7 @@ private:
 	bool IsPeriod = false;
 	float PeriodDist = 300.f;
 	FVector ParryDirection;
-	bool IsDownFlying = false;
+	bool IsDownFlying = false;//날라가는중간에 패링사용금지
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
@@ -125,6 +125,7 @@ private:
 	//Skill UI_MGR
 	UPROPERTY()
 	class UC_PlayerSKillMGR* SkillUiWidget;
+
 
 public:
 	UPROPERTY(EditAnywhere, Category = "UI")
@@ -153,7 +154,7 @@ public:
 
 	//characterbase override function
 	UFUNCTION(BlueprintCallable)
-	void OnMonsterDownAttack(const FHitResult& Hit);
+	void OnMonsterDownAttack(const FHitResult& Hit, AC_BaseCharacter* pInstigator = nullptr);
 	bool DownRecive = false;
 	FVector DownDirection{};
 	float DownDist = 300.f;
@@ -168,6 +169,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void deadPlayer();
+public:
 	UFUNCTION(BlueprintCallable)
 	void restartPlayer();
 private:
@@ -182,9 +184,6 @@ private:
 	void AttackMode();
 	void PlayerStateCheking(float DeltaTime);
 
-	UFUNCTION(BlueprintCallable)
-	void PlayerDownTest();
-	void ReceiveDamage(float damageAmount);
 	void Down();
 	//VFX제거
 	void DeactivateAllNiagaraEffects();
