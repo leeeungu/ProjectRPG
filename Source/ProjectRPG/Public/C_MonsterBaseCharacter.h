@@ -271,5 +271,16 @@ public:
 
 	UFUNCTION()
 	void endStaggerGimmick();
+
+	//VFX
+	//HIT VFX
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class UNiagaraSystem* HitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class USoundBase* HitSound;
+
+	UFUNCTION(BlueprintCallable)
+	void playHitEffect();
 	
 };

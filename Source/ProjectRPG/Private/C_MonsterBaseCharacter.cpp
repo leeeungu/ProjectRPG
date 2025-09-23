@@ -13,6 +13,7 @@
 #include "C_DecalUtils.h"
 #include "C_NiagaraUtil.h"
 #include "../Public/Monster/C_StaggerGimmickComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "GamePlay/C_DamageWidgetComponent.h"
 
 
@@ -480,6 +481,22 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 	* 광역 높은 데미지 등
 	* 처리 후 AI 재가동 시키기
 	*/
+}
+
+void AC_MonsterBaseCharacter::playHitEffect()
+{
+	const FVector ActorLocation = GetActorLocation();
+	// Niagara VFX
+	if (HitVFX)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitVFX, ActorLocation);
+	}
+
+	// Hit Sound
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, ActorLocation);
+	}
 }
 
 
