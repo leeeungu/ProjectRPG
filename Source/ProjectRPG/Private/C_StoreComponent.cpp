@@ -70,12 +70,12 @@ bool UC_StoreComponent::checkAlreadyHave(int nIndex, APlayerController* Player)
 		return false;
 	FS_ItemStoreData& sData = m_arrStoreList[nIndex];
 	E_EquipEffectType ItemType{};
-	int nItemID{};
-	while (ItemType != E_EquipEffectType::E_EquipTypeMax && !Equip->getEquipItemID(ItemType, nItemID))
+	int nItemID = UC_ItemDataSubsystem::getUnValidItemID_CPP();
+	while (ItemType != E_EquipEffectType::E_EquipTypeMax)
 	{
-		ItemType = E_EquipEffectType((int)ItemType + 1);
-		if (nItemID == sData.nBuyItemID)
+		if (Equip->getEquipItemID(ItemType, nItemID) && nItemID == sData.nBuyItemID)
 			return true;
+		ItemType = E_EquipEffectType((int)ItemType + 1);
 	}
 
 	if (Inventroy->getItemCountByID(sData.nBuyItemID, nItemID))

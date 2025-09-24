@@ -126,7 +126,7 @@ TArray<uint8> UC_EquipComponent::getBinaryData()
 bool UC_EquipComponent::getEquipItemID(E_EquipEffectType ItemType, int& ItemID)
 {
 	ItemID = UC_ItemDataSubsystem::getUnValidItemID_CPP();
-	int* pValue = m_setEquipData.Find(ItemType); // 여기 메모리 터짐
+	int* pValue = m_setEquipData.Find(ItemType); 
 	if (pValue)
 		ItemID = *pValue;
 	return pValue != nullptr;

@@ -71,5 +71,5 @@ FVector2D UC_MinimapWidget::WorldToMiniMap(FVector WorldPos, FVector2D MiniMapSi
 	float U = (NormalU + 0.5f) * MiniMapSize.Y;
 	float V = (1.0f - (NormalV + 0.5f)) * MiniMapSize.X;
 
-	return FVector2D(U - 8, V - 8); // 그림 크기 8 pixel
+	return FVector2D(U - 16, V - 16); // 그림 크기 8 pixel
 }
