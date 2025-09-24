@@ -51,7 +51,7 @@ void UC_PhaseComponent::phaseChange(float fHp, float fMaxHp)
 		m_pMonster->setPhaseState(E_MonsterPhaseState::PhaseChanged);
 		m_onPhaseChange.Broadcast();
 
-		m_pMonster->reservePhaseChange(fHp, fMaxHp);
+		//m_pMonster->reservePhaseChange(fHp, fMaxHp);
 
 		
 	}

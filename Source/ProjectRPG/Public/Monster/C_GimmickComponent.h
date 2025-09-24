@@ -41,6 +41,9 @@ public:
 	// Sets default values for this component's properties
 	UC_GimmickComponent();
 
+	bool getIsSucceessGimmick() const;
+	void setSucceessGimmick(bool bSucceess);
+
 private:
 	bool isMonsterIdle() const;
 
@@ -72,5 +75,7 @@ public:
 	bool canPlayGimmickMontage() const;
 
 	bool IsPlayingGimmick();
+
+	void setGimmickPlaying(bool bPlaying);
 		
 };

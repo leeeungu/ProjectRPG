@@ -162,6 +162,8 @@ private:
 
 	void setDeleteNiagaraGimmick();	
 
+	void initGimmick();
+
 	
 
 protected:

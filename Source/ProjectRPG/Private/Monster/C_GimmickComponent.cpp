@@ -64,18 +64,16 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 
 void UC_GimmickComponent::startGimmick()
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("start Gimmick Called"));
 
 	if (!m_pMonster || !m_pAnim)
 		return;
 
-	m_pMonster->setActivePower(true);
-
-
 	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
 
-	m_pMonster->stopAi();
+	m_pMonster->setActivePower(true);
 
-	
+	m_pMonster->stopAi();
 
 	if (m_pGimmickStartMontage)
 	{
@@ -115,6 +113,16 @@ UC_GimmickComponent::UC_GimmickComponent()
 	// ...
 }
 
+bool UC_GimmickComponent::getIsSucceessGimmick() const
+{
+	return m_bSuccessGimmick;
+}
+
+void UC_GimmickComponent::setSucceessGimmick(bool bSucceess)
+{
+	m_bSuccessGimmick = bSucceess;
+}
+
 
 void UC_GimmickComponent::playMontageWithCallBack(UAnimMontage* pMontage, FName strFunctionName)
 {
@@ -142,11 +150,12 @@ void UC_GimmickComponent::playMontageWithCallBack(UAnimMontage* pMontage, FName 
 
 void UC_GimmickComponent::excuteGimmick()
 {
-	m_bGimmickPlaying = true;
-
 	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickExecute);
 
-	m_pAnim->Montage_Play(m_pGimmikPlayMontage);
+	m_bGimmickPlaying = true;
+
+	if (m_pMonster->getCurrentState() == E_MonsterPhaseState::GimmickExecute)
+		m_pAnim->Montage_Play(m_pGimmikPlayMontage);
 
 }
 
@@ -184,6 +193,11 @@ bool UC_GimmickComponent::IsPlayingGimmick()
 	return m_bGimmickPlaying;
 }
 
+void UC_GimmickComponent::setGimmickPlaying(bool bPlaying)
+{
+	m_bGimmickPlaying = bPlaying;
+}
+
 void UC_GimmickComponent::endGimmick()
 {
 	m_bGimmickPlaying = false;
@@ -208,7 +222,7 @@ void UC_GimmickComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	if (m_bGimmickPlaying)
 	{
 		m_fGimmickTime -= DeltaTime;
-		if (m_fGimmickTime <= 0)
+		if (m_fGimmickTime <= 0 && !m_bSuccessGimmick)
 			endGimmick();
 	}
 		

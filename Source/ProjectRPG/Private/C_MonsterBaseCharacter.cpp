@@ -128,24 +128,31 @@ void AC_MonsterBaseCharacter::reStartAi()
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
 {
+	UE_LOG(LogTemp, Warning, TEXT("onStaggerBroken 호출됨 - 현재 상태: %d"), m_eMonsterState);
+
 	AAIController* pAiCon = Cast<AAIController>(GetController());
 
-	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute && m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() > 0.1f)
-	{
-		m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("%d"), m_eMonsterState);
 
+	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute)
+	{
+		if (m_pStaggerGimmickComp && m_pStaggerGimmickComp->getGimmickTime() > 0.1f)
+		{
+			m_pStaggerGimmickComp->setSucceessGimmick(true);
+			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
+		}
+			
 	}
 
 	if (getCurrentState() != E_MonsterPhaseState::Stagger)
 	{
+		setPhaseState(E_MonsterPhaseState::Stagger);
+
 		stopAi();
 
 		playStaggerMontage();
-
-		setPhaseState(E_MonsterPhaseState::Stagger);
+		
 	}
-
-	
 
 	
 }
@@ -155,23 +162,21 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 	if (m_pAiCon)
 		reStartAi();
 
+	if (getCurrentState() == E_MonsterPhaseState::Dead)
+		m_onDead.Broadcast();
+
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, m_pStaggerMontage);
+
+	if (getIsBlockStagger() == true)
+		setBlockStagger(false);
 
 	setPhaseState(E_MonsterPhaseState::Idle);
 
 	tryTriggerPhaseChangeOrGimmick();
 
-	if (getIsBlockStagger() == true)
-		setBlockStagger(false);
-
 	UE_LOG(LogTemp, Warning, TEXT("Recover!!!!!!!!!!!!!!!!!!!!!!!!!!"));
 
-	
-
-	
-	
-	UE_LOG(LogTemp, Warning, TEXT("MaxStagger : %.f"), m_pStaggerComp->getMaxStaggerPoint());
 }
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
@@ -335,6 +340,20 @@ void AC_MonsterBaseCharacter::setDeleteNiagaraGimmick()
 		m_NiagaraGimmickPlay->DeactivateImmediate();
 }
 
+void AC_MonsterBaseCharacter::initGimmick()
+{
+	if (m_pStaggerComp && m_pStaggerGimmickComp)
+	{
+		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
+		m_pStaggerGimmickComp->setGimmickPlaying(false);
+		setDeleteNiagaraGimmick();
+		setPhaseState(E_MonsterPhaseState::Idle);
+		setActivePower(false);
+		setBlockStagger(false);
+		
+	}
+}
+
 void AC_MonsterBaseCharacter::reservePhaseChange(float fHp, float fMaxHp)
 {
 	FS_MonsterAction Action{ E_MonsterDeferredAction::PhaseChange, fHp, fMaxHp };
@@ -402,9 +421,10 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 			break;
 
 		case E_MonsterDeferredAction::Gimmick:
-			if (getCurrentState() != E_MonsterPhaseState::GimmickReady)
+			if (getCurrentState() != E_MonsterPhaseState::GimmickExecute)
 			{
-				playStaggerGimmick();
+				if (m_pStaggerGimmickComp)
+					m_pStaggerGimmickComp->startGimmick();
 			}
 			break;
 
@@ -412,41 +432,6 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 			break;
 		}
 	}
-	
-
-
-		
-	
-
-
-	//if (bPendingPhaseChange)
-	//{
-	//	bPendingPhaseChange = false;
-
-	//	if (m_pPhaseComponent)
-	//	{
-
-	//		m_pPhaseComponent->phaseChange(m_fPendingHp, m_fPendingMaxHp);
-
-	//		return;
-	//	}
-	//}
-
-	//if (getCurrentState() == E_MonsterPhaseState::PhaseChanging)
-	//{
-	//	return;
-	//}
-
-	//// 기믹 예약 처리
-	//if (bPendingGimmickStart)
-	//{
-	//	bPendingGimmickStart = false;
-
-	//	if (m_pStaggerGimmickComp)
-	//	{
-	//		m_pStaggerGimmickComp->startGimmick();
-	//	}
-	//}
 
 	
 }
@@ -454,13 +439,6 @@ void AC_MonsterBaseCharacter::tryTriggerPhaseChangeOrGimmick()
 
 void AC_MonsterBaseCharacter::playStaggerGimmick()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("playStaggerGimmick Called"));
-
-	if (m_pStaggerGimmickComp)
-	{
-		m_pStaggerGimmickComp->startGimmick();
-	}
-
 
 	/*
 	* 무력화를 방해시킬 공격
@@ -481,11 +459,8 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 		UC_NiagaraUtil::spawnNiagaraAtLocation(GetWorld(), m_pDangerPlace, vDecalLocation2,
 			FRotator(-90.f, 0.f, 0.f), 3.f, 800.f);
 	}*/
-	
 
-	
 }
-
 
 void AC_MonsterBaseCharacter::endStaggerGimmick()
 {
@@ -521,8 +496,6 @@ void AC_MonsterBaseCharacter::playHitEffect()
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, ActorLocation);
 	}
 }
-
-
 
 void AC_MonsterBaseCharacter::Destroyed()
 {
