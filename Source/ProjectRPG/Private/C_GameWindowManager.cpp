@@ -77,6 +77,23 @@ void UC_GameWindowManager::setStoreMode(bool bSetStoreMode)
 	}
 }
 
+void UC_GameWindowManager::setNPCMode(bool bMode)
+{
+	int i = 1;
+	for (i; i < (uint8)E_WindowType::E_Max; i++)
+	{
+		removeWidgetFromMain((E_WindowType)i);
+	}
+	if (bMode)
+	{
+		runWidgetFunc({ E_WindowType::E_NPCWidget }, &UC_GameWindowManager::addWidgetToMain);
+	}
+	else
+	{
+		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::addWidgetToMain);
+	}
+}
+
 void UC_GameWindowManager::BeginPlay()
 {
 	UActorComponent::BeginPlay();

@@ -45,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void setStoreMode(bool bSetStoreMode);
+
+	UFUNCTION(BlueprintCallable)
+	void setNPCMode(bool bMode);
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnRegister() override; 
