@@ -292,13 +292,17 @@ bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
 	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return false;
-	AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
-	
-	if (pItem && pItem->useItemActor())
+	int MaxCount = nCount;
+	while (MaxCount > 0)
 	{
-		return removeItemAtSlot(nY, nX, nCount);
+		AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+		if (pItem && pItem->useItemActor())
+		{
+			removeItemAtSlot(nY, nX, 1);
+		}
+		MaxCount--;
 	}
-	return false;
+	return MaxCount <= 0;
 }
 
 void UC_InventoryComponent::BeginPlay()

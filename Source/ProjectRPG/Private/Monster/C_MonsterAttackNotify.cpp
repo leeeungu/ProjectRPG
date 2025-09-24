@@ -35,6 +35,7 @@ void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 
 	Character->GetWorld()->SweepMultiByChannel(OutHits, Position, Position, FQuat::Identity, ECollisionChannel::ECC_Pawn
 		, CollisionShape, Params);
+	float Damage = m_Damage * Character->getAtk();
 	for (FHitResult& Hit : OutHits)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Check"));
@@ -42,7 +43,7 @@ void UC_MonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 		if (pCharacter)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Attack"));
-			pCharacter->takeDamageEvent(m_Damage* pCharacter->getAtk());
+			pCharacter->takeDamageEvent(Damage);
 			if (m_bSetInstigator)
 				pCharacter->OnMonsterDownAttack(Hit, Character);
 			else

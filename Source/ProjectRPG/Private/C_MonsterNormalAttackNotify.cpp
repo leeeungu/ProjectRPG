@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "C_MonsterNormalAttackNotify.h"
@@ -34,6 +34,7 @@ void UC_MonsterNormalAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAni
 
 	Character->GetWorld()->SweepMultiByChannel(OutHits, Position, Position, FQuat::Identity, ECollisionChannel::ECC_Pawn
 		, CollisionShape, Params);
+	float Damage = m_Damage * Character->getAtk();
 	for (FHitResult& Hit : OutHits)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Check"));
@@ -41,7 +42,7 @@ void UC_MonsterNormalAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAni
 		if (pCharacter)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Attack"));
-			pCharacter->takeDamageEvent(m_Damage * pCharacter->getAtk());
+			pCharacter->takeDamageEvent(Damage);
 		}
 	}
 

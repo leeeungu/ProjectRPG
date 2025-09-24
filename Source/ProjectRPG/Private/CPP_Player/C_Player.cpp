@@ -134,6 +134,10 @@ void AC_Player::OnMonsterDownAttack(const FHitResult& Hit, AC_BaseCharacter* pIn
 
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
 {
+	if (getHp() <= 0)
+		return false;
+	if (getHp() - fDamage <= 0)
+		fDamage = getHp();
 	setHp(getHp() - fDamage);
 	PlayHitEffect();
 	if (getHp() <= 0)
@@ -186,7 +190,6 @@ void AC_Player::deadPlayer()
 	DownDist = 0.f;
 	SetRunningSystemState(ERunningSystemState::Busy);
 	m_skillCom->UsingSkill(FName("Dead"));
-	if (getHp() >= 0.1f)
 		setHp(0);
 	if(m_onDead.IsBound())
 	{
