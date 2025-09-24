@@ -23,6 +23,7 @@
 #include "CPP_Player/UI/C_PlayerSKillMGR.h"
 #include "CPP_Player/UI/C_PlayerStateMGR.h"
 #include "GamePlay/C_DamageWidgetComponent.h"
+#include "GamePlay/C_GameInstance.h"
 
 
 void AC_Player::Down()
@@ -113,24 +114,7 @@ void AC_Player::OnMonsterDownAttack(const FHitResult& Hit, AC_BaseCharacter* pIn
 	}
 	DownRecive = true;
 }
-//void AC_Player::OnMonsterDownAttackFrom(FVector SourceLocation)
-//{
-//	if (RunningState == ERunningSystemState::Down) return;
-//
-//	IsDownFlying = true;
-//
-//	FVector MyLocation = GetActorLocation();
-//
-//	// 중앙 기준점을 내 Z 위치에 맞춰서 수평선상 계산
-//	SourceLocation.Z = MyLocation.Z;
-//
-//	FVector KnockbackDir = (MyLocation - SourceLocation).GetSafeNormal();
-//	KnockbackDir.Z = 0.f;
-//
-//	DownDirection = KnockbackDir;
-//	Down();
-//	DownRecive = true;
-//}
+
 
 bool AC_Player::takeDamageEvent_Implementation(float fDamage)
 {
@@ -202,6 +186,7 @@ void AC_Player::restartPlayer()
 	//if (GetController())
 	//	GetController()->SetActorTickEnabled(true);
 	//SetActorLocation("월드상 액터위치")
+	RestartPointMove();
 	SetCanBeDamaged(true);
 	SetActorTickEnabled(true);
 	ClearMoveState();
@@ -576,7 +561,6 @@ void AC_Player::SetPeriodInfo()
 		}
 		DirectionVector.Z = 0.0f;
 		ParryDirection = DirectionVector.GetSafeNormal();
-		UE_LOG(LogTemp, Warning, TEXT("WalkPeriod"));
 	}
 	IsPeriod = true;
 }
@@ -718,64 +702,44 @@ void AC_Player::BeginPlay()
 			SkillUiWidget->AddToViewport();
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fMaxHp);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fHp);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), m_fAtk);
-
 }
 
 void AC_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	PlayerStateCheking(DeltaTime);
+	//상태디버그출력코드
+	//FString StateName;
 
-
-	FString StateName;
-
-	switch (RunningState)
-	{
-	case ERunningSystemState::Idle:
-		StateName = TEXT("Idle");
-		break;
-	case ERunningSystemState::Busy:
-		StateName = TEXT("Busy");
-		break;
-	case ERunningSystemState::Charging:
-		StateName = TEXT("Charging");
-		break;
-	case ERunningSystemState::Down:
-		StateName = TEXT("Down");
-		break;
-	default:
-		StateName = TEXT("Unknown");
-		break;
-	}
-
-	// 화면 좌측 상단에 텍스트 출력 (Key: -1 은 항상 새로 출력됨)
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			0.f,                     // Duration: 0초면 매 프레임 다시 출력
-			FColor::Green,
-			FString::Printf(TEXT("[Player State] RunningState: %s"), *StateName)
-		);
-	}
-
-	//if (isBattle)
+	//switch (RunningState)
 	//{
-	//	//블루프린트클래스가 상속받은 인터페이스는 형변환 불가능 하다.
-	//	//IBattleTarget* t = Cast<IBattleTarget>(attackTarget); 
-	//	if (attackTarget->GetClass()->ImplementsInterface(UBattleTarget::StaticClass()))
-	//	{
-	//		FVector pos = IBattleTarget::Execute_GetLocation(attackTarget);
-	//		OnMoveToPos(pos);
-	//	}
-	//}->아직 인터페이스및 몬스터통신 안됨.
+	//case ERunningSystemState::Idle:
+	//	StateName = TEXT("Idle");
+	//	break;
+	//case ERunningSystemState::Busy:
+	//	StateName = TEXT("Busy");
+	//	break;
+	//case ERunningSystemState::Charging:
+	//	StateName = TEXT("Charging");
+	//	break;
+	//case ERunningSystemState::Down:
+	//	StateName = TEXT("Down");
+	//	break;
+	//default:
+	//	StateName = TEXT("Unknown");
+	//	break;
+	//}
 
-	//moveDir.Normalize();
-	//AddActorWorldOffset(moveDir.GetSafeNormal() * 200.0f * DeltaTime);
-
+	//// 화면 좌측 상단에 텍스트 출력 (Key: -1 은 항상 새로 출력됨)
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1,
+	//		0.f,                     // Duration: 0초면 매 프레임 다시 출력
+	//		FColor::Green,
+	//		FString::Printf(TEXT("[Player State] RunningState: %s"), *StateName)
+	//	);
+	//}
 	if (remainDist > stopDist)
 	{
 		float delta = moveSpeed * DeltaTime;
@@ -858,7 +822,6 @@ void AC_Player::Tick(float DeltaTime)
 			AddActorWorldOffset(MoveVec, true);
 			DownDist -= MoveVec.Length();
 		}
-		UE_LOG(LogTemp, Warning, TEXT("DownDist %f"), DownDist);
 	}
 	RunningSystemManager();
 
@@ -966,7 +929,6 @@ E4WayDirection AC_Player::Set4_WayDirection(const FVector& mousePoint)
 	case E4WayDirectionPlayer::Left:   DirString = TEXT("Left"); break;
 	case E4WayDirectionPlayer::Right:  DirString = TEXT("Right"); break;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("4-Way Direction: %s"), *DirString);
 	
 	switch (Direction)
 	{
@@ -1013,7 +975,6 @@ void AC_Player::PlayerStateCheking(float DeltaTime)
 		IsAttackMode = false;//다시 아이들모드로 되돌림.
 		AttackingModeTime = 0.f;
 		myAnimInterface->SetAttackMode(false);
-		UE_LOG(LogTemp, Warning, TEXT("ReturnIdleMode %f"), AttackingModeTime);
 		return;
 	}
 
@@ -1024,5 +985,18 @@ void AC_Player::runInteraction()
 	if (m_pInteractionDetectComponent)
 	{
 		m_pInteractionDetectComponent->runInteraction();
+	}
+}
+
+void AC_Player::RestartPointMove()
+{
+	UC_GameInstance* GI = Cast<UC_GameInstance>(GetGameInstance());
+	if (GI)
+	{
+		FVector RestartLoc = GI->GetRestartLocation();
+		if (!RestartLoc.IsZero())
+		{
+			SetActorLocation(RestartLoc);
+		}
 	}
 }

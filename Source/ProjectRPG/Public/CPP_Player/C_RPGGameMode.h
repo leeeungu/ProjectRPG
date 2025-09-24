@@ -15,5 +15,6 @@ class PROJECTRPG_API AC_RPGGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	AC_RPGGameMode();
+	virtual void BeginPlay() override;
 	
 };

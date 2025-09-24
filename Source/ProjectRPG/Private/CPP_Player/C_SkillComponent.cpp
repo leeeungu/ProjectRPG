@@ -27,7 +27,6 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 		CollisionShape = FCollisionShape::MakeCapsule(CollisionData.Dimensions.X, CollisionData.Dimensions.Z);
 		break;
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("Unknown Collision ShapeType"));
 		return;
 	}
 	FVector Start = SpawnLocation;
@@ -44,21 +43,21 @@ void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& Collision
 	);
 
 
-
-#ifdef DEBUG_DRAW
-	switch (CollisionData.ShapeType)
-	{
-	case ESkillCollisionShapeType::Sphere:
-		DrawDebugSphere(GetWorld(), SpawnLocation, CollisionData.Dimensions.X, 16, FColor::Green, false, 2.f);
-		break;
-	case ESkillCollisionShapeType::Box:
-		DrawDebugBox(GetWorld(), SpawnLocation, CollisionData.Dimensions * 0.5f, SpawnQuat, FColor::Blue, false, 2.f);
-		break;
-	case ESkillCollisionShapeType::Capsule:
-		DrawDebugCapsule(GetWorld(), SpawnLocation, CollisionData.Dimensions.Z, CollisionData.Dimensions.X, SpawnQuat, FColor::Red, false, 2.f);
-		break;
-	}
-#endif
+	//디버그 라인
+//#ifdef DEBUG_DRAW
+//	switch (CollisionData.ShapeType)
+//	{
+//	case ESkillCollisionShapeType::Sphere:
+//		DrawDebugSphere(GetWorld(), SpawnLocation, CollisionData.Dimensions.X, 16, FColor::Green, false, 2.f);
+//		break;
+//	case ESkillCollisionShapeType::Box:
+//		DrawDebugBox(GetWorld(), SpawnLocation, CollisionData.Dimensions * 0.5f, SpawnQuat, FColor::Blue, false, 2.f);
+//		break;
+//	case ESkillCollisionShapeType::Capsule:
+//		DrawDebugCapsule(GetWorld(), SpawnLocation, CollisionData.Dimensions.Z, CollisionData.Dimensions.X, SpawnQuat, FColor::Red, false, 2.f);
+//		break;
+//	}
+//#endif
 	//블록?, 오버랩? 
 	if (bHit)
 	{
@@ -150,7 +149,7 @@ UC_SkillComponent::UC_SkillComponent()
 	//Q스킬
 	FSkillData SkillNum01{};
 	SkillNum01.SkillName = "S_01";
-	SkillNum01.Cooldown = 2.0f;//테스트용 0초
+	SkillNum01.Cooldown = 7.0f;//테스트용 0초
 	SkillNum01.AttackPowerMultiplier = 3.3f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill01_Montage.Dual_Skill01_Montage"));
 	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
@@ -158,32 +157,33 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData SkillNum02{};
 	SkillNum02.SkillName = "S_02";
-	SkillNum02.Cooldown = 5.0f;
+	SkillNum02.Cooldown = 9.0f;
 	SkillNum02.AttackPowerMultiplier = 4.5f;
+	SkillNum02.StaggerAmount = 5.0f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill02_Montage.Dual_Skill02_Montage"));
 	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
 	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
 
 	FSkillData SkillNum03{};
 	SkillNum03.SkillName = "S_03";
-	SkillNum03.Cooldown = 5.0f;
-	SkillNum03.AttackPowerMultiplier = 5.6f;
+	SkillNum03.Cooldown = 6.5f;
+	SkillNum03.AttackPowerMultiplier = 4.6f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill03_Montage.Dual_Skill03_Montage"));
 	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
 	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
 
 	FSkillData SkillNum04{};
 	SkillNum04.SkillName = "S_04";
-	SkillNum04.Cooldown = 5.0f;
-	SkillNum04.AttackPowerMultiplier = 7.2f;
-	SkillNum04.StaggerAmount = 2.f;
+	SkillNum04.Cooldown = 8.0f;
+	SkillNum04.AttackPowerMultiplier = 5.2f;
+	SkillNum04.StaggerAmount = 2.8f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
 	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
 	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
 
 	FSkillData SkillNum05{};
 	SkillNum05.SkillName = "S_05";
-	SkillNum05.Cooldown = 3.0f;
+	SkillNum05.Cooldown = 4.0f;
 	SkillNum05.AttackPowerMultiplier = 1.5f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill05_Montage.Dual_Skill05_Montage"));
 	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
@@ -191,7 +191,7 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData SkillNum06{};
 	SkillNum06.SkillName = "S_06";
-	SkillNum06.Cooldown = 4.0f;
+	SkillNum06.Cooldown = 3.0f;
 	SkillNum06.AttackPowerMultiplier = 1.5f;
 	SkillNum06.Counter = true;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill06_Montage.Dual_Skill06_Montage"));
@@ -200,9 +200,9 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillData SkillNum07{};
 	SkillNum07.SkillName = "S_07";
-	SkillNum07.Cooldown = 4.0f;
-	SkillNum07.AttackPowerMultiplier = 6.4f;
-	SkillNum07.StaggerAmount = 1.5f;
+	SkillNum07.Cooldown = 7.0f;
+	SkillNum07.AttackPowerMultiplier = 3.4f;
+	SkillNum07.StaggerAmount = 1.9f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
 	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
 	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
@@ -227,9 +227,9 @@ UC_SkillComponent::UC_SkillComponent()
 	//F차징스킬(start)
 	FSkillData ChargingSkill_Start{};
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
-	ChargingSkill_Start.Cooldown = 8.0f;
-	ChargingSkill_Start.AttackPowerMultiplier = 10.0f;//스타트라서 없음 배율이
-	ChargingSkill_Start.StaggerAmount = 20.f;
+	ChargingSkill_Start.Cooldown = 10.0f;
+	ChargingSkill_Start.AttackPowerMultiplier = 30.0f;//스타트라서 없음 배율이
+	ChargingSkill_Start.StaggerAmount = 40.f;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_SKill08_02_Montage.Dual_SKill08_02_Montage"));//변경
 	if (Chargingobj_S.Succeeded())
 	{
@@ -281,7 +281,7 @@ UC_SkillComponent::UC_SkillComponent()
 
 	FSkillCollisionData Box_C{};
 	Box_C.ShapeType = ESkillCollisionShapeType::Box;
-	Box_C.Dimensions = FVector(300.f, 300.f, 600.f);
+	Box_C.Dimensions = FVector(400.f, 400.f, 600.f);
 	Box_C.Duration = 0.5f;
 	SkillCollisionDataArray.Add(Box_C);//4번
 
@@ -363,7 +363,6 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 		// 4방향 전용 스킬이라면
 		if (Skill->DirectionMontages.Num() > 0)//Skill이 방향을 가지고있는 데이터라면?
 		{
-			UE_LOG(LogTemp, Warning, TEXT("4wayMontage"));
 			if (UAnimMontage*const* FoundMontage = Skill->DirectionMontages.Find(Direction))
 			{
 				MontageToPlay = *FoundMontage;
@@ -382,7 +381,6 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 		//즉, **애니메이션이 설정되지 않은 스킬은 실행하지 않음**
 		if (!MontageToPlay)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("NoMontage"));
 			return;
 		}
 		OnSkillMontageRequested.Broadcast(MontageToPlay);//몽타주실행파트
@@ -391,11 +389,9 @@ void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 
 void UC_SkillComponent::HandleSkillHit(int32 SkillIndex, FVector SkillLocation, FRotator SkillRotation)//애님노티파이(SkillHit)호출용
 {
-	UE_LOG(LogTemp, Warning, TEXT("SetCollision"));
 	//유효인덱스 값 검사
 	if (!SkillCollisionDataArray.IsValidIndex(SkillIndex))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid SkillIndex %d"), SkillIndex);
 		return;
 	}
 	bool IsCounter = false;
@@ -429,12 +425,10 @@ void UC_SkillComponent::StartCooldown(FName SkillName)
 {
 	if (!SkillMap.Contains(SkillName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Skill [%s] not found in SkillDataMap"), *SkillName.ToString());
 		return;
 	}
 	if (!GetWorld())
 	{
-		UE_LOG(LogTemp, Error, TEXT("StartCooldown: GetWorld() is nullptr!"));
 		return;
 	}
 	// 스킬 데이터에서 쿨타임 값 가져오기
@@ -457,7 +451,6 @@ float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const
 void UC_SkillComponent::skillCoolTimeTriggered(FName SkillName)
 {
 	float Remain = GetRemainingCooldown(SkillName);
-	UE_LOG(LogTemp, Warning, TEXT("Skill CoolTime = %f"), Remain);
 	FS_GameAlertSubsystemConfig MessageConfig{};
 	MessageConfig.fDefaultAlertDuration = 0.3f;
 	MessageConfig.strDefaultAlertMessage = FText::FromString( TEXT("스킬이 쿨타임 중 입니다."));

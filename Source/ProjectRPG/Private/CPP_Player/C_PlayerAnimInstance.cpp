@@ -36,7 +36,6 @@ void UC_PlayerAnimInstance::PlayUnEquipMontage()
    
 	StopAllMontages(0.1f);
 	Montage_Play(UnEquipMontage);
-	UE_LOG(LogTemp, Warning, TEXT("UnEquip"));
     //FOnMontageEnded MontageEndedDelegate;
     //MontageEndedDelegate.Unbind();//이전델리게이트해재 (중복방지)
     //MontageEndedDelegate.BindUObject(this, &UC_PlayerAnimInstance::OnUnEquipMontageEnded);
@@ -48,7 +47,6 @@ void UC_PlayerAnimInstance::PlayDownMontage()
 {
     StopAllMontages(0.1f);
     Montage_Play(DownMontage);
-    UE_LOG(LogTemp, Warning, TEXT("Down"));
     //아직 다운몽타주 세팅전임(이걸 다운상태를 몽타주로 할것인가 애님그래프로할것인가?
 }
 
@@ -90,10 +88,6 @@ void UC_PlayerAnimInstance::NativeInitializeAnimation()
     if (UnEquipMontage == nullptr)
     {
         UnEquipMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Unequip_Montage.Dual_Unequip_Montage"));
-        if (UnEquipMontage == nullptr)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Failed to load SpearUnequip_Montage in NativeInitializeAnimation"));
-        }
     }
 }
 
@@ -113,7 +107,6 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     if (bInterrupted)
     {
         // 강제 중단된 경우 → 이동 가능 상태 풀지 않음
-        UE_LOG(LogTemp, Warning, TEXT("Montage interrupted. Ignore movement enable."));
         if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))
         {
             // 차징 몽타주가 강제로 중단된 경우에만 퍼펙트존 숨기기
@@ -127,7 +120,6 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     }
     if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))//변경
     {
-        UE_LOG(LogTemp, Warning, TEXT("charging end?? "));
         SetPlayerMovePointEnabled.Broadcast();
         return;
     }
@@ -149,7 +141,6 @@ void UC_PlayerAnimInstance::TriggerPerfectZoneHidden()
 
 void UC_PlayerAnimInstance::SetAttackMode(bool b)
 {
-    UE_LOG(LogTemp, Warning, TEXT("AttakcingMode"));
     m_bIsAttack = b;
     AnimChangeMode();
 }

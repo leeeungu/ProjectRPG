@@ -27,7 +27,6 @@ void UC_PerfectZone::PlayProgressAnimation()
         );
         //IsTick = true;
         PlayAnimation(Start);
-        UE_LOG(LogTemp, Warning, TEXT("Start"));
     }
 }
 
@@ -51,7 +50,6 @@ void UC_PerfectZone::StopProgressAnimation()
         }
 
         StopAnimation(Start);
-        UE_LOG(LogTemp, Warning, TEXT("End"));
     }
     CurrentTime = 0.0f;
     UpdateSecondText(CurrentTime); // 정지 시 0초로 리셋

@@ -219,7 +219,6 @@ void AC_PlayerController::OnLeftClickAction(const FInputActionValue& Value)
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);
-        UE_LOG(LogTemp, Warning, TEXT("Attack"));
     }
 }
 //스페이스바 입력
@@ -328,7 +327,6 @@ void AC_PlayerController::OnF_ActionStarted(const FInputActionValue& Value)
     NewInputData.InputType = EInputType::ChargeSkill;
     NewInputData.InputStateType = EInputStateType::Pressed;
     NewInputData.TargetPoint = CachedMouseHit.ImpactPoint;
-    UE_LOG(LogTemp, Warning, TEXT("[Input] F Skill Triggered: Started"));
     if (InputQueueSystem)
     {
         InputQueueSystem->PushInput(NewInputData);

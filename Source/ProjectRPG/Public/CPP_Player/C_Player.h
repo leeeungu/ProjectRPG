@@ -229,5 +229,7 @@ public:
 
 	void runInteraction();
 
+	UFUNCTION(BlueprintCallable)
+	void RestartPointMove();
 	
 };

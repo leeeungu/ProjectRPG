@@ -14,7 +14,6 @@ void UUnEquipMontageEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
     if (AnimInstance)
     {
         AnimInstance->OnWeaponModeChanged.Broadcast(true); // 예시로 false 브로드캐스트
-        UE_LOG(LogTemp, Warning, TEXT("Brodcast"));
         II_PlayerToAnimInstance* AnimInterface = Cast<II_PlayerToAnimInstance>(AnimInstance);
         if (AnimInterface)
         {

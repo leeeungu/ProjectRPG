@@ -18,7 +18,6 @@ void UC_PlayerStateMGR::NativeConstruct()
         {
             // 델리게이트 바인딩
             MyPlayerBase->m_onDead.AddDynamic(this, &UC_PlayerStateMGR::OnPlayerDead);
-            UE_LOG(LogTemp, Warning, TEXT("Dead_Binding"));
         }
     }
 }
