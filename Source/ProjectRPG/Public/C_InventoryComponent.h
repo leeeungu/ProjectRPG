@@ -166,8 +166,10 @@ public:
 	bool useItemAtSlot(int nY, int nX, int nCount);
 protected:
 	virtual void BeginPlay() override;
-
+#if WITH_EDITOR
+public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 private:
 	/**
 	* Check Array Bound

@@ -46,17 +46,25 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	}
 }
 
+#if WITH_EDITOR
 void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	AActor::PostEditChangeProperty(PropertyChangedEvent);
-	rotateToTarget();
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property)
+	{
+		rotateToTarget();
+	}
 }
+#endif
 
+#if WITH_EDITOR
 void AC_AnimationInteraction::PostEditMove(bool bFinished)
 {
-	AActor::PostEditMove(bFinished);
-	rotateToTarget();
+	Super::PostEditMove(bFinished);
+	if (bFinished)
+		rotateToTarget();
 }
+#endif
 
 void AC_AnimationInteraction::Tick(float DeltaTime)
 {

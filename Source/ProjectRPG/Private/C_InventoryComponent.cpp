@@ -324,17 +324,22 @@ void UC_InventoryComponent::BeginPlay()
 	}
 }
 
+#if WITH_EDITOR
 void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	UActorComponent::PostEditChangeProperty(PropertyChangedEvent);
-	m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
-	if (m_nInventorySize <= 0)
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property)
 	{
-		m_nInventoryHeight = 1;
-		m_nInventoryWidth = 1;
 		m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		if (m_nInventorySize <= 0)
+		{
+			m_nInventoryHeight = 1;
+			m_nInventoryWidth = 1;
+			m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		}
 	}
 }
+#endif
 
 bool UC_InventoryComponent::isBound(int nY, int nX)  const
 {

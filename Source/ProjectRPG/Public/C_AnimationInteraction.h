@@ -48,8 +48,10 @@ private:
 	bool m_bPlay{};
 public:	
 	AC_AnimationInteraction();
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void PostEditMove(bool bFinished) override;
+#endif
 	virtual void Tick(float DeltaTime) override;
 protected:
 	virtual void BeginPlay() override;
