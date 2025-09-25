@@ -30,6 +30,7 @@ enum class E_MonsterPhaseState : uint8
 	GimmickExecute,
 	GimmickEnd,
 	Stagger,
+	CounterSuccess,
 	Dead
 };
 
@@ -38,7 +39,8 @@ enum class E_MonsterDeferredAction : uint8
 {
 	None,
 	PhaseChange,
-	Gimmick
+	Gimmick,
+	Stagger
 };
 
 USTRUCT(BlueprintType)
@@ -146,14 +148,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnMosterDied m_onMonsterDied;
 
-	bool bPendingPhaseChange = false;
-
-	float m_fPendingHp = 0.f;
-	float m_fPendingMaxHp = 0.f;
-
-	bool bPendingGimmickStart = false;
-
-	
 
 private:
 	float getDistanceToTarget() const;
@@ -162,9 +156,6 @@ private:
 
 	void setDeleteNiagaraGimmick();	
 
-	void initGimmick();
-
-	
 
 protected:
 	virtual void BeginPlay() override;
@@ -259,13 +250,6 @@ public:
 	void onDead();
 
 	virtual void Destroyed() override;
-
-	/*
-	* 페이즈 관련
-	*/
-
-	UFUNCTION()
-	void onPhaseChangeFinished();
 
 	/*
 	*  기믹 관련

@@ -45,6 +45,9 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	
 	if (fHpRatio <= m_fTriggerHp)
 	{
+		if (m_pMonster->getCurrentState() == E_MonsterPhaseState::Stagger || m_pMonster->getCurrentState() == E_MonsterPhaseState::CounterSuccess)
+			return false;
+
 		if (!canPlayGimmickMontage())
 		{
 			m_pMonster->reserveGimmick(m_pMonster->getHp(), m_pMonster->getMaxHp());
@@ -97,6 +100,7 @@ void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool
 	}
 
 	m_pMonster->TeleportTo(m_vGimmickPos, FRotator::ZeroRotator);
+	m_pMonster->SetActorRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
 
 	// 기믹 실행으로 넘어감

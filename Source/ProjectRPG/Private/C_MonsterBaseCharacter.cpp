@@ -52,11 +52,6 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 		m_pPhaseComponent = FindComponentByClass<UC_PhaseComponent>();
 
-		if (m_pPhaseComponent)
-		{
-			m_pPhaseComponent->m_onPhaseFinished.AddDynamic(this, &AC_MonsterBaseCharacter::onPhaseChangeFinished);
-		}
-
 
 		if (m_pStaggerGimmickComp)
 		{
@@ -128,11 +123,18 @@ void AC_MonsterBaseCharacter::reStartAi()
 
 void AC_MonsterBaseCharacter::onStaggerBroken()
 {
-	UE_LOG(LogTemp, Warning, TEXT("onStaggerBroken 호출됨 - 현재 상태: %d"), m_eMonsterState);
+	if (getCurrentState() == E_MonsterPhaseState::GimmickReady)
+		return;
 
-	AAIController* pAiCon = Cast<AAIController>(GetController());
+	if (getCurrentState() == E_MonsterPhaseState::Stagger)
+		return;
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), m_eMonsterState);
+	if (getCurrentState() == E_MonsterPhaseState::Dead)
+	{
+		m_onDead.Broadcast();
+		return;
+	}
+		
 
 	if (m_eMonsterState == E_MonsterPhaseState::GimmickExecute)
 	{
@@ -141,18 +143,18 @@ void AC_MonsterBaseCharacter::onStaggerBroken()
 			m_pStaggerGimmickComp->setSucceessGimmick(true);
 			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.Broadcast();
 		}
-			
-	}
 
+	}
 	if (getCurrentState() != E_MonsterPhaseState::Stagger)
-	{
 		setPhaseState(E_MonsterPhaseState::Stagger);
 
-		stopAi();
 
-		playStaggerMontage();
-		
-	}
+	AAIController* pAiCon = Cast<AAIController>(GetController());
+
+
+	stopAi();
+
+	playStaggerMontage();
 
 	
 }
@@ -181,6 +183,11 @@ void AC_MonsterBaseCharacter::onStaggerRecover()
 
 void AC_MonsterBaseCharacter::onCounterSuccess()
 {
+	if (getCurrentState() == E_MonsterPhaseState::Stagger)
+		return;
+
+	setPhaseState(E_MonsterPhaseState::CounterSuccess);
+
 	AAIController* pAiCon = Cast<AAIController>(GetController());
 	if (!pAiCon)
 		return;
@@ -340,20 +347,6 @@ void AC_MonsterBaseCharacter::setDeleteNiagaraGimmick()
 		m_NiagaraGimmickPlay->DeactivateImmediate();
 }
 
-void AC_MonsterBaseCharacter::initGimmick()
-{
-	if (m_pStaggerComp && m_pStaggerGimmickComp)
-	{
-		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
-		m_pStaggerGimmickComp->setGimmickPlaying(false);
-		setDeleteNiagaraGimmick();
-		setPhaseState(E_MonsterPhaseState::Idle);
-		setActivePower(false);
-		setBlockStagger(false);
-		
-	}
-}
-
 void AC_MonsterBaseCharacter::reservePhaseChange(float fHp, float fMaxHp)
 {
 	FS_MonsterAction Action{ E_MonsterDeferredAction::PhaseChange, fHp, fMaxHp };
@@ -501,13 +494,4 @@ void AC_MonsterBaseCharacter::Destroyed()
 {
 	Super::Destroyed();
 	m_onMonsterDied.Broadcast();
-}
-
-void AC_MonsterBaseCharacter::onPhaseChangeFinished()
-{
-	if (bPendingGimmickStart && m_pStaggerGimmickComp)
-	{
-		bPendingGimmickStart = false;
-		m_pStaggerGimmickComp->startGimmick();
-	}
 }
