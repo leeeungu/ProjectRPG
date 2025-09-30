@@ -2,6 +2,7 @@
 
 
 #include "C_StaggerComponent.h"
+#include "C_CounterComponent.h"
 #include "C_MonsterBaseCharacter.h"
 
 
@@ -47,7 +48,7 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 			m_bIsBroken = true;
 			m_fBreakTimer = m_fGimmickBreakDuration;
 
-			m_onBroken.Broadcast();
+			m_onGimmickBroken.Broadcast();
 		}
 		break;
 

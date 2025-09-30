@@ -265,6 +265,12 @@ public:
 	UFUNCTION()
 	void endStaggerGimmick();
 
+	UFUNCTION()
+	void onGimmickEnd();
+
+	UFUNCTION()
+	void onGimmickSuccessBroken();
+
 	//VFX
 	//HIT VFX
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")

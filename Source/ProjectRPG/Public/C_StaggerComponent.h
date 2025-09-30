@@ -17,6 +17,7 @@ enum class E_StaggerMode : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBroken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRecover);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaggerModeChange, E_StaggerMode, eNewMode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGimmickBroken);
 
 
 
@@ -60,6 +61,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Stagger")
 	FOnStaggerModeChange m_onStaggerModeChange;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGimmickBroken m_onGimmickBroken;
 
 private:
 	void recover();

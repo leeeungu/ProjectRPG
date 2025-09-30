@@ -163,6 +163,11 @@ void UC_GimmickComponent::excuteGimmick()
 
 }
 
+bool UC_GimmickComponent::getIsSuccess() const
+{
+	return m_bSuccessGimmick;
+}
+
 
 float UC_GimmickComponent::getGimmickTime() const
 {
@@ -207,13 +212,9 @@ void UC_GimmickComponent::endGimmick()
 	m_bGimmickPlaying = false;
 
 	m_pAnim->Montage_Stop(0.1f);
-
 	m_pAnim->Montage_Play(m_pGimmikEndMontage);
 
 	m_pMonster->setActivePower(false);
-
-	if (m_pMonster->getIsPower() == false)
-		m_pMonster->setPhaseState(E_MonsterPhaseState::Idle);
 
 }
 
@@ -227,7 +228,11 @@ void UC_GimmickComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	{
 		m_fGimmickTime -= DeltaTime;
 		if (m_fGimmickTime <= 0 && !m_bSuccessGimmick)
-			endGimmick();
+		{
+			m_bGimmickPlaying = false;
+			if (m_pMonster)
+				m_pMonster->onGimmickEnd(); // 실패 처리 위임
+		}
 	}
 		
 

@@ -33,6 +33,20 @@ void UC_StaggerGimmickComponent::restoreStagger(UC_StaggerComponent* pStaggerCom
 	pStaggerCom->setMode(E_StaggerMode::Normal);
 }
 
+void UC_StaggerGimmickComponent::onGimmickBroken()
+{
+	if (getGimmickTime() > 0.1f)
+	{
+		setSucceessGimmick(true);
+		m_onStaggerGimmickEnd.Broadcast(); // 기믹 종료 알림 (성공)
+	}
+	else
+	{
+		setSucceessGimmick(false);
+		m_onStaggerGimmickEnd.Broadcast(); // 기믹 종료 알림 (실패)
+	}
+}
+
 void UC_StaggerGimmickComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -44,6 +58,8 @@ void UC_StaggerGimmickComponent::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("StaggerComponent not found!"));
 		}
+
+		m_pStaggerCom->m_onGimmickBroken.AddDynamic(this, &UC_StaggerGimmickComponent::onGimmickBroken);
 	}
 }
 

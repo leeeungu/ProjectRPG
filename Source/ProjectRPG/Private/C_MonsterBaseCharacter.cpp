@@ -55,8 +55,7 @@ void AC_MonsterBaseCharacter::BeginPlay()
 
 		if (m_pStaggerGimmickComp)
 		{
-			m_pStaggerGimmickComp->m_onStaggerGimmickStart.AddDynamic(this, &AC_MonsterBaseCharacter::playStaggerGimmick);
-			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.AddDynamic(this, &AC_MonsterBaseCharacter::endStaggerGimmick);
+			m_pStaggerGimmickComp->m_onStaggerGimmickEnd.AddDynamic(this, &AC_MonsterBaseCharacter::onGimmickEnd);
 
 		}
 
@@ -65,6 +64,8 @@ void AC_MonsterBaseCharacter::BeginPlay()
 			m_pStaggerComp->m_onBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerBroken);
 
 			m_pStaggerComp->m_onRecover.AddDynamic(this, &AC_MonsterBaseCharacter::onStaggerRecover);
+
+			m_pStaggerComp->m_onGimmickBroken.AddDynamic(this, &AC_MonsterBaseCharacter::onGimmickSuccessBroken);
 		}
 
 		m_pCounterComp = FindComponentByClass<UC_CounterComponent>();
@@ -457,6 +458,10 @@ void AC_MonsterBaseCharacter::playStaggerGimmick()
 
 void AC_MonsterBaseCharacter::endStaggerGimmick()
 {
+	static bool bAlreadyHandled = false;
+	if (bAlreadyHandled) return;
+	bAlreadyHandled = true;
+
 	if (m_pStaggerComp && m_pStaggerGimmickComp)
 	{
 		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
@@ -472,6 +477,43 @@ void AC_MonsterBaseCharacter::endStaggerGimmick()
 	* 광역 높은 데미지 등
 	* 처리 후 AI 재가동 시키기
 	*/
+}
+
+void AC_MonsterBaseCharacter::onGimmickEnd()
+{
+	if (m_pStaggerGimmickComp->getIsSuccess())
+	{
+		return;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Gimmick Failed!"));
+		endStaggerGimmick(); // 실패 처리
+	}
+}
+
+void AC_MonsterBaseCharacter::onGimmickSuccessBroken()
+{
+	if (getCurrentState() == E_MonsterPhaseState::Dead)
+		return;
+
+	if (m_pStaggerGimmickComp)
+	{
+		m_pStaggerGimmickComp->setSucceessGimmick(true);
+		m_pStaggerGimmickComp->restoreStagger(m_pStaggerComp);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Gimmick Broken Success!"));
+
+	// 1. 기믹 이펙트 제거
+	setDeleteNiagaraGimmick();
+	setActivePower(false);
+	setBlockStagger(false);
+	
+
+
+	// 2. 일반 무력화 처리 강제 실행
+	onStaggerBroken();
 }
 
 void AC_MonsterBaseCharacter::playHitEffect()

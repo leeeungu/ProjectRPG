@@ -67,6 +67,8 @@ public:
 
 	virtual void excuteGimmick();
 
+	virtual bool getIsSuccess() const;
+
 	UFUNCTION()
 	virtual void onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
@@ -77,5 +79,7 @@ public:
 	bool IsPlayingGimmick();
 
 	void setGimmickPlaying(bool bPlaying);
+
+	
 		
 };

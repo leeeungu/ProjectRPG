@@ -53,5 +53,8 @@ public:
 
 	void applyGimmickStagger(class UC_StaggerComponent* pStaggerCom);
 	void restoreStagger(class UC_StaggerComponent* pStaggerCom);
+
+	UFUNCTION()
+	void onGimmickBroken();
 	
 };
