@@ -1,4 +1,4 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -15,7 +15,8 @@ public class ProjectRPG : ModuleRules
 			"UMG", 
 			"AIModule", "NavigationSystem",
 			"QuestSystemRuntime",
-			"Niagara"
+			"Niagara",
+			"VaRest"
         });
 
 		if (Target.bBuildEditor)

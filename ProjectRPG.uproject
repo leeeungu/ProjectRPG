@@ -61,6 +61,10 @@
 		{
 			"Name": "PCGBiomeSample",
 			"Enabled": true
+		},
+		{
+			"Name": "VaRest",
+			"Enabled": true
 		}
 	]
 }
