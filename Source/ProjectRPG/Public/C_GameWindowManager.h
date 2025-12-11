@@ -8,6 +8,7 @@
 
 class APlayerController;
 class UC_MainWidget;
+class UInputAction;
 
 UCLASS( ClassGroup=(UC_GameWindowManager), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_GameWindowManager : public UActorComponent
@@ -15,15 +16,20 @@ class PROJECTRPG_API UC_GameWindowManager : public UActorComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UC_GameWindowManager")
-	TSubclassOf<UC_MainWidget> m_cMainWidget;
+	TSubclassOf<UC_MainWidget> m_cMainWidget{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "UC_GameWindowManager")
+	UInputAction* m_pExitButton{};
 private:
-	UC_MainWidget* m_pMainWidget;
-	APlayerController* m_pPlayer;
+	UC_MainWidget* m_pMainWidget{};
+	APlayerController* m_pPlayer{};
 public:	
 	UC_GameWindowManager();
 
 	UFUNCTION(BlueprintCallable)
 	bool toggleWidget(E_WindowType eType);
+	UFUNCTION()
+	void toggleWindow(E_WindowType eType);
 
 	UFUNCTION(BlueprintCallable)
 	bool removeWidgetFromMain(E_WindowType eType);
@@ -39,9 +45,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void setStoreMode(bool bSetStoreMode);
+
+	UFUNCTION(BlueprintCallable)
+	void setNPCMode(bool bMode);
 protected:
 	virtual void BeginPlay() override;
-		
+	virtual void OnRegister() override; 
 private:
 	void runWidgetFunc(std::initializer_list< E_WindowType> arrWidget, bool (UC_GameWindowManager::* pFunc)(E_WindowType));
 };

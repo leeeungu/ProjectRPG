@@ -4,8 +4,6 @@
 #include "C_InventoryComponent.h"
 #include "C_QuickSlotManagerComponent.h"
 
-UC_ItemDataSubsystem* UC_ItemDataSubsystem::m_pInstance = nullptr;
-
 UC_ItemDataSubsystem::UC_ItemDataSubsystem()  
 {
     //Script/Engine.DataTable'/Game/Item/DataTable/DT_ItemData.DT_ItemData'
@@ -42,16 +40,19 @@ void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			}
         }
     }
-    if (!m_pInstance)
-        m_pInstance = this;
 }
 
 void UC_ItemDataSubsystem::Deinitialize()
 {
-    if (m_pInstance)
-        m_pInstance = nullptr;
     m_mapItemData.Empty();
 	Super::Deinitialize();
+}
+
+UC_ItemDataSubsystem* UC_ItemDataSubsystem::getInstance(UObject* pWorldContextObject)
+{
+    if (!pWorldContextObject || !pWorldContextObject->GetWorld() || !pWorldContextObject->GetWorld()->GetGameInstance())
+        return nullptr;
+    return pWorldContextObject->GetWorld()->GetGameInstance()->GetSubsystem<UC_ItemDataSubsystem>();
 }
 
 bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) const
@@ -65,9 +66,13 @@ bool UC_ItemDataSubsystem::getItemDataByID(int ItemID, FS_ItemData& OutData) con
     return pItemData != nullptr;
 }
 
-bool UC_ItemDataSubsystem::getItemDataByID_CPP(int ItemID, FS_ItemData& OutData) 
+bool UC_ItemDataSubsystem::getItemDataByID_CPP(UObject* pWorldContextObject, int ItemID, FS_ItemData& OutData)
 {
-    return m_pInstance->getItemDataByID(ItemID, OutData);
+    if (UC_ItemDataSubsystem* pInstance = getInstance(pWorldContextObject))
+    {
+        return pInstance->getItemDataByID(ItemID, OutData);
+    }
+    return false;
 }
 
 bool UC_ItemDataSubsystem::isValidItemID(int ItemID) const
@@ -92,66 +97,22 @@ AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem(int ItemID, APawn* pInst
     return pItem;
 }
 
-void UC_ItemDataSubsystem::loadInventroyData(UC_InventoryComponent* pInventory)
+AC_ItemActorBase* UC_ItemDataSubsystem::spawnEffectItem_Cpp(int ItemID, APawn* pInstigator)
 {
-    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
-        return;
+    UC_ItemDataSubsystem* pInstance = getInstance(pInstigator);
+    FS_ItemData* pItemData = pInstance->getItemDataByID_Internal(ItemID);
+    if (!pItemData || !pInstigator || !pItemData->cEffectItemClass.Get())
+        return nullptr;
+    FTransform transfrom = pInstigator->GetActorTransform();
 
-    int nWidth = pInventory->getInventoryWidth();
-    int nHeight = pInventory->getInventoryHeight();
-    if (m_arrInventory.Num() != nWidth * nHeight)
-        return;
-    for (int i = 0; i < nHeight; i++)
+    AC_ItemActorBase* pItem = pInstance->GetWorld()->SpawnActorDeferred< AC_ItemActorBase>(pItemData->cEffectItemClass, transfrom, pInstigator, pInstigator);
+    if (pItem)
     {
-        for (int j = 0; j < nWidth; j++)
-        {
-            int nIndex = pInventory->getArrayIndex(i, j);
-            if (m_arrInventory.IsValidIndex(nIndex))
-            pInventory->setInventorySlotData(i, j, m_arrInventory[nIndex]);
-        }
+        pItem->setItemID(ItemID);
+        pItem->SetInstigator(pInstigator);
+        pItem->FinishSpawning(transfrom);
     }
-}
-
-void UC_ItemDataSubsystem::saveInventroyData(UC_InventoryComponent* pInventory)
-{
-    if (!pInventory || !Cast<APlayerController>(pInventory->GetOwner()))
-        return;
-
-    m_arrInventory.Empty();
-	int nWidth = pInventory->getInventoryWidth();
-	int nHeight = pInventory->getInventoryHeight();
-	m_arrInventory.Init(FS_InventorySlotData{}, pInventory->getInventorySize());
-    for (int i = 0; i < nHeight; i++)
-    {
-        for (int j = 0; j < nWidth; j++)
-        {
-            int nIndex = pInventory->getArrayIndex(i, j);
-            if (m_arrInventory.IsValidIndex(nIndex))
-                pInventory->getInventorySlotData(i, j, m_arrInventory[nIndex]);
-        }
-    }
-}
-
-void UC_ItemDataSubsystem::loadQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
-{
-    if (!pQuickSlot)
-        return;
-
-    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
-    {
-        pQuickSlot->setQuickSlotItem((E_QuickSlotType)i, m_arrQuickSlotItem[i]);
-    }
-}
-
-void UC_ItemDataSubsystem::saveQuickSlotData(UC_QuickSlotManagerComponent* pQuickSlot)
-{
-    if (!pQuickSlot)
-        return;
-
-    for (int i = (uint8)E_QuickSlotType::E_None + 1; i < (uint8)E_QuickSlotType::E_QuickSlot_MAX; i++)
-    {
-        m_arrQuickSlotItem[i] = pQuickSlot->getQuickSlotID((E_QuickSlotType)i);
-    }
+    return pItem;
 }
 
 FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
@@ -163,7 +124,7 @@ FS_ItemData* UC_ItemDataSubsystem::getItemDataByID_Internal(int ItemID) const
     return nullptr;
 }
 
-bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID,  int32 Bitmask) const
+bool UC_ItemDataSubsystem::hasItemStateFlag(int ItemID, uint8 Bitmask) const
 {   
     FS_ItemData* pItemData = getItemDataByID_Internal(ItemID);
     if (pItemData)

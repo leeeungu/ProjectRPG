@@ -10,6 +10,7 @@ class UC_InteractionComponent;
 class UCapsuleComponent;
 class ACharacter;
 class UArrowComponent;
+class UC_InteractionArrow;
 //enum class E_TrabelType : uint8;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -27,6 +28,8 @@ protected:
 	UCapsuleComponent* m_pEndCollision2{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
 	UWidgetComponent* m_pInteractionWidget{};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AC_AnimationInteraction")
+	UC_InteractionArrow* m_pInteractionArrow{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
 	E_TrabelType m_eStartType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AC_AnimationInteraction")
@@ -45,8 +48,10 @@ private:
 	bool m_bPlay{};
 public:	
 	AC_AnimationInteraction();
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void PostEditMove(bool bFinished) override;
+#endif
 	virtual void Tick(float DeltaTime) override;
 protected:
 	virtual void BeginPlay() override;

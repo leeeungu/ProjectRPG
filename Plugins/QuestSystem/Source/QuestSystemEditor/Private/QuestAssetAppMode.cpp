@@ -9,7 +9,8 @@ QuestAssetAppMode::QuestAssetAppMode(TSharedPtr<QuestAssetEditorApp> app) : FApp
 	_app = app;
 	_tabs.RegisterFactory(MakeShareable(new QuestAssetPrimaryTabFactory(app)));
 	_tabs.RegisterFactory(MakeShareable(new QuestAssetPropertiesTabFactory(app)));
-
+	// 내가 만든 커스텀 에셋은 에디터에서 QuestAssetPrimaryTabFactory 과 QuestAssetPropertiesTabFactory으로 구성되어 있다.
+	// 아래의 코드는 해당 탭들이 어떻게 배치될지 정의한다.
 	TabLayout = FTabManager::NewLayout("QuestAssetAppMode_LayOut_v1")
 		->AddArea(
 			FTabManager::NewPrimaryArea()

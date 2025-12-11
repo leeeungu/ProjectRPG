@@ -8,6 +8,19 @@
 /**
  * 
  */
+
+
+UENUM(BlueprintType)
+enum class E4WayDirection : uint8
+{
+    Forward,
+    Back,
+    Left,
+    Right,
+    Default
+};
+
+
 USTRUCT(BlueprintType)
 struct FSkillData
 {
@@ -21,6 +34,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     UAnimMontage* SkillMontage = nullptr;
 
+    // 사용할 애님 몽타주(방향 있음)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TMap<E4WayDirection, UAnimMontage*> DirectionMontages;
+
     // 공격력 퍼센트 (100 = 100%)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     float AttackPowerMultiplier = 100.f;
@@ -28,5 +45,14 @@ public:
     // 스킬 쿨타임 (초)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     float Cooldown = 0.f;
+
+    // 스킬 카운터여부
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+    bool Counter = false;
+
+    // 무력화수치
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+    float StaggerAmount = 0.f;
+
 
 };

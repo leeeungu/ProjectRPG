@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+Content/SkyTown/Textures/T_Moss02_BC.uasset filter=lfs diff=lfs merge=lfs -text
+Content/SkyTown/Textures/T_Moss_Norm.uasset filter=lfs diff=lfs merge=lfs -text

@@ -21,7 +21,11 @@ class PROJECTRPG_API II_PlayerToAnimInstance
 	GENERATED_BODY()
 public:
 	virtual void SetAttackMode(bool b) {}
-	virtual void SetActiveValue(bool b) {}
+	virtual void SetIsAttackingMode(bool b) {}
+	virtual void SetIsDownMode(bool b) {}
+	virtual void SetDownPeriodState(bool b) {}
+	virtual void SetIsDownMode_DownState(bool b) {}
+	
 	
 
 };

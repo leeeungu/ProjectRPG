@@ -50,7 +50,7 @@ bool AC_ItemActorBase::useSuccess_Implementation()
 FText AC_ItemActorBase::getItemName_Implementation() const
 {
 	FS_ItemData Data{};
-	if(!UC_ItemDataSubsystem::getItemDataByID_CPP(m_nItemID, Data))
+	if(!UC_ItemDataSubsystem::getItemDataByID_CPP((UObject*)this, m_nItemID, Data))
 		return FText();
 	return Data.strItemName;
 }
@@ -58,7 +58,7 @@ FText AC_ItemActorBase::getItemName_Implementation() const
 FText AC_ItemActorBase::getItemDesc_Implementation() const
 {
 	FS_ItemData Data{};
-	if (!UC_ItemDataSubsystem::getItemDataByID_CPP(m_nItemID, Data))
+	if (!UC_ItemDataSubsystem::getItemDataByID_CPP((UObject*)this, m_nItemID, Data))
 		return FText();
 	return FText::FromString( Data.strItemDescription );
 }

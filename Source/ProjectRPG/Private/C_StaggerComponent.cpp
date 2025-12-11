@@ -2,6 +2,8 @@
 
 
 #include "C_StaggerComponent.h"
+#include "C_CounterComponent.h"
+#include "C_MonsterBaseCharacter.h"
 
 
 
@@ -12,6 +14,7 @@ UC_StaggerComponent::UC_StaggerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+
 	// ...
 }
 
@@ -20,20 +23,69 @@ void UC_StaggerComponent::applyStagger(float fStagger)
 	if (m_bIsBroken)
 		return;
 
-	m_fCurrentStagger += fStagger;
-
-	if (m_fCurrentStagger >= m_fMaxStagger)
+	switch (getStaggerMode())
 	{
-		m_bIsBroken = true;
-		m_fBreakTimer = m_fBrokenDuration;
+	case E_StaggerMode::Normal:
+		if (m_pMonster->getIsBlockStagger() == false)
+		{
+			m_fCurrentStagger += fStagger;
 
-		m_onBroken.Broadcast();
+			if (m_fCurrentStagger >= m_fMaxStagger)
+			{
+				m_bIsBroken = true;
+				m_fBreakTimer = m_fBrokenDuration;
+
+				m_onBroken.Broadcast();
+			}
+		}
+		break;
+
+	case E_StaggerMode::Gimmick:
+		m_fGimmickCurrentStagger += fStagger;
+
+		if (m_fGimmickCurrentStagger >= m_fGimmickMaxStagger)
+		{
+			m_bIsBroken = true;
+			m_fBreakTimer = m_fGimmickBreakDuration;
+
+			m_onGimmickBroken.Broadcast();
+		}
+		break;
+
+	default:
+		break;
 	}
+	
 }
 
 bool UC_StaggerComponent::isBroken()
 {
 	return m_bIsBroken;
+}
+
+void UC_StaggerComponent::setGimmickMaxStaggerPoint(float fStagger)
+{
+	m_fGimmickMaxStagger = fStagger;
+}
+
+void UC_StaggerComponent::setGimmickStaggerPoint(float fStagger)
+{
+	m_fGimmickCurrentStagger = fStagger;
+}
+
+void UC_StaggerComponent::setGimmickBreakDuration(float fDuration)
+{
+	m_fGimmickBreakDuration = fDuration;
+}
+
+float UC_StaggerComponent::getGimmickMaxStaggerPoint() const
+{
+	return m_fGimmickMaxStagger;
+}
+
+float UC_StaggerComponent::getGimmickCurrentStaggerPoint() const
+{
+	return m_fGimmickCurrentStagger;
 }
 
 void UC_StaggerComponent::setMaxStaggerPoint(float fStagger)
@@ -66,6 +118,22 @@ float UC_StaggerComponent::getCurrentBreakPoint() const
 	return m_fBrokenDuration;
 }
 
+void UC_StaggerComponent::setMode(E_StaggerMode eMode)
+{
+	if (m_eCurrentMode != eMode)
+	{
+		m_eCurrentMode = eMode;
+		m_onStaggerModeChange.Broadcast(eMode);
+	}
+
+	
+}
+
+E_StaggerMode UC_StaggerComponent::getStaggerMode() const
+{
+	return m_eCurrentMode;
+}
+
 void UC_StaggerComponent::recover()
 {
 	m_bIsBroken = false;
@@ -80,7 +148,10 @@ void UC_StaggerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	m_pCounterCom = GetOwner()->GetComponentByClass<UC_CounterComponent>();
+
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
+
 }
 
 

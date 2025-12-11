@@ -1,6 +1,10 @@
 ﻿#include "C_InventoryComponent.h"
 #include <C_GameAlertSubsystem.h>
 #include "C_ItemActorBase.h"
+#include "GamePlay/C_DataMangerSubsystem.h"
+
+
+DEFINE_LOG_CATEGORY_STATIC(C_InventoryComponent, Log, All);
 
 UC_InventoryComponent::UC_InventoryComponent()
 {
@@ -10,6 +14,7 @@ UC_InventoryComponent::UC_InventoryComponent()
 		m_nInventoryHeight = 10;
 		m_nInventoryWidth = 10;
 		m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
 	}
 }
 
@@ -109,10 +114,19 @@ void UC_InventoryComponent::swapInventorySlot(int nSrcY, int nSrcX, int nDstY, i
 	runSlotChangeInterface(pDstSlotData);
 }
 
+
+/**
+* 아이템을 인벤토리에 추가합니다.
+* @param nItemID - Item Key Value
+* @param nItemCount - Item Count
+*/
 bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 {
 	FS_InventorySlot* pSlotData = &m_sDummyItemData;
 	bool bStackable = m_pItemDataSubsystem->hasItemStateFlag(nItemID, (int32)E_EItemState::CanStackable);
+	// 1. 스택 가능한 아이템이면 첫번째로 발견되는 같은 아이템 슬롯 선택
+	// 2. 스택 불가능한 아이템이거나 같은 아이템이 없으면 빈 슬롯 선택
+	// 3. 빈 슬롯이 없으면 실패
 	for (int i = 0; i < m_nInventorySize && pSlotData  == &m_sDummyItemData; i++)
 	{
 		if (m_arrInventory[i].sData.nItemID == m_pItemDataSubsystem->getUnValidItemID())
@@ -121,6 +135,8 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 			pSlotData = &m_arrInventory[i];
 		}
 	}
+
+	// 4. 슬롯이 있으면 아이템 추가
 	if (pSlotData != &m_sDummyItemData)
 	{
 		pSlotData->sData.nItemID = nItemID;
@@ -135,11 +151,11 @@ bool UC_InventoryComponent::pushItem(int nItemID, int nItemCount)
 	}
 	else
 	{
+		// 인벤토리 공간 없음
 		FS_GameAlertSubsystemConfig config{};
 		config.strDefaultAlertMessage = FText::FromString(TEXT("인벤토리의 공간이 없습니다."));
 		UC_GameAlertSubsystem::pushAlertMessage_Cpp(config);
 	}
-
 	return  pSlotData != &m_sDummyItemData;
 }
 
@@ -171,6 +187,7 @@ bool UC_InventoryComponent::getItemCountAtSlot(int nY, int nX, int& nCount)
 
 bool UC_InventoryComponent::getItemCountByID(int nItemID, int& nCount)
 {
+	nCount = 0;
 	int* pCount = m_mapItemCount.Find(nItemID);
 	if (!pCount)
 		return false;
@@ -254,6 +271,7 @@ void UC_InventoryComponent::setSlotInterface(int nY, int nX, UObject* pInterface
 	if (pSlotData == &m_sDummyItemData || !pInterface || !pInterface->Implements<UC_InventorySlotInterface>())
 		return ;
 	pSlotData->pSlotInterface = TScriptInterface< IC_InventorySlotInterface>(pInterface);
+
 	runSlotChangeInterface(pSlotData);
 }
 
@@ -274,18 +292,26 @@ bool UC_InventoryComponent::useItemAtSlot(int nY, int nX, int nCount)
 	FS_InventorySlot* pSlotData = getInventorySlotData(nY, nX);
 	if (pSlotData == &m_sDummyItemData)
 		return false;
-	AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
-	if (pItem && pItem->useItemActor())
+	int MaxCount = nCount;
+	while (MaxCount > 0)
 	{
-		return removeItemAtSlot(nY, nX, nCount);
+		AC_ItemActorBase* pItem = m_pItemDataSubsystem->spawnEffectItem(pSlotData->sData.nItemID, Cast<APlayerController>(GetOwner())->AcknowledgedPawn);
+		if (pItem && pItem->useItemActor())
+		{
+			removeItemAtSlot(nY, nX, 1);
+		}
+		MaxCount--;
 	}
-	return false;
+	return MaxCount <= 0;
 }
 
 void UC_InventoryComponent::BeginPlay()
 {
-	if (m_nInventorySize > 0)
-		m_arrInventory.Init(FS_InventorySlot{}, m_nInventorySize);
+	if (Cast<APlayerController>(GetOwner()))
+	{
+		UC_DataMangerSubsystem::loadData(this);
+	}
+
 	UActorComponent::BeginPlay();
 
 	if (!GetWorld())
@@ -294,21 +320,26 @@ void UC_InventoryComponent::BeginPlay()
 	if (GameInstance)
 	{
 		m_pItemDataSubsystem = GameInstance->GetSubsystem<UC_ItemDataSubsystem>();
-		m_pItemDataSubsystem->loadInventroyData(this);
+		//m_pItemDataSubsystem->loadInventroyData(this);
 	}
 }
 
+#if WITH_EDITOR
 void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	UActorComponent::PostEditChangeProperty(PropertyChangedEvent);
-	m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
-	if (m_nInventorySize <= 0)
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property)
 	{
-		m_nInventoryHeight = 1;
-		m_nInventoryWidth = 1;
 		m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		if (m_nInventorySize <= 0)
+		{
+			m_nInventoryHeight = 1;
+			m_nInventoryWidth = 1;
+			m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+		}
 	}
 }
+#endif
 
 bool UC_InventoryComponent::isBound(int nY, int nX)  const
 {
@@ -332,7 +363,10 @@ int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UActorComponent::EndPlay(EndPlayReason);
-	m_pItemDataSubsystem->saveInventroyData(this);
+	if (Cast<APlayerController>(GetOwner()))
+	{
+		UC_DataMangerSubsystem::saveBinaryData(this);
+	}
 }
 
 void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
@@ -351,4 +385,45 @@ void UC_InventoryComponent::runSlotChangeInterface(FS_InventorySlot* pItemSlot)
 	}
 }
 
+E_DataType UC_InventoryComponent::getDataType()
+{
+	return E_DataType::E_Binary;
+}
 
+FString UC_InventoryComponent::getFilePath(E_DataType eType)
+{
+	return  FPaths::ProjectSavedDir() + TEXT("InventoryData");
+}
+
+void UC_InventoryComponent::loadBinaryData(TArray<uint8>& arData)
+{
+	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
+	if (!UC_DataMangerSubsystem::readBinaryFile(arData, &Data))
+		return;
+	m_nInventoryHeight = Data.nInventoryWidth;
+	m_nInventoryWidth = Data.nInventoryHeight;
+	m_nInventorySize = m_nInventoryHeight * m_nInventoryWidth;
+	for (int i = 0; i < m_nInventoryHeight; i++)
+	{
+		for (int j = 0; j < m_nInventoryWidth; j++)
+		{
+			setInventorySlotData(i, j, Data.arrInventory[getArrayIndex(i,j)].sData);
+		}
+	}
+}
+
+TArray<uint8> UC_InventoryComponent::getBinaryData()
+{
+	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
+	TArray<uint8> result{};
+	UC_DataMangerSubsystem::saveBinaryFile< FS_InventorySaveData>(result, &Data);
+	return result;
+}
+
+FS_InventorySaveData::FS_InventorySaveData(int Width, int Height, TArray<FS_InventorySlot>& Inventory)
+	: arrInventory{}, nInventoryWidth{}, nInventoryHeight{}
+{
+	nInventoryWidth = Width;
+	nInventoryHeight = Height;
+	arrInventory = Inventory;
+}

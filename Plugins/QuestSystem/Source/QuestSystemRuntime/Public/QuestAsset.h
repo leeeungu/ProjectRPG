@@ -15,11 +15,17 @@ class QUESTSYSTEMRUNTIME_API UQuestAsset : public UObject
 {
     GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestAsset")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
     FString QuestName = TEXT("Enter Quest Name Here");
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "QuestAsset")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
     FString QuestDesc = TEXT("Enter Quest Desc");
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
+    bool bFinishQuest{};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "QuestAsset")
+    bool bQuestAccept{};
 
     UPROPERTY()
     UQuestRuntimeGraph* Graph = nullptr;
@@ -36,6 +42,17 @@ protected:
 public:
     UFUNCTION(BlueprintCallable, Category = "QuestAsset")
     UQuestRuntimeNode* GetQuestStartNode();
+
+    UFUNCTION(BlueprintCallable, Category = "QuestAsset")
+    void SetFinishQuest(bool bValue);
+    UFUNCTION(BlueprintPure, Category = "QuestAsset")
+    bool GetFinishQuest() const { return bFinishQuest; }
+
+
+    UFUNCTION(BlueprintCallable, Category = "QuestAsset")
+    void SetQuestAccept(bool bValue) { bQuestAccept = bValue; }
+    UFUNCTION(BlueprintPure, Category = "QuestAsset")
+    bool GetQuestAccept() const { return bQuestAccept; }
 
     void SetPreSaveListener(std::function<void()> onPreSaveListener) { _onPreSaveListener = onPreSaveListener ; }
 

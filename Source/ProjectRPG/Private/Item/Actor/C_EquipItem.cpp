@@ -10,11 +10,10 @@ AC_EquipItem::AC_EquipItem() : AC_ItemActorBase{}
 FText AC_EquipItem::getItemDesc_Implementation() const
 {
 	FS_ItemData Data{};
-	if (!UC_ItemDataSubsystem::getItemDataByID_CPP(m_nItemID, Data))
+	if (!UC_ItemDataSubsystem::getItemDataByID_CPP((UObject*)this, m_nItemID, Data))
 		return FText();
-	FTextFormat format{};
-	format.FromString(Data.strItemDescription);
-	return FText::Format<float>(format, m_fEquipValue);
+	FString Result = FString::Format(*Data.strItemDescription, { (int)m_fEquipValue });
+	return  FText::FromString(Result);//FText::Format(LOCTEXT("Test", Data.strItemDescription), m_fEquipValue);
 }
 
 bool AC_EquipItem::findActor_Implementation(AActor*& pTargetActor)
@@ -32,24 +31,26 @@ bool AC_EquipItem::itemEffect_Implementation()
 	UC_EquipComponent* pComponent = m_pTargetActor->GetComponentByClass<UC_EquipComponent>();
 	if (pComponent)
 	{
-		if (m_pEquipItemDataTable)
-		{
-			TArray< FS_EquipItemData*> arrData{};
-			m_pEquipItemDataTable->GetAllRows(TEXT(""), arrData);
-			if (arrData.IsValidIndex(m_nEquipLevel))
-			{
-				m_fEquipValue = arrData[m_nEquipLevel]->fValue;
-			}
-		}
 		pComponent->registerEquip(this);
 		return true;
 	}
 	return false;
 }
-
+void AC_EquipItem::BeginPlay()
+{
+	AC_ItemActorBase::BeginPlay();
+	if (m_pEquipItemDataTable)
+	{
+		TArray< FS_EquipItemData*> arrData{};
+		m_pEquipItemDataTable->GetAllRows(TEXT(""), arrData);
+		if (arrData.IsValidIndex(m_nEquipLevel))
+		{
+			m_fEquipValue = arrData[m_nEquipLevel]->fValue;
+		}
+	}
+}
 bool AC_EquipItem::useFail_Implementation()
 {
-	Destroy();
 	return true;
 }
 

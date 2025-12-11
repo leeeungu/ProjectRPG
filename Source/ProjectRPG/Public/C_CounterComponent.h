@@ -19,6 +19,9 @@ private:
 	bool m_bCanCounter;
 	FTimerHandle m_sCounterHandle;
 
+	UPROPERTY()
+	class AC_MonsterBaseCharacter* m_pMonster;
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Counter")
 	FOnCounterSuccess m_onCounterSuccess;
@@ -36,7 +39,7 @@ public:
 	void startCounterWindow(float fDuration);
 
 	UFUNCTION(BlueprintCallable, Category = "Counter")
-	bool tryCounter(AActor* pPlayer);
+	bool tryCounter();
 
 protected:
 	// Called when the game starts

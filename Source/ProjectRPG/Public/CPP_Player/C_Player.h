@@ -7,7 +7,14 @@
 #include "Interface/C_CameraInterface.h"
 #include "I_PlayerToAnimInstance.h"
 #include "C_Player.generated.h"
+//위젯(perfectZone)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChargeEnd);
+//위젯(perfectzone result)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResultOpen, bool, bIsSuccess);
 
+struct FSkillData;
+enum class E4WayDirection : uint8;
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -16,8 +23,9 @@ class UC_SkillComponent;
 class USceneCaptureComponent2D;
 class UC_InteractionDetectorComponent;
 class UC_TravelManagerComponent;
+class UC_DamageWidgetComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum class ERunningSystemState : uint8
 {
 	Idle,       // 입력 대기
@@ -25,12 +33,14 @@ enum class ERunningSystemState : uint8
 	Busy,       // 일반 스킬/애니메이션 실행 중 (차단)
 	Charging    // 차징 스킬 진행 중 (차징 입력만 허용)
 };
-enum class E4WayDirection : uint8
+UENUM()
+enum class E4WayDirectionPlayer : uint8
 {
 	Foward,
 	Back,
 	Left,
-	Right
+	Right,
+	Default
 };
 /**
  * 
@@ -52,17 +62,33 @@ private:
 	UPROPERTY()
 	TScriptInterface<II_PlayerToAnimInstance> myAnimInterface;
 	
-	UPROPERTY(VisibleAnywhere, Category = "PlayerInfoCaptureComponent", meta = (DisplayName = "PlayerInfoCaptureComponent"), BlueprintGetter = getPlayerInfoCaptureComponent)
-	USceneCaptureComponent2D* m_pPlayerInfoCaptureComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "InteractionDetectComponent", meta = (DisplayName = "InteractionDetectComponent"), BlueprintGetter = getInteractionDetectComponent)
 	UC_InteractionDetectorComponent* m_pInteractionDetectComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "TravelComponent", meta = (DisplayName = "TravelComponent"), BlueprintGetter = getTravelComponent)
 	UC_TravelManagerComponent* m_pTravelComponent{};
 
+	UPROPERTY(VisibleAnywhere, Category = "DamageWidget", meta = (DisplayName = "DamageWidget"))
+	UC_DamageWidgetComponent* m_pDamageWidget{};
+
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AActor> WeaponClass;  // 블루프린트 무기 클래스 지정
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AActor> DualWeaponClass;  // 블루프린트 무기 클래스 지정
+
+	UPROPERTY()
+	AActor* EquippedWeapon;  // 현재 장착된 무기
+	UPROPERTY()
+	AActor* EquippedWeaponDual;  // 현재 장착된 보조무기
 
 	//플레이어 상태
 	UPROPERTY()
 	ERunningSystemState RunningState = ERunningSystemState::Idle;
+	UPROPERTY()
+	E4WayDirectionPlayer DirectionSkillState = E4WayDirectionPlayer::Default;
+	//무기 부착상태
+	bool IsEquipMode = true;
+	UFUNCTION()
+	void SetEquipMode(bool IsEquip);
 
 	//이동 및 회전
 	float moveSpeed = 500.0f;
@@ -80,6 +106,7 @@ private:
 	bool IsPeriod = false;
 	float PeriodDist = 300.f;
 	FVector ParryDirection;
+	bool IsDownFlying = false;//날라가는중간에 패링사용금지
 	//로테이트 보간
 	bool bRotate = false; //true시 틱의 보간함수 실행(보간하고자하는 포인팅위치 필요)          
 	FQuat TargetRotationQuat;                 
@@ -88,17 +115,68 @@ private:
 	//차징스킬
 	bool bHoldSkillPlayed = false;
 	bool bChargingReady = false;
-public:
-	
 
+	//콤보어택
+	int32 m_nComboCount{};
+	FName SetPlainAttack();
+	float ComboTime = 0.f;
+	void ComboCountSetting(float DeltaTime);
+
+	//Skill UI_MGR
+	UPROPERTY()
+	class UC_PlayerSKillMGR* SkillUiWidget;
+
+
+public:
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UC_PlayerSKillMGR> SkillUiClass;
+
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeStart OnChargeStart;
+
+	UPROPERTY(BlueprintAssignable, Category = "Charge")
+	FOnChargeEnd OnChargeEnd;
+
+	UPROPERTY(BlueprintAssignable, Category = "PerfectZone")
+	FOnResultOpen OnResultOpen;
+
+	//HIT VFX
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class UNiagaraSystem* HitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class USoundBase* HitSound;
+
+	void HandleChargeInputStart();
+	void HandleChargeInputEnd();
+
+	void HandleResult(bool result);
+
+	//characterbase override function
+	UFUNCTION(BlueprintCallable)
+	void OnMonsterDownAttack(const FHitResult& Hit, AC_BaseCharacter* pInstigator = nullptr);
+	bool DownRecive = false;
+	FVector DownDirection{};
+	float DownDist = 300.f;
+
+	bool takeDamageEvent_Implementation(float fDamage) override;
+	//Hit VFX
+	UFUNCTION(BlueprintCallable, Category = "Hit Effect")
+	void PlayHitEffect();
 protected:
 	UFUNCTION()
 	void HandleChangeRunningState();
+
+	UFUNCTION(BlueprintCallable)
+	void deadPlayer();
+public:
+	UFUNCTION(BlueprintCallable)
+	void restartPlayer();
 private:
 	void CalMoveData();
 	void RunningSystemManager();
-	void ClearMoveState();
-	void Set4_WayDirection(const FVector& mousePoint);
+	//플레이어에서 방향계산후 애님인스턴스에 넘겨줄 이넘으로 변환
+	E4WayDirection Set4_WayDirection(const FVector& mousePoint);
 
 	//플레이어 상태(idle? attck?)
 	bool IsAttackMode = false;
@@ -106,23 +184,35 @@ private:
 	void AttackMode();
 	void PlayerStateCheking(float DeltaTime);
 
+	void Down();
+	//VFX제거
+	void DeactivateAllNiagaraEffects();
+
 public:
 	AC_Player();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)
 	void OnMoveToPosPlayer(FVector pos);//외부에서도 호출해서 pos값을넣어주면 해당위치로이동함.
+	UFUNCTION(BlueprintCallable)
+	void ClearMoveState();
 	FVector GetMousePointDir();
 	void CalRotateData(const FVector& TargetPoint);
 	bool IsRotating() const { return bRotate; }//로테이팅 여부확인(외부확인용)
 	void SetCanMove() { bCanMove = true; }
+	void ForceLandToGround();
+	bool IsLandToGround = true;
 	//플레이어 canmove값 트루로 바꿔줌(moveToOnPos 활성화) 몽타주가끝나야지 호출됨
 	//중간에 몽타주가 선입력으로 끝까지 못가고 다른몽타주로 블랜딩되면 그냥 return시켜져서 해당함수호출이안됨.
 
 	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
 	void SetRunningSystemState(ERunningSystemState newState) { RunningState = newState; }//러닝스테이트 세팅
-	UFUNCTION(BlueprintCallable, Category = "RunningSystem")
-	ERunningSystemState GetRunningSystemState() { return RunningState; }
+	//무기부착상태(Unequip노티파이 호출 바인딩용)
+	
+	void AttachWeaponToSocket(bool bEquipMode);
+	void AttachDualWeaponToSocket(bool bEquipMode);
+	UFUNCTION(BlueprintPure, Category = "RunningSystem")
+	ERunningSystemState GetRunningSystemState() const { return RunningState; }
 
 
 	virtual UCameraComponent* getCamera_Implementation() override;
@@ -130,10 +220,16 @@ public:
 	
 	void SetPeriodInfo();
 
-	UFUNCTION(BlueprintPure, Category = "PlayerInfoCaptureComponent")
-	USceneCaptureComponent2D*  getPlayerInfoCaptureComponent() { return m_pPlayerInfoCaptureComponent; }
+	//UFUNCTION(BlueprintPure, Category = "PlayerInfoCaptureComponent")
+	//USceneCaptureComponent2D*  getPlayerInfoCaptureComponent() { return m_pPlayerInfoCaptureComponent; }
 	UFUNCTION(BlueprintPure, Category = "InteractionDetectComponent")
 	UC_InteractionDetectorComponent* getInteractionDetectComponent() { return m_pInteractionDetectComponent; }
 	UFUNCTION(BlueprintPure, Category = "TravelComponent")
 	UC_TravelManagerComponent* getTravelComponent() { return m_pTravelComponent ; }
+
+	void runInteraction();
+
+	UFUNCTION(BlueprintCallable)
+	void RestartPointMove();
+	
 };

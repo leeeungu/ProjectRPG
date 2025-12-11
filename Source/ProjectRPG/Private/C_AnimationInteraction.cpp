@@ -7,6 +7,7 @@
 #include <NavigationSystem.h>
 #include <NavigationPath.h>
 #include "CPP_Player/C_Player.h"
+#include <GamePlay/C_InteractionArrow.h>
 
 AC_AnimationInteraction::AC_AnimationInteraction() :
 	AActor{}
@@ -34,6 +35,8 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	m_pInteractionWidget->SetRelativeRotation({ 0,180,0 });
 	m_pInteractionWidget->SetCollisionProfileName("NoCollision");
 
+	m_pInteractionArrow = CreateDefaultSubobject< UC_InteractionArrow>("InteractionArrow");
+	m_pInteractionArrow->SetupAttachment(RootComponent);
 	//Script/Engine.Texture2D'/Game/UI/Interaction/Texture/T_InteractionKey.T_InteractionKey'
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI'
 	static ConstructorHelpers::FClassFinder<UUserWidget> Texture(TEXT("/Game/UI/Interaction/WBP_InteractionUI.WBP_InteractionUI_C"));
@@ -43,17 +46,25 @@ AC_AnimationInteraction::AC_AnimationInteraction() :
 	}
 }
 
+#if WITH_EDITOR
 void AC_AnimationInteraction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	AActor::PostEditChangeProperty(PropertyChangedEvent);
-	rotateToTarget();
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property)
+	{
+		rotateToTarget();
+	}
 }
+#endif
 
+#if WITH_EDITOR
 void AC_AnimationInteraction::PostEditMove(bool bFinished)
 {
-	AActor::PostEditMove(bFinished);
-	rotateToTarget();
+	Super::PostEditMove(bFinished);
+	if (bFinished)
+		rotateToTarget();
 }
+#endif
 
 void AC_AnimationInteraction::Tick(float DeltaTime)
 {
@@ -76,6 +87,8 @@ void AC_AnimationInteraction::BeginPlay()
 	m_pInteractionWidget->SetVisibility(false);
 
 	AActor::BeginPlay();
+	// 인터렉션 콤포넌트에 상호작용 델리게이트 바인딩하고
+	// Ovelap 델리게이트도 기존 문법대로 사용할 수 있음
 	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::interactionStart);
 	m_pStartCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginOverlap);
 	m_pStartCollision->OnComponentEndOverlap.AddDynamic(this, &AC_AnimationInteraction::endOverlap);

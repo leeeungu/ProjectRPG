@@ -1,82 +1,307 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CPP_Player/C_SkillComponent.h"
 #include "CPP_Player/S_SkillData.h"
 #include "CPP_Player/C_PlayerAnimInstance.h"
+#include "C_MonsterBaseCharacter.h"
+#include "C_Basecharacter.h"
 #include "GameFramework/Character.h"
+#include "C_GameAlertSubsystem.h"
+
+void UC_SkillComponent::SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter)
+{
+	FVector SpawnLocation = skillLocation;
+	FQuat SpawnQuat = skillRotation.Quaternion();
+
+	FCollisionShape CollisionShape;
+	switch (CollisionData.ShapeType)
+	{
+	case ESkillCollisionShapeType::Sphere:
+		CollisionShape = FCollisionShape::MakeSphere(CollisionData.Dimensions.X);
+		break;
+	case ESkillCollisionShapeType::Box:
+		CollisionShape = FCollisionShape::MakeBox(CollisionData.Dimensions * 0.5f);
+		break;
+	case ESkillCollisionShapeType::Capsule:
+		CollisionShape = FCollisionShape::MakeCapsule(CollisionData.Dimensions.X, CollisionData.Dimensions.Z);
+		break;
+	default:
+		return;
+	}
+	FVector Start = SpawnLocation;
+	FVector End = SpawnLocation + FVector(0.1f, 0, 0); // ÏïÑÏ£º ÏûëÏùÄ Ïù¥Îèô
+	// Îç∞ÎØ∏ÏßÄ Ï†ÅÏö© Î°úÏßÅ ÏòàÏãú
+	TArray<FHitResult> HitResults;
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		Start,
+		End,
+		SpawnQuat,
+		ECC_Pawn,
+		CollisionShape
+	);
+
+
+	//ÎîîÎ≤ÑÍ∑∏ ÎùºÏù∏
+//#ifdef DEBUG_DRAW
+//	switch (CollisionData.ShapeType)
+//	{
+//	case ESkillCollisionShapeType::Sphere:
+//		DrawDebugSphere(GetWorld(), SpawnLocation, CollisionData.Dimensions.X, 16, FColor::Green, false, 2.f);
+//		break;
+//	case ESkillCollisionShapeType::Box:
+//		DrawDebugBox(GetWorld(), SpawnLocation, CollisionData.Dimensions * 0.5f, SpawnQuat, FColor::Blue, false, 2.f);
+//		break;
+//	case ESkillCollisionShapeType::Capsule:
+//		DrawDebugCapsule(GetWorld(), SpawnLocation, CollisionData.Dimensions.Z, CollisionData.Dimensions.X, SpawnQuat, FColor::Red, false, 2.f);
+//		break;
+//	}
+//#endif
+	//Î∏îÎ°ù?, Ïò§Î≤ÑÎû©? 
+	if (bHit)
+	{
+		//get owner
+		for (const FHitResult& Hit : HitResults)
+		{
+			AC_MonsterBaseCharacter* HitActor = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
+			if (HitActor && HitActor != GetOwner())
+			{
+				float Amount = DamageAmount(CurrentSkillName);
+				float Stagger = StaggerAmount(CurrentSkillName);
+				HitActor->takeDamageEvent(Amount);
+				HitActor->takeStaggerEvent(Stagger);
+			}
+			if (IsGetCounter)
+			{
+				AC_MonsterBaseCharacter* BossMonster = Cast<AC_MonsterBaseCharacter>(Hit.GetActor());
+				if (BossMonster)
+				{
+					BossMonster->tryCounter();
+				}
+			}
+			
+		}
+	}
+}
+
+float UC_SkillComponent::DamageAmount(FName SkillName)
+{
+	float Amount{};
+	if (const FSkillData* Skill = SkillMap.Find(SkillName))
+	{
+		// Owner Í∞ÄÏ†∏Ïò§Í∏∞
+		if (AC_BaseCharacter* OwnerChar = Cast<AC_BaseCharacter>(GetOwner()))
+		{
+			// Ï∫êÎ¶≠ÌÑ∞ ÌÅ¥ÎûòÏä§Ïóê GetAtk() Ìï®ÏàòÍ∞Ä ÏûàÎã§Í≥† Í∞ÄÏ†ï
+			float BaseAtk = OwnerChar->getAtk();
+			Amount = BaseAtk * Skill->AttackPowerMultiplier;
+		}
+	}
+	return Amount;
+}
+
+float UC_SkillComponent::StaggerAmount(FName SkillName)
+{
+	float Amount{};
+	if (const FSkillData* Skill = SkillMap.Find(SkillName))
+	{
+		// Owner Í∞ÄÏ†∏Ïò§Í∏∞
+		if (AC_BaseCharacter* OwnerChar = Cast<AC_BaseCharacter>(GetOwner()))
+		{
+			Amount = Skill->AttackPowerMultiplier;//Î¨¥Î†•ÌôîÍ∞íÏúºÎ°ú Î≥ÄÍ≤Ω
+		}
+	}
+	return Amount;
+}
+
+
 
 // Sets default values for this component's properties
 UC_SkillComponent::UC_SkillComponent()
 {
-	//QΩ∫≈≥
 	PrimaryComponentTick.bCanEverTick = true;
-	FSkillData SkillNum01;
-	SkillNum01.SkillName = "S_01";
-	SkillNum01.Cooldown = 5.0f;
-	SkillNum01.AttackPowerMultiplier = 200.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation/SpearSkill_01_Montage.SpearSkill_01_Montage"));
-	if (skill1obj.Succeeded())
-	{
-		SkillNum01.SkillMontage = skill1obj.Object;
-	}
-	SkillMap.Add(SkillNum01.SkillName, SkillNum01);//mapπËø≠0π¯ø° key¥¬ skill_01¿” ¡Ô ¿Ã ¿Ã∏ß¿∏∑Œ Testskill1ø°¡¢±Ÿ∞°¥…
-	//∆–∏µ
-	FSkillData Pering;
-	Pering.SkillName = "Period";
-	Pering.Cooldown = 5.0f;
-	Pering.AttackPowerMultiplier = 10.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Peringobj(TEXT("/Game/RPG_Hero_Animation/SpearPeriod_Top/SpearPeriod_T_F_Montage.SpearPeriod_T_F_Montage"));
-	if (skill1obj.Succeeded())
-	{
-		Pering.SkillMontage = Peringobj.Object;
-	}
-	SkillMap.Add(Pering.SkillName, Pering);//mapπËø≠0π¯ø° key¥¬ skill_01¿” ¡Ô ¿Ã ¿Ã∏ß¿∏∑Œ Testskill1ø°¡¢±Ÿ∞°¥…
+	//ÌèâÌÉÄ
+	FSkillData PlainAttack01{};
+	PlainAttack01.SkillName = "PA_01";
+	PlainAttack01.Cooldown = 0.0f;//ÌÖåÏä§Ìä∏Ïö© 0Ï¥à
+	PlainAttack01.AttackPowerMultiplier = 2.1f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA1obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain01_Montage.Dual_Plain01_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack01.DirectionMontages.Add(E4WayDirection::Default, PA1obj.Object);
+	SkillMap.Add(PlainAttack01.SkillName, PlainAttack01);
 
-	//F¬˜¬°Ω∫≈≥(start)
-	FSkillData ChargingSkill_Start;
+	FSkillData PlainAttack02{};
+	PlainAttack02.SkillName = "PA_02";
+	PlainAttack02.Cooldown = 0.0f;//ÌÖåÏä§Ìä∏Ïö© 0Ï¥à
+	PlainAttack02.AttackPowerMultiplier = 2.1f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA2obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain02_Montage.Dual_Plain02_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack02.DirectionMontages.Add(E4WayDirection::Default, PA2obj.Object);
+	SkillMap.Add(PlainAttack02.SkillName, PlainAttack02);
+
+	FSkillData PlainAttack03{};
+	PlainAttack03.SkillName = "PA_03";
+	PlainAttack03.Cooldown = 0.0f;//ÌÖåÏä§Ìä∏Ïö© 0Ï¥à
+	PlainAttack03.AttackPowerMultiplier = 2.1f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PA3obj(TEXT("/Game/RPG_Hero_Animation(v2)/PlainAttack/Dual_Plain03_Montage.Dual_Plain03_Montage"));
+	if (PA1obj.Succeeded()) PlainAttack03.DirectionMontages.Add(E4WayDirection::Default, PA3obj.Object);
+	SkillMap.Add(PlainAttack03.SkillName, PlainAttack03);
+
+	//QÏä§ÌÇ¨
+	FSkillData SkillNum01{};
+	SkillNum01.SkillName = "S_01";
+	SkillNum01.Cooldown = 7.0f;//ÌÖåÏä§Ìä∏Ïö© 0Ï¥à
+	SkillNum01.AttackPowerMultiplier = 3.3f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill1obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill01_Montage.Dual_Skill01_Montage"));
+	if (skill1obj.Succeeded()) SkillNum01.DirectionMontages.Add(E4WayDirection::Default, skill1obj.Object);
+	SkillMap.Add(SkillNum01.SkillName, SkillNum01);
+
+	FSkillData SkillNum02{};
+	SkillNum02.SkillName = "S_02";
+	SkillNum02.Cooldown = 9.0f;
+	SkillNum02.AttackPowerMultiplier = 4.5f;
+	SkillNum02.StaggerAmount = 5.0f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill2obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill02_Montage.Dual_Skill02_Montage"));
+	if (skill2obj.Succeeded()) SkillNum02.DirectionMontages.Add(E4WayDirection::Default, skill2obj.Object);
+	SkillMap.Add(SkillNum02.SkillName, SkillNum02);
+
+	FSkillData SkillNum03{};
+	SkillNum03.SkillName = "S_03";
+	SkillNum03.Cooldown = 6.5f;
+	SkillNum03.AttackPowerMultiplier = 4.6f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill3obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill03_Montage.Dual_Skill03_Montage"));
+	if (skill3obj.Succeeded()) SkillNum03.DirectionMontages.Add(E4WayDirection::Default, skill3obj.Object);
+	SkillMap.Add(SkillNum03.SkillName, SkillNum03);
+
+	FSkillData SkillNum04{};
+	SkillNum04.SkillName = "S_04";
+	SkillNum04.Cooldown = 8.0f;
+	SkillNum04.AttackPowerMultiplier = 5.2f;
+	SkillNum04.StaggerAmount = 2.8f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill4obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill04_Montage.Dual_Skill04_Montage"));
+	if (skill4obj.Succeeded()) SkillNum04.DirectionMontages.Add(E4WayDirection::Default, skill4obj.Object);
+	SkillMap.Add(SkillNum04.SkillName, SkillNum04);
+
+	FSkillData SkillNum05{};
+	SkillNum05.SkillName = "S_05";
+	SkillNum05.Cooldown = 4.0f;
+	SkillNum05.AttackPowerMultiplier = 1.5f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill5obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill05_Montage.Dual_Skill05_Montage"));
+	if (skill5obj.Succeeded()) SkillNum05.DirectionMontages.Add(E4WayDirection::Default, skill5obj.Object);
+	SkillMap.Add(SkillNum05.SkillName, SkillNum05);
+
+	FSkillData SkillNum06{};
+	SkillNum06.SkillName = "S_06";
+	SkillNum06.Cooldown = 3.0f;
+	SkillNum06.AttackPowerMultiplier = 1.5f;
+	SkillNum06.Counter = true;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill6obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill06_Montage.Dual_Skill06_Montage"));
+	if (skill6obj.Succeeded()) SkillNum06.DirectionMontages.Add(E4WayDirection::Default, skill6obj.Object);
+	SkillMap.Add(SkillNum06.SkillName, SkillNum06);
+
+	FSkillData SkillNum07{};
+	SkillNum07.SkillName = "S_07";
+	SkillNum07.Cooldown = 7.0f;
+	SkillNum07.AttackPowerMultiplier = 3.4f;
+	SkillNum07.StaggerAmount = 1.9f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> skill7obj(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_Skill07_Montage.Dual_Skill07_Montage"));
+	if (skill7obj.Succeeded()) SkillNum07.DirectionMontages.Add(E4WayDirection::Default, skill7obj.Object);
+	SkillMap.Add(SkillNum07.SkillName, SkillNum07);
+
+	FSkillData DownPering{};
+	DownPering.SkillName = "Period";
+	DownPering.Cooldown = 3.0f;
+	DownPering.AttackPowerMultiplier = 0.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryDefault(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Dash_Montage.Dual_Dash_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryF(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_F_Montage.Dual_Period_F_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryB(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_B_Montage.Dual_Period_B_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryL(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_L_Montage.Dual_Period_L_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DownParryR(TEXT("/Game/RPG_Hero_Animation(v2)/Period/Dual_Period_R_Montage.Dual_Period_R_Montage"));
+	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Default, DownParryDefault.Object);
+	if (DownParryF.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Forward, DownParryF.Object);
+	if (DownParryB.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Back, DownParryB.Object);
+	if (DownParryL.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Left, DownParryL.Object);
+	if (DownParryR.Succeeded()) DownPering.DirectionMontages.Add(E4WayDirection::Right, DownParryR.Object);
+
+	SkillMap.Add(DownPering.SkillName, DownPering);
+
+	//FÏ∞®ÏßïÏä§ÌÇ¨(start)
+	FSkillData ChargingSkill_Start{};
 	ChargingSkill_Start.SkillName = "ChargingStartSkill";
 	ChargingSkill_Start.Cooldown = 10.0f;
-	ChargingSkill_Start.AttackPowerMultiplier = 0.f;//Ω∫≈∏∆Æ∂Ûº≠ æ¯¿Ω πË¿≤¿Ã
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Pull.SpearSkill_08_Pull"));//∫Ø∞Ê
+	ChargingSkill_Start.AttackPowerMultiplier = 30.0f;//Ïä§ÌÉÄÌä∏ÎùºÏÑú ÏóÜÏùå Î∞∞Ïú®Ïù¥
+	ChargingSkill_Start.StaggerAmount = 40.f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_S(TEXT("/Game/RPG_Hero_Animation(v2)/Skill/Dual_SKill08_02_Montage.Dual_SKill08_02_Montage"));//Î≥ÄÍ≤Ω
 	if (Chargingobj_S.Succeeded())
 	{
 		ChargingSkill_Start.SkillMontage = Chargingobj_S.Object;
 	}
 	SkillMap.Add(ChargingSkill_Start.SkillName, ChargingSkill_Start);
-	//F¬˜¬°Ω∫≈≥(Hold)
-	FSkillData ChargingSkill_Hold;
-	ChargingSkill_Hold.SkillName = "ChargingHoldingSkill";
-	ChargingSkill_Hold.Cooldown = 0.0f;
-	ChargingSkill_Hold.AttackPowerMultiplier = 0.f;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_H(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_Hold.SpearSkill_08_Hold"));
-	if (Chargingobj_H.Succeeded())
-	{
-		ChargingSkill_Hold.SkillMontage = Chargingobj_H.Object;
-	}
-	SkillMap.Add(ChargingSkill_Hold.SkillName, ChargingSkill_Hold);
-	//F¬˜¬°Ω∫≈≥(Cancel)
-	FSkillData ChargingSkill_Cancel;
-	ChargingSkill_Cancel.SkillName = "ChargingEndCancelSkill";
-	ChargingSkill_Cancel.Cooldown = 0.0f;
-	ChargingSkill_Cancel.AttackPowerMultiplier = 100.f;//∏∑≈∏ + Ω«∆– πË¿≤
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CC(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndCancel.SpearSkill_08_EndCancel"));
-	if (Chargingobj_CC.Succeeded())
-	{
-		ChargingSkill_Cancel.SkillMontage = Chargingobj_CC.Object;
-	}
-	SkillMap.Add(ChargingSkill_Cancel.SkillName, ChargingSkill_Cancel);
-	//F¬˜¬°Ω∫≈≥(Complete)
-	FSkillData ChargingSkill_Complete;
-	ChargingSkill_Complete.SkillName = "ChargingEndCompleteSkill";
-	ChargingSkill_Complete.Cooldown = 0.0f;
-	ChargingSkill_Complete.AttackPowerMultiplier = 200.f;//∏∑≈∏ + º∫∞¯ πË¿≤
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Chargingobj_CP(TEXT("/Game/RPG_Hero_Animation/SpearSkill_08_EndComplete.SpearSkill_08_EndComplete"));
-	if (Chargingobj_CP.Succeeded())
-	{
-		ChargingSkill_Complete.SkillMontage = Chargingobj_CP.Object;
-	}
-	SkillMap.Add(ChargingSkill_Complete.SkillName, ChargingSkill_Complete);
+	//Dead Ïï†ÎãàÎ©îÏù¥ÏÖò
+	FSkillData Dead{};
+	Dead.SkillName = "Dead";
+	Dead.Cooldown = 0.0f;
+	Dead.AttackPowerMultiplier = 0.0f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> deadobj(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Die_Montage.Dual_Die_Montage"));
+	if (deadobj.Succeeded()) Dead.DirectionMontages.Add(E4WayDirection::Default, deadobj.Object);
+	SkillMap.Add(Dead.SkillName, Dead);
+	//RestartÏï†ÎãàÎ©îÏù¥ÏÖò
+	FSkillData Restart{};
+	Restart.SkillName = "Restart";
+	Restart.Cooldown = 0.0f;
+	Restart.AttackPowerMultiplier = 0.0f;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> restartobj(TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Restart_Montage.Dual_Restart_Montage"));
+	if (restartobj.Succeeded()) Restart.DirectionMontages.Add(E4WayDirection::Default, restartobj.Object);
+	SkillMap.Add(Restart.SkillName, Restart);
+	
+	//Collision
+	FSkillCollisionData Sphere_A{};
+	Sphere_A.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_A.Dimensions = FVector(200.f, 200.f, 50.f);
+	Sphere_A.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Sphere_A);//0Î≤à
+
+	//Collision
+	FSkillCollisionData Sphere_B{};
+	Sphere_B.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_B.Dimensions = FVector(400.f, 400.f, 50.f);
+	Sphere_B.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Sphere_B);
+
+	FSkillCollisionData Box_A{};
+	Box_A.ShapeType = ESkillCollisionShapeType::Box;
+	Box_A.Dimensions = FVector(500.f, 400.f, 300.f);
+	Box_A.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_A);
+
+	FSkillCollisionData Box_B{};
+	Box_B.ShapeType = ESkillCollisionShapeType::Box;
+	Box_B.Dimensions = FVector(700.f, 600.f, 300.f);
+	Box_B.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_B);
+
+	FSkillCollisionData Box_C{};
+	Box_C.ShapeType = ESkillCollisionShapeType::Box;
+	Box_C.Dimensions = FVector(400.f, 400.f, 600.f);
+	Box_C.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_C);//4Î≤à
+
+	FSkillCollisionData Sphere_C{};
+	Sphere_C.ShapeType = ESkillCollisionShapeType::Sphere;
+	Sphere_C.Dimensions = FVector(600.f, 600.f, 50.f);
+	Sphere_C.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Sphere_C);
+
+	FSkillCollisionData Box_D{};
+	Box_D.ShapeType = ESkillCollisionShapeType::Box;
+	Box_D.Dimensions = FVector(800.f, 700.f, 300.f);
+	Box_D.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_D);
+
+	FSkillCollisionData Box_E{};
+	Box_E.ShapeType = ESkillCollisionShapeType::Box;
+	Box_E.Dimensions = FVector(300.f, 1000.f, 300.f);
+	Box_E.Duration = 0.5f;
+	SkillCollisionDataArray.Add(Box_E);//7Î≤à
 }
 
 
@@ -86,6 +311,15 @@ void UC_SkillComponent::RequestJumpToSection(FName SectionName)
 	{
 		CachedAnimInstance->OnRequestJumpSection.Broadcast(SectionName);
 	}
+}
+
+float UC_SkillComponent::GetskillCoolTime(FName skill_Key)
+{
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))
+	{
+		return Skill->Cooldown;
+	}
+	return 0.0f;
 }
 
 // Called when the game starts
@@ -120,50 +354,108 @@ void UC_SkillComponent::InitializeComponent()
 	
 }
 
-void UC_SkillComponent::UsingSkill(FName skill_Key)
+void UC_SkillComponent::UsingSkill(FName skill_Key, E4WayDirection Direction)
 {
-	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//Ω∫≈≥∏ ø° ∞∞¿∫¿Ã∏ß¿ª∞°¡¯∞‘¿÷¥Ÿ∏È ™Oæ∆º≠ Skill∫Øºˆø° ¿˙¿Â->¿Ã∞‘ º∫∞¯«œ∏È true
+	if (const FSkillData* Skill = SkillMap.Find(skill_Key))//Ïä§ÌÇ¨ÎßµÏóê Í∞ôÏùÄÏù¥Î¶ÑÏùÑÍ∞ÄÏßÑÍ≤åÏûàÎã§Î©¥ Ï∞øÏïÑÏÑú SkillÎ≥ÄÏàòÏóê Ï†ÄÏû•->Ïù¥Í≤å ÏÑ±Í≥µÌïòÎ©¥ true
 	{
-		//Ω∫≈≥¿∫ ¡∏¿Á«œ¡ˆ∏∏, `SkillMontage`∞° º≥¡§µ«æÓ ¿÷¡ˆ æ ¿∫ ∞ÊøÏ Ω««‡ ¡ﬂ¥‹
-		//¡Ô, **æ÷¥œ∏ﬁ¿Ãº«¿Ã º≥¡§µ«¡ˆ æ ¿∫ Ω∫≈≥¿∫ Ω««‡«œ¡ˆ æ ¿Ω**
-		if (!Skill->SkillMontage)
+		UAnimMontage* MontageToPlay = nullptr;//Ïã§ÌñâÌï†Î™ΩÌÉÄÏ£º Î∞±ÏóÖÏö©
+		CurrentSkillName = skill_Key;
+		// 4Î∞©Ìñ• Ï†ÑÏö© Ïä§ÌÇ¨Ïù¥ÎùºÎ©¥
+		if (Skill->DirectionMontages.Num() > 0)//SkillÏù¥ Î∞©Ìñ•ÏùÑ Í∞ÄÏßÄÍ≥†ÏûàÎäî Îç∞Ïù¥ÌÑ∞ÎùºÎ©¥?
 		{
-			UE_LOG(LogTemp, Warning, TEXT("NoMontage"));
+			if (UAnimMontage*const* FoundMontage = Skill->DirectionMontages.Find(Direction))
+			{
+				MontageToPlay = *FoundMontage;
+			}
+			else if (UAnimMontage* const* DefaultMontage = Skill->DirectionMontages.Find(E4WayDirection::Default))
+			{
+				MontageToPlay = *DefaultMontage;
+			}
+		}
+		else
+		{
+			// Í∏∞Ï°¥ Ïä§ÌÇ¨ (Î∞©Ìñ• ÏóÜÎäî)
+			MontageToPlay = Skill->SkillMontage;
+		}
+		//Ïä§ÌÇ¨ÏùÄ Ï°¥Ïû¨ÌïòÏßÄÎßå, `SkillMontage`Í∞Ä ÏÑ§Ï†ïÎêòÏñ¥ ÏûàÏßÄ ÏïäÏùÄ Í≤ΩÏö∞ Ïã§Ìñâ Ï§ëÎã®
+		//Ï¶â, **Ïï†ÎãàÎ©îÏù¥ÏÖòÏù¥ ÏÑ§Ï†ïÎêòÏßÄ ÏïäÏùÄ Ïä§ÌÇ¨ÏùÄ Ïã§ÌñâÌïòÏßÄ ÏïäÏùå**
+		if (!MontageToPlay)
+		{
 			return;
 		}
-		OnSkillMontageRequested.Broadcast(Skill->SkillMontage);//∏˘≈∏¡÷Ω««‡∆ƒ∆Æ
+		OnSkillMontageRequested.Broadcast(MontageToPlay);//Î™ΩÌÉÄÏ£ºÏã§ÌñâÌååÌä∏
 	}
+}
+
+void UC_SkillComponent::HandleSkillHit(int32 SkillIndex, FVector SkillLocation, FRotator SkillRotation)//Ïï†ÎãòÎÖ∏Ìã∞ÌååÏù¥(SkillHit)Ìò∏Ï∂úÏö©
+{
+	//Ïú†Ìö®Ïù∏Îç±Ïä§ Í∞í Í≤ÄÏÇ¨
+	if (!SkillCollisionDataArray.IsValidIndex(SkillIndex))
+	{
+		return;
+	}
+	bool IsCounter = false;
+	if (const FSkillData* Skill = SkillMap.Find(CurrentSkillName))
+	{
+		IsCounter = Skill->Counter;
+	}
+	const FSkillCollisionData& CollisionData = SkillCollisionDataArray[SkillIndex];
+	SpawnSkillCollision(CollisionData, SkillLocation, SkillRotation, IsCounter);
+	//const FSkillData* SkillData = SkillMap.Find(CurrentSkillName);
+	//if (!SkillData)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("NonePlayingSkill"));
+	//	return;
+	//}
+	//const FSkillCollisionData& CollisionData = SkillData->CollisionData;//Ïä§ÌÇ¨Îç∞Ïù¥ÌÑ∞Ïùò Ïª¨Î¶¨Ï†ºÎç∞Ïù¥ÌÑ∞Î•º Ï∞∏Ï°∞ÌïòÎäî ÎûòÌçºÎü∞Ïä§ÏÉùÏÑ±.
+	//SpawnSkillCollision(CollisionData, SkillData->Counter);
+
 }
 
 bool UC_SkillComponent::IsCooldownReady(FName SkillName) const
 {
-	//Skillƒ≈∏¿” ∏ ø° «ÿ¥Á Ω∫≈≥µ•¿Ã≈Õ∞°æ¯¿∏∏È æ∆¡˜ ¥≠∏Æ¡ˆæ æ“¿∏¥œ ture∑Œ ∏Æ≈œ
+	//SkillÏø®ÌÉÄÏûÑ ÎßµÏóê Ìï¥Îãπ Ïä§ÌÇ¨Îç∞Ïù¥ÌÑ∞Í∞ÄÏóÜÏúºÎ©¥ ÏïÑÏßÅ ÎàåÎ¶¨ÏßÄÏïäÏïòÏúºÎãà tureÎ°ú Î¶¨ÌÑ¥
 	if (!SkillCooldownEndTime.Contains(SkillName)) return true;
 	return GetWorld()->GetTimeSeconds() >= SkillCooldownEndTime[SkillName];
-	//«ˆ¡¶Ω√∞£ >= endTime = false∏È ø£µÂ≈∏¿”¿Ã ¥ı≈©π«∑Œ æ∆¡˜ ƒ≈∏¿”æ»¡ˆ≥≤
-	//«ˆ¡¶Ω√∞£ >= endTime = true∏È ø£µÂ≈∏¿”∫∏¥Ÿ «ˆ¡¶Ω√∞£¿Ã ¡ˆ≥µ¿∏π«∑Œ ƒ≈∏¿”≥°≥≤
+	//ÌòÑÏ†úÏãúÍ∞Ñ >= endTime = falseÎ©¥ ÏóîÎìúÌÉÄÏûÑÏù¥ ÎçîÌÅ¨ÎØÄÎ°ú ÏïÑÏßÅ Ïø®ÌÉÄÏûÑÏïàÏßÄÎÇ®
+	//ÌòÑÏ†úÏãúÍ∞Ñ >= endTime = trueÎ©¥ ÏóîÎìúÌÉÄÏûÑÎ≥¥Îã§ ÌòÑÏ†úÏãúÍ∞ÑÏù¥ ÏßÄÎÇ¨ÏúºÎØÄÎ°ú Ïø®ÌÉÄÏûÑÎÅùÎÇ®
 }
 
 void UC_SkillComponent::StartCooldown(FName SkillName)
 {
 	if (!SkillMap.Contains(SkillName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Skill [%s] not found in SkillDataMap"), *SkillName.ToString());
 		return;
 	}
-	// Ω∫≈≥ µ•¿Ã≈Õø°º≠ ƒ≈∏¿” ∞™ ∞°¡Æø¿±‚
+	if (!GetWorld())
+	{
+		return;
+	}
+	// Ïä§ÌÇ¨ Îç∞Ïù¥ÌÑ∞ÏóêÏÑú Ïø®ÌÉÄÏûÑ Í∞í Í∞ÄÏ†∏Ïò§Í∏∞
 	float CooldownDuration = SkillMap[SkillName].Cooldown;
-	// ƒ≈∏¿” ¡æ∑· Ω√∞£ ∞ËªÍ »ƒ TMapø° ±‚∑œ
+	//********Ïä§ÌÇ¨Ïø®ÌÉÄÏûÑÏù¥ ÏãúÏûëÎêòÎäîÏãúÏ†êÏù¥ Ïù¥Î∂ÄÎ∂Ñ -> Ïó¨Í∏∞ÏÑú Îç∏Î¶¨Í≤åÏù¥Ìä∏Î°ú ÏïåÎ†§Ï§å Ïä§ÌÇ¨ÌÇ§Î•º Í∞ÄÏ†∏ÏôÄÏÑú,***********
+	// Ïø®ÌÉÄÏûÑ Ï¢ÖÎ£å ÏãúÍ∞Ñ Í≥ÑÏÇ∞ ÌõÑ TMapÏóê Í∏∞Î°ù
 	float EndTime = GetWorld()->GetTimeSeconds() + CooldownDuration;
 	SkillCooldownEndTime.Add(SkillName, EndTime);
 
-	// UI µø±‚»≠∏¶ ¿ß«— ∫Í∑ŒµÂƒ≥Ω∫∆Æ
-	//OnCooldownStarted.Broadcast(SkillName, CooldownDuration);
+	// UI ÎèôÍ∏∞ÌôîÎ•º ÏúÑÌïú Î∏åÎ°úÎìúÏ∫êÏä§Ìä∏
+	OnSkillCooldownStarted.Broadcast(SkillName);
 }
 
 float UC_SkillComponent::GetRemainingCooldown(FName SkillName) const
 {
-	if (!SkillCooldownEndTime.Contains(SkillName)) return 0.0f;//ƒ≈∏¿”∏Æ≈œ(¥≠∏∞¿˚¿Ãæ¯¿∏∏È)
-	return FMath::Max(SkillCooldownEndTime[SkillName] - GetWorld()->GetTimeSeconds(), 0.0f);//≥≤¿∫ƒ≈∏¿” ∏Æ≈œ
+	if (!SkillCooldownEndTime.Contains(SkillName)) return 0.0f;//Ïø®ÌÉÄÏûÑÎ¶¨ÌÑ¥(ÎàåÎ¶∞Ï†ÅÏù¥ÏóÜÏúºÎ©¥)
+	return FMath::Max(SkillCooldownEndTime[SkillName] - GetWorld()->GetTimeSeconds(), 0.0f);//ÎÇ®ÏùÄÏø®ÌÉÄÏûÑ Î¶¨ÌÑ¥
+}
+
+void UC_SkillComponent::skillCoolTimeTriggered(FName SkillName)
+{
+	float Remain = GetRemainingCooldown(SkillName);
+	FS_GameAlertSubsystemConfig MessageConfig{};
+	MessageConfig.fDefaultAlertDuration = 0.3f;
+	MessageConfig.strDefaultAlertMessage = FText::FromString( TEXT("Ïä§ÌÇ¨Ïù¥ Ïø®ÌÉÄÏûÑ Ï§ë ÏûÖÎãàÎã§."));
+	UC_GameAlertSubsystem::pushAlertMessage_Cpp(MessageConfig);
+	//if (m_OnSkillCoolTimeTriggered.IsBound())
+	//	m_OnSkillCoolTimeTriggered.Broadcast(SkillName, Remain);
 }
 

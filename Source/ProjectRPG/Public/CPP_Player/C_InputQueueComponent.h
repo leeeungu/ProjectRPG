@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "S_InputActionData.h"
 #include "C_InputQueueComponent.generated.h"
 
 
@@ -19,6 +20,8 @@ private:
 	TArray<FInputActionData> InputQueue;
 	static const int32 MaxQueueSize = 3;
 	TArray<FInputActionData> ChargingQueue;
+	FInputActionData CurrentChargingData = {};
+	float ChargingStratTime = {};
 public:	
 	// Sets default values for this component's properties
 	UC_InputQueueComponent();
@@ -34,6 +37,8 @@ public:
 	void ClearQueueList();
 	UFUNCTION(BlueprintCallable)
 	void ClearChargingQueueList();
+	UFUNCTION(BlueprintCallable)
+	void StartChargingSet();
 
 protected:
 	// Called when the game starts

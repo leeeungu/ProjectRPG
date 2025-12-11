@@ -19,7 +19,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool useItemActor();
-
 	void setItemID(int nItemID) { m_nItemID = nItemID; }
 	int getItemID() const { return m_nItemID; }
 protected:

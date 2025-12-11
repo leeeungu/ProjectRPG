@@ -7,6 +7,9 @@ SBS  국비 지원반에서 Unreal Engine을 사용하여 개발한 팀 프로�
 
 노션 주소2 : https://www.notion.so/259debf7d548805886e8d2ee6ba54f18?v=259debf7d5488066b7f2000c83384d4f
 
+시연영상
+https://youtu.be/LlWDZ32syRo
+
 ## 📂 Project Structure
 ```text
 📦 ProjectRoot

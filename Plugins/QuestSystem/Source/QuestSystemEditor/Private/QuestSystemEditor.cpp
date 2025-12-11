@@ -93,7 +93,8 @@ public:
 
 void FQuestSystemEditorModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	//  모듈 시작 시 호출되는 함수
+	//IAssetTools 인터페이스에 에셋 선택시 실행 할 행동 정의
 	IAssetTools& assetTool = IAssetTools::Get();
 	EAssetTypeCategories::Type assetType = assetTool.RegisterAdvancedAssetCategory(FName("QuestAssets"), FText::FromString("Quest Asset"));
 	TSharedPtr<QuestAssetAction> questAction = MakeShareable(new QuestAssetAction(assetType));
@@ -106,6 +107,7 @@ void FQuestSystemEditorModule::StartupModule()
 	_styleSet->SetContentRoot(contentDir);
 
 
+	//핀에 사용할 이미지 등을 저장
 	FSlateImageBrush* nodeAddPinIcon = new FSlateImageBrush(_styleSet->RootToContentDir(TEXT("NodeAddPinIcon"), TEXT(".png")), FVector2D(128.0f, 128.0f));
 	FSlateImageBrush* nodeDeletePinIcon = new FSlateImageBrush(_styleSet->RootToContentDir(TEXT("NodeDeletePinIcon"), TEXT(".png")), FVector2D(128.0f, 128.0f));
 	FSlateImageBrush* nodeDeleteNodeIcon = new FSlateImageBrush(_styleSet->RootToContentDir(TEXT("NodeDeleteNodeIcon"), TEXT(".png")), FVector2D(128.0f, 128.0f));
@@ -114,16 +116,15 @@ void FQuestSystemEditorModule::StartupModule()
 	_styleSet->Set(TEXT("QuestAssetEditor.NodeDeleteNodeIcon"), nodeDeleteNodeIcon);
 	FSlateStyleRegistry::RegisterSlateStyle(*_styleSet);
 
-	//// Register a custom pin factory for creating pins the way we want
+	// 블루프린트 그래프에서 사용될 패널을 을 정의한 구조체를 만들어서 설정한다.
 	_pinFactory = MakeShareable(new FQuestPinFactory());
 	FEdGraphUtilities::RegisterVisualPinFactory(_pinFactory);
 }
+
 void FQuestSystemEditorModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
-	FSlateStyleRegistry::UnRegisterSlateStyle(*_styleSet);
 	FEdGraphUtilities::UnregisterVisualPinFactory(_pinFactory);
+	FSlateStyleRegistry::UnRegisterSlateStyle(*_styleSet);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include <C_ItemDataSubsystem.h>
 #include "C_InventorySlotInterface.h"
+#include "GamePlay/C_DataManagerInterface.h"
 #include "C_InventoryComponent.generated.h"
 
 
@@ -18,9 +19,33 @@ struct FS_InventorySlot
 	TScriptInterface< IC_InventorySlotInterface> pSlotInterface{};
 };
 
+USTRUCT()
+struct FS_InventorySaveData
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	TArray<FS_InventorySlot> arrInventory;
+	int nInventoryWidth = 1;
+	int nInventoryHeight = 1;
+
+	FS_InventorySaveData(int Width, int Height, TArray<FS_InventorySlot>& arrInventory);
+	FS_InventorySaveData() = default;
+
+	friend FArchive& operator<<(FArchive& Ar, FS_InventorySaveData* Data)
+	{
+		int nSize = Data->arrInventory.Num();
+		for (int i = 0; i < nSize; i++)
+		{
+			Ar << Data->arrInventory[i].sData.nItemID;
+			Ar << Data->arrInventory[i].sData.nItemCount;
+			Ar << Data->arrInventory[i].sData.bLockSort;
+		}
+		return Ar;
+	}
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTRPG_API UC_InventoryComponent : public UActorComponent
+class PROJECTRPG_API UC_InventoryComponent : public UActorComponent, public IC_DataManagerInterface
 {
 	GENERATED_BODY()
 
@@ -98,11 +123,11 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	void swapInventorySlot(int nSrcY, int nSrcX, int nDstY, int nDstX);
-	/**
-	* @param nSrcY - Item1 Height/Row Index
-	* @param nSrcX - Item1 Width/Col Index
-	* @param nDstY - Item2 Height/Row Index
-	* @param nDstX - Item2 Width/Col Index
+
+	/**	
+	* 아이템을 인벤토리에 추가합니다.
+	* @param nItemID - Item Key Value
+	* @param nItemCount - Item Count
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UC_InventoryComponent") 
 	bool pushItem(int nItemID, int nItemCount);
@@ -141,8 +166,10 @@ public:
 	bool useItemAtSlot(int nY, int nX, int nCount);
 protected:
 	virtual void BeginPlay() override;
-
+#if WITH_EDITOR
+public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 private:
 	/**
 	* Check Array Bound
@@ -160,4 +187,12 @@ private:
 	void resetItemSlot(FS_InventorySlot* pItemSlot);
 	void runSlotChangeInterface(FS_InventorySlot* pItemSlot);
 
+
+	// IC_DataManagerInterface을(를) 통해 상속됨
+public:
+	virtual E_DataType getDataType() override;
+	virtual FString getFilePath(E_DataType eType) override;
+
+	virtual void loadBinaryData(TArray<uint8>& arData) override;
+	virtual TArray<uint8> getBinaryData() override;
 };

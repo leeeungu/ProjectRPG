@@ -1,0 +1,9 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "CPP_Player/UI/C_PerfectZoneResult.h"
+
+void UC_PerfectZoneResult::HandleResultAnimEnd()
+{
+	OnRerultAnimEnd.Broadcast();
+}

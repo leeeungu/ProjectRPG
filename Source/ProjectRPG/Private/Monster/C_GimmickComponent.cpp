@@ -2,9 +2,39 @@
 
 
 #include "Monster/C_GimmickComponent.h"
-
+#include "C_MonsterBaseCharacter.h"
+#include "../Public/Monster/C_GimmickStartPos.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(C_GimmickGimmickComponent, Log, All);
+
+// Called when the game starts
+void UC_GimmickComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+
+	// ...
+
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
+
+	if (m_pMonster)
+	{
+		m_pAnim = m_pMonster->GetMesh()->GetAnimInstance();
+	}
+
+	TArray<AActor*> arrFound{};
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AC_GimmickStartPos::StaticClass(), arrFound);
+
+	if (arrFound.Num() > 0)
+	{
+		AActor* pFoundActor = arrFound[0];
+		FVector vFoundPos = pFoundActor->GetActorLocation();
+		m_vGimmickPos = vFoundPos;
+	}
+
+}
 
 bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 {
@@ -15,7 +45,14 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	
 	if (fHpRatio <= m_fTriggerHp)
 	{
-		UE_LOG(C_GimmickGimmickComponent, Error, TEXT("HP: [%s] %.1f / %.1f , Trigger: %.1f"),*this->GetName(), fHp, fMaxHp, m_fTriggerHp);
+		if (m_pMonster->getCurrentState() == E_MonsterPhaseState::Stagger || m_pMonster->getCurrentState() == E_MonsterPhaseState::CounterSuccess)
+			return false;
+
+		if (!canPlayGimmickMontage())
+		{
+			m_pMonster->reserveGimmick(m_pMonster->getHp(), m_pMonster->getMaxHp());
+			return false;
+		}
 		return true;
 	}
 		
@@ -28,6 +65,48 @@ bool UC_GimmickComponent::canGimmickStart(float fHp, float fMaxHp)
 	return false;
 }
 
+void UC_GimmickComponent::startGimmick()
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("start Gimmick Called"));
+
+	if (!m_pMonster || !m_pAnim)
+		return;
+
+	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickReady);
+
+	m_pMonster->setActivePower(true);
+
+	m_pMonster->stopAi();
+
+	if (m_pGimmickStartMontage)
+	{
+		playMontageWithCallBack(m_pGimmickStartMontage, TEXT("onStartGimmickMontageEnded"));
+	}
+	else
+	{
+		onStartGimmickMontageEnded(nullptr, false);
+	}
+
+}
+
+void UC_GimmickComponent::onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!m_pMonster)
+		return;
+
+	if (m_pAnim)
+	{
+		m_pAnim->OnMontageEnded.RemoveAll(this);
+	}
+
+	m_pMonster->TeleportTo(m_vGimmickPos, FRotator::ZeroRotator);
+	m_pMonster->SetActorRelativeRotation(FRotator(0.f, -90.f, 0.f));
+
+
+	// 기믹 실행으로 넘어감
+	excuteGimmick();
+}
+
 // Sets default values for this component's properties
 UC_GimmickComponent::UC_GimmickComponent()
 {
@@ -38,26 +117,84 @@ UC_GimmickComponent::UC_GimmickComponent()
 	// ...
 }
 
-
-// Called when the game starts
-void UC_GimmickComponent::BeginPlay()
+bool UC_GimmickComponent::getIsSucceessGimmick() const
 {
-	Super::BeginPlay();
+	return m_bSuccessGimmick;
+}
 
-	// ...
-	
+void UC_GimmickComponent::setSucceessGimmick(bool bSucceess)
+{
+	m_bSuccessGimmick = bSucceess;
+}
+
+
+void UC_GimmickComponent::playMontageWithCallBack(UAnimMontage* pMontage, FName strFunctionName)
+{
+	if (!m_pAnim || !pMontage)
+		return;
+
+	if (m_pAnim->IsAnyMontagePlaying())
+	{
+		// 몽타주가 끝났을 때 특정 함수 호출
+		FScriptDelegate onMontageEndDelegate;
+		onMontageEndDelegate.BindUFunction(this, strFunctionName);
+		m_pAnim->OnMontageEnded.Add(onMontageEndDelegate);
+
+	}
+	else
+	{
+		m_pAnim->Montage_Play(pMontage);
+
+		// 바로 콜백 바인딩
+		FScriptDelegate onMontageEndDelegate;
+		onMontageEndDelegate.BindUFunction(this, strFunctionName);
+		m_pAnim->OnMontageEnded.Add(onMontageEndDelegate);
+	}
 }
 
 void UC_GimmickComponent::excuteGimmick()
 {
+	m_pMonster->setPhaseState(E_MonsterPhaseState::GimmickExecute);
+
 	m_bGimmickPlaying = true;
 
+	if (m_pMonster->getCurrentState() == E_MonsterPhaseState::GimmickExecute)
+		m_pAnim->Montage_Play(m_pGimmikPlayMontage);
 
 }
+
+bool UC_GimmickComponent::getIsSuccess() const
+{
+	return m_bSuccessGimmick;
+}
+
 
 float UC_GimmickComponent::getGimmickTime() const
 {
 	return m_fGimmickTime;
+}
+
+bool UC_GimmickComponent::isMonsterIdle() const
+{
+	if (m_pMonster->getCurrentState() != E_MonsterPhaseState::Idle)
+		return false;
+
+	return true;
+}
+
+bool UC_GimmickComponent::canPlayGimmickMontage() const
+{
+	if (!m_pAnim)
+		return false;
+
+	if (m_pMonster->getIsAttacking())
+		return false;
+
+	if (m_pMonster->getCurrentState() == E_MonsterPhaseState::Stagger)
+		return false;
+
+
+	return isMonsterIdle();
 }
 
 bool UC_GimmickComponent::IsPlayingGimmick()
@@ -65,9 +202,19 @@ bool UC_GimmickComponent::IsPlayingGimmick()
 	return m_bGimmickPlaying;
 }
 
+void UC_GimmickComponent::setGimmickPlaying(bool bPlaying)
+{
+	m_bGimmickPlaying = bPlaying;
+}
+
 void UC_GimmickComponent::endGimmick()
 {
 	m_bGimmickPlaying = false;
+
+	m_pAnim->Montage_Stop(0.1f);
+	m_pAnim->Montage_Play(m_pGimmikEndMontage);
+
+	m_pMonster->setActivePower(false);
 
 }
 
@@ -78,10 +225,16 @@ void UC_GimmickComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (m_bGimmickPlaying)
+	{
 		m_fGimmickTime -= DeltaTime;
-
-	if (m_fGimmickTime <= 0)
-		endGimmick();
+		if (m_fGimmickTime <= 0 && !m_bSuccessGimmick)
+		{
+			m_bGimmickPlaying = false;
+			if (m_pMonster)
+				m_pMonster->onGimmickEnd(); // 실패 처리 위임
+		}
+	}
+		
 
 	// ...
 }

@@ -4,7 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "C_TravelManagerComponent.generated.h"
 
-UENUM(BlueprintType)
+
+UENUM(BlueprintType, meta = (ScriptName = "TravelType"))
 enum class E_TrabelType : uint8
 {
 	E_NONE				UMETA(DisplayName = "None"),
@@ -20,6 +21,8 @@ enum class E_TrabelType : uint8
 	E_BalanceBeamEnd		UMETA(DisplayName = "BalanceBeamEnd"),
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTravelChange, E_TrabelType, Pre, E_TrabelType, Current);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_TravelManagerComponent : public UActorComponent
@@ -27,14 +30,17 @@ class PROJECTRPG_API UC_TravelManagerComponent : public UActorComponent
 	GENERATED_BODY()
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	E_TrabelType m_eTravelType;
+	E_TrabelType m_eTravelType{};
+public:
+	UPROPERTY(BlueprintAssignable, Category = "TravelManagerComponent")
+	FOnTravelChange m_onTravelChanged{};
 public:	
 	UC_TravelManagerComponent();
 
 	UFUNCTION(BlueprintPure)
 	E_TrabelType getTravelType() const { return m_eTravelType; }
 	UFUNCTION(BlueprintCallable)
-	void setTravelType(E_TrabelType eType) { m_eTravelType = eType; }
+	void setTravelType(E_TrabelType eType);
 protected:
 	virtual void BeginPlay() override;
 };

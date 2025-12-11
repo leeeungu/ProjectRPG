@@ -12,7 +12,9 @@
 				"Engine",
 				"AIModule",
 				"UMG",
-				"Niagara"
+				"Niagara",
+				"CoreUObject",
+				"NiagaraAnimNotifies"
 			]
 		}
 	],
@@ -42,6 +44,26 @@
 		},
 		{
 			"Name": "MovieRenderPipeline",
+			"Enabled": true
+		},
+		{
+			"Name": "PCG",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGGeometryScriptInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGBiomeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGBiomeSample",
+			"Enabled": true
+		},
+		{
+			"Name": "VaRest",
 			"Enabled": true
 		}
 	]

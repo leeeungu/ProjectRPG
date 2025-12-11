@@ -7,10 +7,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(C_SphereAttackNotify, Log, All);
 
-void UC_SphereAttackNotify::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
-{
-	//ContainingAnimNotifyEvent.
-}
 
 void UC_SphereAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

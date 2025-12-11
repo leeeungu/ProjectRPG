@@ -9,6 +9,7 @@
 #include "C_MonsterBaseCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMosterDied);
+class UC_DamageWidgetComponent;
 
 UENUM(BlueprintType)
 enum class E_MonsterRank : uint8
@@ -16,6 +17,40 @@ enum class E_MonsterRank : uint8
 	Normal	UMETA(DisplayName = "Normal"),
 	Named	UMETA(DisplayName = "Named"),
 	Boss	UMETA(DisplayName = "Boss")
+};
+
+UENUM(BlueprintType)
+enum class E_MonsterPhaseState : uint8
+{
+	Idle,
+	Attacking,
+	PhaseChanging,
+	PhaseChanged,
+	GimmickReady,
+	GimmickExecute,
+	GimmickEnd,
+	Stagger,
+	CounterSuccess,
+	Dead
+};
+
+UENUM(BlueprintType)
+enum class E_MonsterDeferredAction : uint8
+{
+	None,
+	PhaseChange,
+	Gimmick,
+	Stagger
+};
+
+USTRUCT(BlueprintType)
+struct FS_MonsterAction
+{
+	GENERATED_BODY()
+
+	E_MonsterDeferredAction eType;
+	float fHp;
+	float fMaxHp;
 };
 
 USTRUCT(BlueprintType)
@@ -38,17 +73,9 @@ struct FS_PatternData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 nWeight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* pNiagara;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraLife;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float fNiagaraScale;
-
 	float LastUsedTime = -100.f;
 };
+
 /**
  * 
  */
@@ -57,12 +84,28 @@ class PROJECTRPG_API AC_MonsterBaseCharacter : public AC_BaseCharacter
 {
 	GENERATED_BODY()
 
-private:	
+private:
+	UPROPERTY()
+	class AC_MonsterAiController* m_pAiCon;
+
+	UPROPERTY()
+	class UNiagaraComponent* m_NiagaraGimmickPlay;
+
+	/*
+	* 애님몽타주
+	*/
+
 	UPROPERTY(EditAnywhere, Category = "Stagger Montage")
 	UAnimMontage* m_pStaggerMontage;
 
-	UPROPERTY(EditAnywhere, Category = "Niagara")
-	UNiagaraSystem* m_pDangerPlace;
+	UPROPERTY(EditAnywhere, Category = "Counter Montage")
+	UAnimMontage* m_pCounterMontage;
+
+	
+
+	/*
+	* 컴포넌트
+	*/
 
 	UPROPERTY(EditAnywhere, Category = "Gimmick")
 	class UC_StaggerGimmickComponent* m_pStaggerGimmickComp;
@@ -71,17 +114,23 @@ private:
 	class UC_StaggerComponent* m_pStaggerComp;
 
 	UPROPERTY()
-	class UC_PhaseComponent* m_pPhaseComp;
-
-	UPROPERTY()
 	class UC_CounterComponent* m_pCounterComp;
 
-	bool m_bIsAttacking = false;
-	bool m_bIsGimmickReady = false;
+	UPROPERTY()
+	class UC_PhaseComponent* m_pPhaseComponent;
 
-	float m_fKeepMaxStagger = 0.0f;
-	float m_fKeepStagger = 0.0f;
-	float m_fKeepBreak = 0.0f;
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DamageWidget")
+	UC_DamageWidgetComponent* m_pDamageWidget{};
+private:
+	TQueue<FS_MonsterAction> m_quePendingActions;
+
+	bool m_bIsAttacking = false;
+
+	bool m_bIsPower = false;
+
+	bool m_bStaggerBlock = false;
+
 
 	FTimerHandle m_timeHandle;
 
@@ -92,31 +141,65 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster Rank")
 	E_MonsterRank m_eMonsterRank = E_MonsterRank::Normal;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster State")
+	E_MonsterPhaseState m_eMonsterState = E_MonsterPhaseState::Idle;
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnMosterDied m_onMonsterDied;
+
 
 private:
 	float getDistanceToTarget() const;
 
 	void onAttackEnd();
 
+	void setDeleteNiagaraGimmick();	
+
 
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(BlueprintAssignable)
-	FOnMosterDied m_onMonsterDied;
 
 public:
 	AC_MonsterBaseCharacter();
 
 	virtual void Tick(float DeltaTime) override;
 
+	void setNiagaraComponent(UNiagaraComponent* NiagaraCom);
+
+	UFUNCTION(BlueprintCallable)
+	void reStartAi();
+
 	UFUNCTION(BlueprintCallable)
 	void stopAi();
 
-	UFUNCTION()
-	void onMontageEnded_moveToGimmick(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION(BlueprintCallable)
+	void tryTriggerPhaseChangeOrGimmick();
+
+	UFUNCTION(BlueprintCallable)
+	void setPhaseState(E_MonsterPhaseState eState);
+
+	UFUNCTION(BlueprintCallable)
+	E_MonsterPhaseState getCurrentState() const;
+
+	UFUNCTION(BlueprintCallable)
+	void reservePhaseChange(float fHp, float fMaxHp);
+
+	UFUNCTION(BlueprintCallable)
+	void reserveGimmick(float fHp, float fMaxHp);
+
+	UFUNCTION(BlueprintCallable)
+	void setActivePower(bool bActive);
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsPower() const;
+
+	UFUNCTION(BlueprintCallable)
+	void setBlockStagger(bool bActive);
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsBlockStagger() const;
 
 	/*
 	* 전투 관련
@@ -156,6 +239,9 @@ public:
 	UFUNCTION()
 	void onCounterFailed();
 
+	UFUNCTION(BlueprintCallable)
+	void tryCounter();
+
 	/*
 	* 죽음 소멸 관련 
 	*/
@@ -168,20 +254,32 @@ public:
 	/*
 	*  기믹 관련
 	*/
-	FVector getGimmickPos();
 
-	void moveToGimmick();
+	//void moveToGimmick();
 
-	void startGimmick();
+	//void startGimmick();
 
 	UFUNCTION()
 	void playStaggerGimmick();
 
-
 	UFUNCTION()
 	void endStaggerGimmick();
 
-	
+	UFUNCTION()
+	void onGimmickEnd();
 
+	UFUNCTION()
+	void onGimmickSuccessBroken();
+
+	//VFX
+	//HIT VFX
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class UNiagaraSystem* HitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Effect")
+	class USoundBase* HitSound;
+
+	UFUNCTION(BlueprintCallable)
+	void playHitEffect();
 	
 };

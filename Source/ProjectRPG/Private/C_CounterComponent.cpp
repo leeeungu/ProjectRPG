@@ -2,6 +2,7 @@
 
 
 #include "C_CounterComponent.h"
+#include "C_MonsterBaseCharacter.h"
 
 void UC_CounterComponent::endCounterWindow()
 {
@@ -27,7 +28,7 @@ void UC_CounterComponent::startCounterWindow(float fDuration)
 		&UC_CounterComponent::endCounterWindow,fDuration, false);
 }
 
-bool UC_CounterComponent::tryCounter(AActor* pPlayer)
+bool UC_CounterComponent::tryCounter()
 {
 	if (!m_bCanCounter)
 	{
@@ -36,8 +37,10 @@ bool UC_CounterComponent::tryCounter(AActor* pPlayer)
 	}
 
 	m_bCanCounter = false;
+	m_pMonster->setBlockStagger(true);
 
 	m_onCounterSuccess.Broadcast();
+	
 	return true;
 }
 
@@ -49,6 +52,7 @@ void UC_CounterComponent::BeginPlay()
 
 	// ...
 	
+	m_pMonster = Cast<AC_MonsterBaseCharacter>(GetOwner());
 }
 
 

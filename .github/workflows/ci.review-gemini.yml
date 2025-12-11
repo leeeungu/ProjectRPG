@@ -2,8 +2,7 @@ name: Gemini AI Pull Request Review
 
 on:
   pull_request:
-
-permissions: write-all
+    types: [opened, reopened, synchronize]
 
 jobs:
   gemini-review:

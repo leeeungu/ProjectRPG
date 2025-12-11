@@ -21,24 +21,40 @@ private:
 	float m_fGoalStagger = 200.f;
 	float m_fBrokenDuration = 5.f;
 
+	float m_fSavedMax{};
+	float m_fSavedBreak{};
+	float m_fSavedCurStagger{};
+
+	UPROPERTY()
+	class UC_StaggerComponent* m_pStaggerCom;
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnStaggerGimmickStart m_onStaggerGimmickStart;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnStaggerGimmickEnd m_onStaggerGimmickEnd;
 
-	float getGoalStagger() const;
-	float getBrokenDuration() const;
-
+	
+private:
+	virtual void endGimmick() override;
 
 protected:
+	virtual void BeginPlay() override;
+
 	virtual bool canGimmickStart(float fHp, float fMaxHp) override;
-
-	virtual void excuteGimmick() override;
-
-	virtual void endGimmick() override; 
 
 public:
 	UC_StaggerGimmickComponent();
+
+	float getGoalStagger() const;
+	float getBrokenDuration() const;
+
+	virtual void excuteGimmick() override;
+
+	void applyGimmickStagger(class UC_StaggerComponent* pStaggerCom);
+	void restoreStagger(class UC_StaggerComponent* pStaggerCom);
+
+	UFUNCTION()
+	void onGimmickBroken();
 	
 };

@@ -12,8 +12,6 @@ class PROJECTRPG_API UC_GimmickComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
-	
 
 protected:
 	bool m_bGimmickPlaying = false;
@@ -21,15 +19,39 @@ protected:
 	float m_fTriggerHp = 0.f;
 	float m_fGimmickTime = 0.f;
 
+	UPROPERTY()
+	class AC_MonsterBaseCharacter* m_pMonster;
 
+	UPROPERTY()
+	UAnimInstance* m_pAnim;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gimmick | Animation")
+	UAnimMontage* m_pGimmickStartMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gimmick | Animation")
+	UAnimMontage* m_pGimmikPlayMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gimmick | Animation")
+	UAnimMontage* m_pGimmikEndMontage;
+
+	UPROPERTY()
+	FVector m_vGimmickPos;
 
 public:	
 	// Sets default values for this component's properties
 	UC_GimmickComponent();
 
+	bool getIsSucceessGimmick() const;
+	void setSucceessGimmick(bool bSucceess);
+
+private:
+	bool isMonsterIdle() const;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void playMontageWithCallBack(UAnimMontage* pMontage, FName strFunctionName);
 
 	virtual void endGimmick();
 
@@ -40,10 +62,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool canGimmickStart(float fHp, float fMaxHp);
 
+	UFUNCTION(BlueprintCallable)
+	virtual void startGimmick();
+
 	virtual void excuteGimmick();
+
+	virtual bool getIsSuccess() const;
+
+	UFUNCTION()
+	virtual void onStartGimmickMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	float getGimmickTime() const;
 
+	bool canPlayGimmickMontage() const;
+
 	bool IsPlayingGimmick();
+
+	void setGimmickPlaying(bool bPlaying);
+
+	
 		
 };

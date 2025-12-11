@@ -3,13 +3,15 @@
 
 #include "CPP_Player/C_PlayerAnimInstance.h"
 #include "CPP_Player/C_SkillComponent.h"
+#include "CPP_Player/UI/C_PlayerSKillMGR.h"
+
 
 void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
 {
     //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
     if (MontageToPlay)
     {
-        StopAllMontages(0.1f);
+        StopAllMontages(0.0f);
         Montage_Play(MontageToPlay);
         CurrentActiveMontage = MontageToPlay;//몽타주 백업용
         //UE_LOG(LogTemp, Warning, TEXT("MontagePlay"));
@@ -29,6 +31,45 @@ void UC_PlayerAnimInstance::PlaySkillMontage(UAnimMontage* MontageToPlay)
     }        
 }
 
+void UC_PlayerAnimInstance::PlayUnEquipMontage()
+{
+   
+	StopAllMontages(0.1f);
+	Montage_Play(UnEquipMontage);
+    //FOnMontageEnded MontageEndedDelegate;
+    //MontageEndedDelegate.Unbind();//이전델리게이트해재 (중복방지)
+    //MontageEndedDelegate.BindUObject(this, &UC_PlayerAnimInstance::OnUnEquipMontageEnded);
+    //Montage_SetEndDelegate(MontageEndedDelegate, UnEquipMontage);
+    
+}
+
+void UC_PlayerAnimInstance::PlayDownMontage()
+{
+    StopAllMontages(0.1f);
+    Montage_Play(DownMontage);
+    //아직 다운몽타주 세팅전임(이걸 다운상태를 몽타주로 할것인가 애님그래프로할것인가?
+}
+
+void UC_PlayerAnimInstance::AnimChangeMode()
+{
+    if (!m_bIsAttack)
+    {
+        //m_bIsAttackMode = m_bIsAttack;
+        PlayUnEquipMontage();
+        return;
+    }
+    m_bIsAttackMode = m_bIsAttack;
+    
+}
+
+void UC_PlayerAnimInstance::OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (Montage == UnEquipMontage)
+    {
+        m_bIsAttackMode = m_bIsAttack;//아이들상태로 변환
+    }
+}
+
 void UC_PlayerAnimInstance::NativeInitializeAnimation()
 {
     Super::NativeInitializeAnimation();
@@ -44,11 +85,20 @@ void UC_PlayerAnimInstance::NativeInitializeAnimation()
         //언바인딩을해야할경우->이 애님인스턴스를 더이상 쓰지않을떄.
     }
     OnRequestJumpSection.AddDynamic(this, &UC_PlayerAnimInstance::HandleJumpSection);//지금은 플레이어에서 직접호출하지만 컴포넌트로 옮겨야함 그래야 구조깔끔
+    if (UnEquipMontage == nullptr)
+    {
+        UnEquipMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Game/RPG_Hero_Animation(v2)/Dual_Unequip_Montage.Dual_Unequip_Montage"));
+    }
 }
 
 void UC_PlayerAnimInstance::OnChangeRunningState()
 {
     ChangeRunningState.Broadcast();
+}
+
+void UC_PlayerAnimInstance::OnChangeDownState()
+{
+    m_IsDown = false;
 }
 
 void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupted)
@@ -57,7 +107,11 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     if (bInterrupted)
     {
         // 강제 중단된 경우 → 이동 가능 상태 풀지 않음
-        UE_LOG(LogTemp, Warning, TEXT("Montage interrupted. Ignore movement enable."));
+        if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))
+        {
+            // 차징 몽타주가 강제로 중단된 경우에만 퍼펙트존 숨기기
+            TriggerPerfectZoneHidden();
+        }
         return;//리턴을 때리면서 브로드캐스트 실행하지않음으로 여전히 이동불가상태로 남아있게됨.
         //선입력시스템으로 애니메이션이 전부끝나지않고 다른애니메이션이 호출되도 이로직으로 넘어오게됨.
         //*일단 패링은 스킬중간에쓰면 Interrupted로 처리가되는데 어차피 패링로직에 bCanMove 다시 false로 설정되서 추가 이동은 못하게됨.
@@ -66,7 +120,6 @@ void UC_PlayerAnimInstance::OnEndMontage(UAnimMontage* Montage, bool bInterrupte
     }
     if (Montage && Montage->GetName().Contains("SpearSkill_08_Pull"))//변경
     {
-        UE_LOG(LogTemp, Warning, TEXT("charging end?? "));
         SetPlayerMovePointEnabled.Broadcast();
         return;
     }
@@ -81,15 +134,43 @@ void UC_PlayerAnimInstance::HandleJumpSection(FName SectionName)
     }
 }
 
-void UC_PlayerAnimInstance::SetAttackMode(bool b)
+void UC_PlayerAnimInstance::TriggerPerfectZoneHidden()
 {
-    UE_LOG(LogTemp, Warning, TEXT("AttakcingMode"));
-    m_bIsAttack = b;
+    OnPerfectZoneHidden.Broadcast();
 }
 
-void UC_PlayerAnimInstance::SetActiveValue(bool b)
+void UC_PlayerAnimInstance::SetAttackMode(bool b)
 {
-    m_ActiveValue = b;
+    m_bIsAttack = b;
+    AnimChangeMode();
 }
+
+void UC_PlayerAnimInstance::SetIsAttackingMode(bool b)
+{
+    m_bIsAttackMode = b;
+}
+
+void UC_PlayerAnimInstance::SetIsDownMode(bool b)
+{
+    StopAllMontages(0.1f);
+    m_IsDown = b;
+    //m_IsDown = false;
+}
+
+void UC_PlayerAnimInstance::SetDownPeriodState(bool b)
+{
+    m_IsDownPeriod = b;
+    if (b)
+    {
+        m_IsDown = false;
+    }
+}
+
+void UC_PlayerAnimInstance::SetIsDownMode_DownState(bool b)
+{
+    m_IsDown = b;
+}
+
+
 
 

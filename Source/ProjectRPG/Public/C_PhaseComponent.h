@@ -7,9 +7,7 @@
 #include "C_PhaseComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseChange);
-
-class AC_MonsterBaseCharacter;
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseFinished);
 
 USTRUCT(BlueprintType)
 struct FS_PhaseData
@@ -32,7 +30,7 @@ private:
 	int32 m_nCurrentPhaseIndex = 0;
 
 	UPROPERTY()
-	AC_MonsterBaseCharacter* m_pMonster;
+	class AC_MonsterBaseCharacter* m_pMonster;
 
 	UPROPERTY()
 	UAnimInstance* m_pAnim;
@@ -41,6 +39,9 @@ private:
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Phase")
 	FOnPhaseChange m_onPhaseChange;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Phase")
+	FOnPhaseFinished m_onPhaseFinished;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phase")
 	TArray<FS_PhaseData> m_arrPhase;

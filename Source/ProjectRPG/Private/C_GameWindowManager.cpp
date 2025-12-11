@@ -3,17 +3,28 @@
 #include <Components/CanvasPanel.h>
 #include <Components/CanvasPanelSlot.h>
 #include "C_MainWidget.h"
+#include "EnhancedInputComponent.h"
 
 UC_GameWindowManager::UC_GameWindowManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_Main.WBP_Main'
-	static ConstructorHelpers::FClassFinder< UC_MainWidget> WidgetClass(TEXT("/Game/UI/WBP_Main.WBP_Main_C"));
+	ConstructorHelpers::FClassFinder< UC_MainWidget> WidgetClass(TEXT("/Game/UI/WBP_Main.WBP_Main_C"));
 	if (WidgetClass.Succeeded())
 	{
 		m_cMainWidget = WidgetClass.Class;
 	}
 
+	//Script/EnhancedInput.InputAction'/Game/RPG_Player/Input/Actions/Window/IA_ExitGame.IA_ExitGame'
+	ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(TEXT("/Game/RPG_Player/Input/Actions/Window/IA_ExitGame.IA_ExitGame"));
+	if (IA_FAction.Succeeded())
+	{
+		m_pExitButton = IA_FAction.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("NOne"));
+	}
 }
 
 bool UC_GameWindowManager::toggleWidget(E_WindowType eType)
@@ -23,6 +34,11 @@ bool UC_GameWindowManager::toggleWidget(E_WindowType eType)
 		return removeWidgetFromMain(eType);
 	}
 	return addWidgetToMain(eType);
+}
+
+void UC_GameWindowManager::toggleWindow(E_WindowType eType)
+{
+	toggleWidget(eType);
 }
 
 bool UC_GameWindowManager::removeWidgetFromMain(E_WindowType eType)
@@ -42,6 +58,8 @@ bool UC_GameWindowManager::isWidgetOpened(E_WindowType eType) const
 
 UC_GameWindowWidget* UC_GameWindowManager::getGameWindowWidget(E_WindowType eType)
 {
+	if (!m_pMainWidget)
+		return nullptr;
 	return m_pMainWidget->getGameWindowWidget(eType);
 }
 
@@ -59,17 +77,22 @@ void UC_GameWindowManager::setStoreMode(bool bSetStoreMode)
 	}
 }
 
-//bool UC_GameWindowManager::onoffMainWidget(bool bVal)
-//{
-//	if (!m_pMainWidget || m_bMainWidgetOpened == bVal)
-//		return false;
-//	m_bMainWidgetOpened = bVal;
-//	if (m_bMainWidgetOpened)
-//		m_pMainWidget->AddToViewport();
-//	else
-//		m_pMainWidget->RemoveFromParent();
-//	return false;
-//}
+void UC_GameWindowManager::setNPCMode(bool bMode)
+{
+	int i = 1;
+	for (i; i < (uint8)E_WindowType::E_Max; i++)
+	{
+		removeWidgetFromMain((E_WindowType)i);
+	}
+	if (bMode)
+	{
+		runWidgetFunc({ E_WindowType::E_NPCWidget }, &UC_GameWindowManager::addWidgetToMain);
+	}
+	else
+	{
+		runWidgetFunc({ E_WindowType::E_QuickSlot }, &UC_GameWindowManager::addWidgetToMain);
+	}
+}
 
 void UC_GameWindowManager::BeginPlay()
 {
@@ -77,11 +100,24 @@ void UC_GameWindowManager::BeginPlay()
 	m_pPlayer = Cast< APlayerController>(GetOwner());
 	if (!m_pPlayer)
 		return;
-
-	m_pMainWidget = CreateWidget<UC_MainWidget>(m_pPlayer, m_cMainWidget,TEXT("MainWidget"));
+	m_pMainWidget = CreateWidget<UC_MainWidget>(m_pPlayer, m_cMainWidget, TEXT("MainWidget"));
 	if (!m_pMainWidget)
 		return;
 	m_pMainWidget->AddToViewport();
+	UE_LOG(LogTemp, Log, TEXT("Toggle"));
+	if (m_pPlayer && m_pExitButton)
+	{
+		UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(m_pPlayer->InputComponent);
+		if (EnhancedInput)
+		{
+			EnhancedInput->BindAction(m_pExitButton, ETriggerEvent::Completed, this, &UC_GameWindowManager::toggleWindow, E_WindowType::E_ExitWidget);
+		}
+	}
+}
+
+void UC_GameWindowManager::OnRegister()
+{
+	UActorComponent::OnRegister();
 }
 
 void UC_GameWindowManager::runWidgetFunc(std::initializer_list<E_WindowType> arrWidget, bool(UC_GameWindowManager::* pFunc)(E_WindowType))

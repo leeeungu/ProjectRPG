@@ -2,19 +2,26 @@
 
 
 #include "C_BaseCharacter.h"
+#include "Kismet/GameplayStatics.h"   // UGameplayStatics
+#include "Sound/SoundBase.h"          // USoundBase
+#include "NiagaraFunctionLibrary.h"   // 나이아가라 이펙트용
+#include "NiagaraSystem.h"            // UNiagaraSystem
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AC_BaseCharacter::AC_BaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 }
 
 // Called when the game starts or when spawned
 void AC_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (GetCapsuleComponent())
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 // Called every frame
@@ -34,16 +41,18 @@ void AC_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 bool AC_BaseCharacter::takeDamageEvent_Implementation(float fDamage)
 {
+	if (m_fHp <= 0.f)
+	{
+		m_onDead.Broadcast();
+		m_fHp = 0.f;
+		return false;
+	}
 
-	m_fHp -= fDamage;
-
-
-	if (m_fHp > 0)
+	setHp(m_fHp - fDamage);
+	if (m_fHp > 0.f)
 		return true;
 
-	if (m_fHp <= 0)
-		m_onDead.Broadcast();
-
+	
 
 	return false;
 	
@@ -98,3 +107,5 @@ void AC_BaseCharacter::brodcastStatChange(FOnStatChange& Delegate, float PreValu
 	}
 
 }
+
+

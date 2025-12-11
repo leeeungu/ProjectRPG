@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,11 +6,38 @@
 #include "Components/ActorComponent.h"
 #include "S_SkillData.h"
 #include "C_SkillComponent.generated.h"
+#define DEBUG_DRAW
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillMontageRequested, class UAnimMontage*, MontageToPlay);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillCooldownStarted, FName, SkillName);
 
 struct FSkillData;
 
+UENUM(BlueprintType)
+enum class ESkillCollisionShapeType : uint8
+{
+	Sphere,
+	Box,
+	Capsule
+};
+
+USTRUCT(BlueprintType)
+struct FSkillCollisionData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESkillCollisionShapeType ShapeType = ESkillCollisionShapeType::Sphere;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Dimensions = FVector(100.f); // Sphere: X=radius, Box: XYZ, Capsule: X=radius, Z=half-height
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Duration = 0.1f; // ÏΩúÎ¶¨Ï†Ñ Ïú†ÏßÄ ÏãúÍ∞Ñ
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bApplyDamage = true;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRPG_API UC_SkillComponent : public UActorComponent
@@ -20,16 +47,30 @@ private:
 	UPROPERTY()
 	TMap<FName, FSkillData> SkillMap;
 	TMap<FName, float> SkillCooldownEndTime;
+	FName CurrentSkillName = {};
+	void SpawnSkillCollision(const FSkillCollisionData& CollisionData, FVector skillLocation, FRotator skillRotation, bool IsGetCounter);
+	float DamageAmount(FName SkillName);
+	float StaggerAmount(FName SkillName);
+
 public:	
 	// Sets default values for this component's properties
 	UC_SkillComponent();
 	UPROPERTY(BlueprintAssignable, Category = "Skill")
 	FOnSkillMontageRequested OnSkillMontageRequested;
-	//Ω∫≈≥ƒƒ∆˜≥Õ∆Æø°º≠ æ÷¥‘¿ŒΩ∫≈œΩ∫ ¬¸¡∂øÎ ∆˜¿Œ≈Õ
+	UPROPERTY(BlueprintAssignable, Category = "Skill")
+	FOnSkillCooldownStarted OnSkillCooldownStarted;
+	//Ïä§ÌÇ¨Ïª¥Ìè¨ÎÑåÌä∏ÏóêÏÑú Ïï†ÎãòÏù∏Ïä§ÌÑ¥Ïä§ Ï∞∏Ï°∞Ïö© Ìè¨Ïù∏ÌÑ∞
 	UPROPERTY()
     class UC_PlayerAnimInstance* CachedAnimInstance;
 	UFUNCTION()
 	void RequestJumpToSection(FName SectionName);
+
+	//Ïä§ÌÇ¨Ïø®ÌÉÄÏûÑ Î∞òÌôòÌï®Ïàò
+	UFUNCTION(BlueprintCallable)
+	float GetskillCoolTime(FName skill_Key);
+	//Ïª¨Î¶¨Ï†º Îç∞Ïù¥ÌÑ∞
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+	TArray<FSkillCollisionData> SkillCollisionDataArray;
 
 protected:
 	// Called when the game starts
@@ -39,11 +80,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void InitializeComponent() override;
-	void UsingSkill(FName skill_Key);
+	void UsingSkill(FName skill_Key, E4WayDirection Direction = E4WayDirection::Default);
+	void HandleSkillHit(int32 SkillIndex, FVector SkillLocation, FRotator SkillRotation);
 
 	bool IsCooldownReady(FName SkillName) const;
 	void StartCooldown(FName SkillName);
 	float GetRemainingCooldown(FName SkillName) const;
 
-		
+	void skillCoolTimeTriggered(FName SkillName);
 };

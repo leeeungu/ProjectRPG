@@ -14,7 +14,7 @@ class UC_InputQueueComponent;
 class UC_CurrencyComponent;
 class UC_GameWindowManager;
 class UC_QuickSlotManagerComponent;
-class UQuestManagerComponent;
+class UC_QuestManagerComponent;
 class UC_EquipComponent;
 class UC_InventoryComponent;
 /**
@@ -46,7 +46,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "QuickSlot", meta = (DisplayName = "QuickSlotManagerComponent"), BlueprintGetter = getQuickSlotManagerComponent)
 	UC_QuickSlotManagerComponent* m_pQuickSlotManagerComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "QuestManager", meta = (DisplayName = "QuestManagerComponent"), BlueprintGetter = getQuestManagerComponent)
-	UQuestManagerComponent* m_pQuestManagerComponent{};
+	UC_QuestManagerComponent* m_pQuestManagerComponent2{};
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "EquipComponent"), BlueprintGetter = getEquipComponent)
 	UC_EquipComponent* m_pEquipComponent{};
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (DisplayName = "InventoryComponent"), BlueprintGetter = getInventoryComponent)
@@ -63,21 +63,61 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClick;
 	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* LeftClick;
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SpaceBar;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Q_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* F_Key;
+	UInputAction* W_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* E_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* R_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* A_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* S_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* D_Key;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* F_Key;
+	/*UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Number1_Key;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* Number2_Key;
+	UInputAction* Number2_Key;*/
 
-	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pInteraction{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot1{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot2{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot3{};
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuickSlot4{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pInventoryWidget{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pPlayerInfoWidget{};
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* m_pQuestWidget{};
 public:
 	void OnRightClickAction(const FInputActionValue& Value);
+	void OnLeftClickAction(const FInputActionValue& Value);
 	void OnSpaceBarAction(const FInputActionValue& Value);
 	void OnQ_Action(const FInputActionValue& Value);
+	void OnW_Action(const FInputActionValue& Value);
+	void OnE_Action(const FInputActionValue& Value);
+	void OnR_Action(const FInputActionValue& Value);
+	void OnA_Action(const FInputActionValue& Value);
+	void OnS_Action(const FInputActionValue& Value);
+	void OnD_Action(const FInputActionValue& Value);
 	void OnF_ActionStarted(const FInputActionValue& Value);
 	void OnF_ActionOngoing(const FInputActionValue& Value);
 	void OnF_ActionCanceld(const FInputActionValue& Value);
@@ -98,7 +138,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "QuickSlot")
 	UC_QuickSlotManagerComponent* getQuickSlotManagerComponent() const { return m_pQuickSlotManagerComponent; }
 	UFUNCTION(BlueprintPure, Category = "QuestManager")
-	UQuestManagerComponent* getQuestManagerComponent() const { return m_pQuestManagerComponent; }
+	UC_QuestManagerComponent* getQuestManagerComponent() const { return m_pQuestManagerComponent2; }
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UC_EquipComponent* getEquipComponent() const { return m_pEquipComponent; }
 	UFUNCTION(BlueprintPure, Category = "Inventory")
