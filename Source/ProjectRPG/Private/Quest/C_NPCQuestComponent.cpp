@@ -10,6 +10,7 @@ UC_NPCQuestComponent::UC_NPCQuestComponent()
 
 }
 
+// Runtime노드에서 현재 NCP 대사를 가져오는 함수
 FText UC_NPCQuestComponent::getQuestText() const
 {
 	if (!m_CurrentQuestAsset)
