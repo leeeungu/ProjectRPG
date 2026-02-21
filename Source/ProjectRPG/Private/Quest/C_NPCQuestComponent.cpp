@@ -1,4 +1,4 @@
-ï»¿#include "Quest/C_NPCQuestComponent.h"
+#include "Quest/C_NPCQuestComponent.h"
 #include "QuestAsset.h"
 #include "QuestNodeInfo.h"
 #include "QuestRuntimeGraph.h"
@@ -13,11 +13,11 @@ UC_NPCQuestComponent::UC_NPCQuestComponent()
 FText UC_NPCQuestComponent::getQuestText() const
 {
 	if (!m_CurrentQuestAsset)
-		return  FText::FromString(TEXT("í€˜ìŠ¤íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤."));
+		return  FText::FromString(TEXT("Äù½ºÆ®°¡ ¾ø½À´Ï´Ù."));
 	if (m_CurrentQuestAsset->GetQuestAccept())
-		return FText::FromString(TEXT("í€˜ìŠ¤íŠ¸ê°€ ì´ë¯¸ ì§„í–‰ ì¤‘ì…ë‹ˆë‹¤."));
+		return FText::FromString(TEXT("Äù½ºÆ®°¡ ÀÌ¹Ì ÁøÇà ÁßÀÔ´Ï´Ù."));
 	if (!m_pRunTimeNode)
-		return FText::FromString(TEXT("ì§„í–‰ ê°€ëŠ¥í•œ í€˜ìŠ¤íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤."));
+		return FText::FromString(TEXT("ÁøÇà °¡´ÉÇÑ Äù½ºÆ®°¡ ¾ø½À´Ï´Ù."));
 	if (UQuestNodeInfo* pNode = Cast< UQuestNodeInfo>(m_pRunTimeNode->QuestInfo))
 	{
 		return pNode->QuestText;
@@ -30,9 +30,10 @@ FText UC_NPCQuestComponent::getQuestText() const
 				return FText{};
 		}
 	}
-	return FText::FromString(TEXT("ì§„í–‰ ê°€ëŠ¥í•œ í€˜ìŠ¤íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤."));
+	return FText::FromString(TEXT("ÁøÇà °¡´ÉÇÑ Äù½ºÆ®°¡ ¾ø½À´Ï´Ù."));
 }
 
+// questAseetÀ¸·Î ºÎÅÍ Runtime³ëµå¸¦ °¡Á®¿Í NCP ´ë»ç¸¦ °¡Á®¿À´Â ÇÔ¼ö
 bool UC_NPCQuestComponent::startTalk()
 {
 	m_nQuestAssetIndex = 0;
