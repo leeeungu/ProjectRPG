@@ -1,4 +1,4 @@
-ï»¿#include "C_InteractionDetectorComponent.h"
+#include "C_InteractionDetectorComponent.h"
 #include "C_InteractionComponent.h"
 
 UC_InteractionDetectorComponent::UC_InteractionDetectorComponent() : 
@@ -16,28 +16,30 @@ void UC_InteractionDetectorComponent::BeginPlay()
 	OnComponentEndOverlap.AddDynamic(this, &UC_InteractionDetectorComponent::endDetected);
 }
 
-bool UC_InteractionDetectorComponent::runInteraction()
+UC_InteractionComponent* UC_InteractionDetectorComponent::getInteractionComponent()
 {
-	if (!m_pFirst)
-		return false;
-	// ìƒí˜¸ìž‘ìš© ì´ë²¤íŠ¸ ì‹¤í–‰
-	m_pFirst->runInteraction(GetOwner());
-	return true;
+	return m_pFirst;
 }
 
 AActor* UC_InteractionDetectorComponent::getInteractionActor() const
 {
 	if (!m_pFirst)
 		return nullptr;
-	// ì²˜ìŒ íƒìƒ‰ëœ ìƒí˜¸ìž‘ìš©ì˜ ì†Œìœ ìž ë°˜í™˜
+	// Ã³À½ Å½»öµÈ »óÈ£ÀÛ¿ëÀÇ ¼ÒÀ¯ÀÚ ¹ÝÈ¯
 	return m_pFirst->GetOwner();
 }
 
-UC_InteractionComponent* UC_InteractionDetectorComponent::getInteractionComponent()
+// »óÈ£ÀÛ¿ë ½ÇÇà ÇÔ¼ö
+bool UC_InteractionDetectorComponent::runInteraction()
 {
-	return m_pFirst;
+	if (!m_pFirst)
+		return false;
+	// »óÈ£ÀÛ¿ë ÀÌº¥Æ® ½ÇÇà
+	m_pFirst->runInteraction(GetOwner());
+	return true;
 }
 
+// OnComponentBeginOverlap Bind Function
 void UC_InteractionDetectorComponent::beginDetected(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UC_InteractionComponent* pInteraction = Cast< UC_InteractionComponent>(OtherComp);
@@ -48,6 +50,7 @@ void UC_InteractionDetectorComponent::beginDetected(UPrimitiveComponent* Overlap
 		m_pFirst = *m_setInteractionComponents.begin();
 }
 
+// OnComponentEndOverlap Bind Function
 void UC_InteractionDetectorComponent::endDetected(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	UC_InteractionComponent* pInteraction = Cast< UC_InteractionComponent>(OtherComp);
