@@ -1,4 +1,4 @@
-ï»¿#include "C_AnimationInteraction.h"
+#include "C_AnimationInteraction.h"
 #include <GameFramework/Character.h>
 #include <Components/ArrowComponent.h>
 #include <Components/WidgetComponent.h>
@@ -87,8 +87,9 @@ void AC_AnimationInteraction::BeginPlay()
 	m_pInteractionWidget->SetVisibility(false);
 
 	AActor::BeginPlay();
-	// ì¸í„°ë ‰ì…˜ ì½¤í¬ë„ŒíŠ¸ì— ìƒí˜¸ìž‘ìš© ë¸ë¦¬ê²Œì´íŠ¸ ë°”ì¸ë”©í•˜ê³ 
-	// Ovelap ë¸ë¦¬ê²Œì´íŠ¸ë„ ê¸°ì¡´ ë¬¸ë²•ëŒ€ë¡œ ì‚¬ìš©í•  ìˆ˜ ìžˆìŒ
+	// HEADR : UC_InteractionComponent* m_pStartCollision{};
+	// ÀÎÅÍ·º¼Ç ÄÞÆ÷³ÍÆ®¿¡ »óÈ£ÀÛ¿ë µ¨¸®°ÔÀÌÆ® ¹ÙÀÎµùÇÏ°í
+	// Ovelap µ¨¸®°ÔÀÌÆ®µµ ±âÁ¸ ¹®¹ý´ë·Î »ç¿ëÇÒ ¼ö ÀÖÀ½
 	m_pStartCollision->m_onInteraction.AddDynamic(this, &AC_AnimationInteraction::interactionStart);
 	m_pStartCollision->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginOverlap);
 	m_pStartCollision->OnComponentEndOverlap.AddDynamic(this, &AC_AnimationInteraction::endOverlap);
@@ -96,16 +97,18 @@ void AC_AnimationInteraction::BeginPlay()
 		m_pEndCollision2->OnComponentBeginOverlap.AddDynamic(this, &AC_AnimationInteraction::beginEndCollision);
 }
 
+// »óÈ£ÀÛ¿ë ½Ã Animation ÀÌ ½ÃÀÛµÇ´Â ÇÔ¼ö
 void AC_AnimationInteraction::interactionStart(AActor* pDetectedActor)
 {
 	if (!pDetectedActor || m_eStartType == E_TrabelType::E_NONE || m_bPlay)
 		return;
 	AC_Player* pPlayer = Cast<AC_Player>(pDetectedActor);
 	m_pDetector = pPlayer;
-	m_pTravelManagerComponent = pDetectedActor->GetComponentByClass<UC_TravelManagerComponent>();
+	m_pTravelManagerComponent = pPlayer->getTravelComponent();
 	if (!pPlayer || !m_pDetector || !m_pTravelManagerComponent || m_pTravelManagerComponent->getTravelType() != E_TrabelType::E_NONE)
 		return;
 	m_TargetLocations = GetActorLocation();
+	// ´Ù¸¥ ÇÁ·Î±×·¡¸Ó°¡ Á¦ÀÛÇÑ ¸ñÀûÁö ÀÌµ¿ ÇÔ¼ö È£Ãâ
 	pPlayer->OnMoveToPosPlayer(m_TargetLocations);
 	SetActorTickEnabled(true);
 }
