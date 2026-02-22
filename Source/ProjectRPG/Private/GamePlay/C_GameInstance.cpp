@@ -1,4 +1,4 @@
-﻿#include "GamePlay/C_GameInstance.h"
+#include "GamePlay/C_GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -25,13 +25,7 @@ void UC_GameInstance::loadLevelStatic(UObject* pWorldContext)
 		return;
 	}
 
-	Instance->m_nCount = 0;
-	//FLoadPackageAsyncOptionalParams LoadParams{};
-	//LoadParams.CompletionDelegate = MakeUnique<FLoadPackageAsyncDelegate>();
-	//LoadParams.CompletionDelegate->BindUObject(Instance, &UC_GameInstance::openLoadedLevel);
-	//LoadParams.ProgressDelegate = MakeUnique<FLoadPackageAsyncProgressDelegate>();
-	//LoadParams.ProgressDelegate->BindUFunction(Instance, FName(TEXT("progressFunction")));	
-
+	Instance->m_nCount = 0;	
 	FLoadPackageAsyncDelegate LoadedDelegate{};
 	LoadedDelegate.BindUFunction(Instance, FName(TEXT("openLoadedLevel")));
 	LoadPackageAsync(FPackageName::ObjectPathToPackageName(Instance->m_pTargetLevel.ToString()), MoveTemp(LoadedDelegate));
@@ -58,17 +52,6 @@ void UC_GameInstance::openLoadedLevel()
 	UE_LOG(LogTemp, Warning, TEXT("openLoadedLevel %d"), m_nCount);
 	m_nCount++;
 }
-//void UC_GameInstance::openLoadedLevel(const FName& PackageName, UPackage* LoadedPackage, EAsyncLoadingResult::Type Result)
-//{
-//	if (Result == EAsyncLoadingResult::Succeeded)
-//	{
-//		UGameplayStatics::UnloadStreamLevelBySoftObjectPtr(GetWorld(), GetWorld()->GetCurrentLevel(), FLatentActionInfo{}, false);
-//		UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), m_pTargetLevel);
-//		m_pTargetLevel = nullptr;
-//		UE_LOG(LogTemp, Warning, TEXT("openLoadedLevel %d"), m_nCount);
-//		m_nCount++;
-//	}
-//}
 
 void UC_GameInstance::progressFunction()
 {

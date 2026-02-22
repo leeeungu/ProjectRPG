@@ -1,4 +1,4 @@
-癤�#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
@@ -19,6 +19,7 @@ class UC_DataManagerInterface : public UInterface
 	GENERATED_BODY()
 };
 
+// 데이터 저장 및 로드 인터페이스
 class PROJECTRPG_API IC_DataManagerInterface
 {
 	GENERATED_BODY()

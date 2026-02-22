@@ -422,6 +422,7 @@ TArray<uint8> UC_InventoryComponent::getBinaryData()
 {
 	FS_InventorySaveData Data(m_nInventoryWidth, m_nInventoryHeight, m_arrInventory);
 	TArray<uint8> result{};
+	// FMemoryWriter에 의해 구조체를 바이트 배열로 변환하는 함수
 	UC_DataMangerSubsystem::saveBinaryFile< FS_InventorySaveData>(result, &Data);
 	return result;
 }
