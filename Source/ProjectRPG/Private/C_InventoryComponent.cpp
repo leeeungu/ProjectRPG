@@ -330,6 +330,15 @@ void UC_InventoryComponent::BeginPlay()
 	}
 }
 
+void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UActorComponent::EndPlay(EndPlayReason);
+	if (Cast<APlayerController>(GetOwner()))
+	{
+		UC_DataMangerSubsystem::saveBinaryData(this);
+	}
+}
+
 #if WITH_EDITOR
 void UC_InventoryComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -366,14 +375,7 @@ int UC_InventoryComponent::getArrayIndex(int nY, int nX) const
 	return nY * m_nInventoryWidth + nX;
 }
 
-void UC_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	UActorComponent::EndPlay(EndPlayReason);
-	if (Cast<APlayerController>(GetOwner()))
-	{
-		UC_DataMangerSubsystem::saveBinaryData(this);
-	}
-}
+
 
 void UC_InventoryComponent::resetItemSlot(FS_InventorySlot* pItemSlot)
 {
