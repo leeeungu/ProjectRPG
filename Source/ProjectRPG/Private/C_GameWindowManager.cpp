@@ -9,11 +9,6 @@ UC_GameWindowManager::UC_GameWindowManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	///Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_Main.WBP_Main'
-	ConstructorHelpers::FClassFinder< UC_MainWidget> WidgetClass(TEXT("/Game/UI/WBP_Main.WBP_Main_C"));
-	if (WidgetClass.Succeeded())
-	{
-		m_cMainWidget = WidgetClass.Class;
-	}
 
 	//Script/EnhancedInput.InputAction'/Game/RPG_Player/Input/Actions/Window/IA_ExitGame.IA_ExitGame'
 	ConstructorHelpers::FObjectFinder<UInputAction> IA_FAction(TEXT("/Game/RPG_Player/Input/Actions/Window/IA_ExitGame.IA_ExitGame"));
@@ -100,6 +95,10 @@ void UC_GameWindowManager::BeginPlay()
 	m_pPlayer = Cast< APlayerController>(GetOwner());
 	if (!m_pPlayer)
 		return;
+	if (!m_cMainWidget)
+	{
+		m_cMainWidget = LoadClass<UC_MainWidget>(nullptr, TEXT("/Game/UI/WBP_Main.WBP_Main_C"), nullptr, LOAD_None, nullptr);
+	}
 	m_pMainWidget = CreateWidget<UC_MainWidget>(m_pPlayer, m_cMainWidget, TEXT("MainWidget"));
 	if (!m_pMainWidget)
 		return;
