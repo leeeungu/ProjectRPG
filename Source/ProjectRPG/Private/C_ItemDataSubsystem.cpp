@@ -4,14 +4,6 @@
 #include "C_InventoryComponent.h"
 #include "C_QuickSlotManagerComponent.h"
 
-UC_ItemDataSubsystem::UC_ItemDataSubsystem()  
-{
-    //Script/Engine.DataTable'/Game/Item/DataTable/DT_ItemData.DT_ItemData'
-    static ConstructorHelpers::FObjectFinder<UDataTable> pObject(*m_strDataTablePath);
-    if (pObject.Succeeded())
-        m_pItemDataTable = pObject.Object;
-}
-
 void UC_ItemDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);

@@ -76,7 +76,6 @@ protected:
 private:
 	TMap<int, const FS_ItemData*> m_mapItemData{};
 public:
-	UC_ItemDataSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
